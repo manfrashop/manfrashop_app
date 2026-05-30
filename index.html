@@ -449,16 +449,172 @@ tbody tr:last-child td { border-bottom:none; }
 #pwa-install-btn { display:none; align-items:center; gap:8px; padding:8px 16px; border-radius:20px; background:linear-gradient(135deg,var(--or),var(--or2)); color:var(--bg); border:none; cursor:pointer; font-family:'Raleway',sans-serif; font-size:12px; font-weight:700; letter-spacing:.5px; box-shadow:0 2px 12px rgba(212,175,55,.4); transition:all .2s; position:fixed; bottom:24px; right:24px; z-index:200; text-transform:uppercase; }
 #pwa-install-btn:hover { transform:translateY(-2px); box-shadow:0 4px 20px rgba(212,175,55,.6); }
 
-@media(max-width:768px){
-  #sidebar { transform:translateX(-220px); }
-  #sidebar.open { transform:translateX(0); }
-  #main { margin-left:0; padding-left:16px; padding-right:16px; }
-  .kpi-grid { grid-template-columns:repeat(2,1fr); }
+/* ═══════════════════════════════════════
+   HAMBURGER BUTTON
+═══════════════════════════════════════ */
+#hamburger {
+  display:none;
+  position:fixed; top:9px; left:12px; z-index:201;
+  background:transparent; border:none; cursor:pointer;
+  padding:6px; border-radius:6px; transition:background .2s;
+}
+#hamburger:hover { background:var(--bg3); }
+#hamburger span {
+  display:block; width:22px; height:2px;
+  background:var(--or); border-radius:2px;
+  transition:all .25s;
+}
+#hamburger span+span { margin-top:5px; }
+#hamburger.open span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+#hamburger.open span:nth-child(2) { opacity:0; }
+#hamburger.open span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+/* ═══════════════════════════════════════
+   SIDEBAR OVERLAY (mobile)
+═══════════════════════════════════════ */
+#sidebar-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.55); z-index:99;
+  backdrop-filter:blur(2px);
+}
+
+/* ═══════════════════════════════════════
+   TABLE SCROLL WRAPPER (mobile)
+═══════════════════════════════════════ */
+.table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — TABLETTE  ≤ 900px
+═══════════════════════════════════════ */
+@media(max-width:900px){
+  .admin-grid { grid-template-columns:1fr; }
+  .stock-kpis { grid-template-columns:repeat(3,1fr); }
   .charts-row { grid-template-columns:1fr; }
+  .kpi-grid { grid-template-columns:repeat(2,1fr); }
+  .achat-kpis { grid-template-columns:repeat(2,1fr); }
+  .achat-form-grid { grid-template-columns:1fr 1fr; }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — MOBILE  ≤ 768px
+═══════════════════════════════════════ */
+@media(max-width:768px){
+  /* Sidebar : masquée, glisse à l'ouverture */
+  #sidebar {
+    transform:translateX(-220px);
+    z-index:200;
+  }
+  #sidebar.open { transform:translateX(0); }
+  #sidebar-overlay.open { display:block; }
+
+  /* Hamburger visible */
+  #hamburger { display:flex; flex-direction:column; }
+
+  /* Topbar : pleine largeur, décalée à droite pour le hamburger */
+  #topbar { left:0; padding-left:52px; }
+
+  /* Main : pas de marge sidebar */
+  #main { margin-left:0 !important; padding-left:12px; padding-right:12px; padding-top:56px; }
+
+  /* Page header : empilé si écran étroit */
+  .page-header { flex-direction:column; align-items:flex-start; gap:10px; margin-top:8px; }
+  .page-header .search-bar input { width:100%; }
+  .page-header .search-bar { width:100%; }
+
+  /* KPI grids */
+  .kpi-grid { grid-template-columns:repeat(2,1fr); gap:10px; }
+  .achat-kpis { grid-template-columns:repeat(2,1fr); gap:10px; }
+  .stock-kpis { grid-template-columns:repeat(2,1fr); gap:10px; }
+
+  /* Charts */
+  .charts-row { grid-template-columns:1fr; }
+
+  /* Forms */
+  .achat-form-grid { grid-template-columns:1fr 1fr; }
+  .stock-form-row { grid-template-columns:1fr 1fr; }
+  .admin-grid { grid-template-columns:1fr; }
+  .pdv-form-grid { grid-template-columns:1fr; }
+
+  /* Tables scrollables */
+  .table-wrap { border-radius:var(--radius); }
+  th, td { padding:9px 12px; font-size:12px; }
+
+  /* Table toolbar : empilé */
+  .table-toolbar { flex-direction:column; align-items:flex-start; gap:10px; }
+  .filter-btns { flex-wrap:wrap; }
+
+  /* Stock tabs */
+  .stock-tabs { flex-wrap:wrap; gap:4px; }
+
+  /* Pagination */
+  .pagination { flex-direction:column; gap:8px; align-items:center; }
+
+  /* POS : empilé verticalement */
+  .pos-grid {
+    grid-template-columns:1fr;
+    height:auto;
+  }
+  .pos-cart {
+    max-height:60vh;
+    overflow-y:auto;
+  }
+
+  /* Points de vente */
+  .pdv-grid { grid-template-columns:1fr; }
+
+  /* Donut chart */
+  .donut-wrap { flex-direction:column; }
+
+  /* Topbar user : cacher le nom sur très petit écran */
+  .topbar-name, .topbar-role { display:none; }
+  .topbar-user { padding:4px 6px; }
+
+  /* KPI value font size */
+  .kpi-value { font-size:20px; }
+
+  /* Grilles inline (dépenses, crédits, ventes, rapports) */
+  [style*="grid-template-columns:repeat(4,1fr)"],
+  [style*="grid-template-columns:1fr 1fr 1fr 1fr"] {
+    grid-template-columns:1fr 1fr !important;
+  }
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns:1fr !important;
+  }
+}
+
+/* ═══════════════════════════════════════
+   RESPONSIVE — TRÈS PETIT  ≤ 480px
+═══════════════════════════════════════ */
+@media(max-width:480px){
+  .kpi-grid { grid-template-columns:1fr 1fr; gap:8px; }
+  .kpi { padding:14px 12px; }
+  .kpi-value { font-size:17px; }
+  .kpi-icon { font-size:26px; }
+  .achat-form-grid { grid-template-columns:1fr; }
+  .stock-form-row { grid-template-columns:1fr; }
+  .stock-kpis { grid-template-columns:1fr 1fr; }
+  .pos-product-grid { grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); }
+  .auth-card { padding:28px 18px; }
+  .page-title { font-size:17px; }
+  [style*="grid-template-columns:repeat(4,1fr)"],
+  [style*="grid-template-columns:1fr 1fr 1fr 1fr"] {
+    grid-template-columns:1fr !important;
+  }
+  [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns:1fr !important;
+  }
 }
 </style>
 </head>
 <body>
+
+<!-- HAMBURGER (mobile) -->
+<button id="hamburger" aria-label="Menu" style="display:none">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- SIDEBAR OVERLAY (mobile) -->
+<div id="sidebar-overlay"></div>
 
 <!-- LOADER -->
 <div id="loader">
@@ -1028,11 +1184,12 @@ tbody tr:last-child td { border-bottom:none; }
         <div class="page-title">🛒 Point de Vente</div>
         <div class="page-sub" id="pos-point-label">Sélectionnez un point de vente</div>
       </div>
-      <div style="display:flex;gap:10px;align-items:center">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
         <select id="pos-point-select" style="background:var(--bg2);border:1px solid var(--brd);border-radius:6px;padding:7px 12px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;min-width:180px;">
           <option value="">-- Point de vente --</option>
         </select>
         <button id="pos-btn-newticket" class="btn-add" onclick="posNouveauTicket()" style="padding:8px 16px">+ Nouveau ticket</button>
+        <button id="pos-toggle-cart" onclick="posToggleCart()" style="display:none;padding:8px 14px;border-radius:6px;border:1px solid var(--or);color:var(--or);background:transparent;font-family:'Raleway',sans-serif;font-size:12px;cursor:pointer;font-weight:600">🧾 Panier (<span id="pos-cart-count">0</span>)</button>
       </div>
     </div>
     <div class="pos-grid">
@@ -1384,6 +1541,42 @@ async function loadFromFirestore() {
   };
 }
 
+// ─── HAMBURGER / SIDEBAR MOBILE ────────────────────────────────
+(function(){
+  const hamburger = document.getElementById('hamburger');
+  const sidebar   = document.getElementById('sidebar');
+  const overlay   = document.getElementById('sidebar-overlay');
+
+  function openSidebar(){
+    sidebar.classList.add('open');
+    overlay.classList.add('open');
+    hamburger.classList.add('open');
+  }
+  function closeSidebar(){
+    sidebar.classList.remove('open');
+    overlay.classList.remove('open');
+    hamburger.classList.remove('open');
+  }
+
+  // Show hamburger only on small screens (CSS hides it on desktop)
+  function updateHamburger(){
+    hamburger.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+  }
+  updateHamburger();
+  window.addEventListener('resize', updateHamburger);
+
+  hamburger.addEventListener('click', () => {
+    if(sidebar.classList.contains('open')) closeSidebar();
+    else openSidebar();
+  });
+  overlay.addEventListener('click', closeSidebar);
+
+  // Close sidebar on nav link click (mobile)
+  document.querySelectorAll('nav a').forEach(a => {
+    a.addEventListener('click', () => { if(window.innerWidth <= 768) closeSidebar(); });
+  });
+})();
+
 // ─── NAVIGATION ────────────────────────────────────────────────
 document.querySelectorAll('nav a').forEach(a => {
   a.addEventListener('click', () => {
@@ -1675,6 +1868,45 @@ function posNouveauTicket() {
   posClearCart();
 }
 
+// Mobile: toggle between product grid and cart
+function posToggleCart() {
+  const grid = document.querySelector('.pos-products');
+  const cart = document.querySelector('.pos-cart');
+  const btn  = document.getElementById('pos-toggle-cart');
+  if(!grid || !cart) return;
+  const cartVisible = cart.style.display !== 'none';
+  if(cartVisible) {
+    cart.style.display = 'none';
+    grid.style.display = '';
+    btn.style.background = 'transparent';
+    btn.style.color = 'var(--or)';
+  } else {
+    cart.style.display = 'flex';
+    grid.style.display = 'none';
+    btn.style.background = 'var(--or)';
+    btn.style.color = 'var(--bg)';
+  }
+}
+
+// Show/hide the mobile cart toggle button on resize
+(function(){
+  function updatePosBtn(){
+    const btn = document.getElementById('pos-toggle-cart');
+    if(!btn) return;
+    btn.style.display = window.innerWidth <= 768 ? 'inline-block' : 'none';
+    if(window.innerWidth > 768){
+      // Reset visibility on desktop
+      const grid = document.querySelector('.pos-products');
+      const cart = document.querySelector('.pos-cart');
+      if(grid) grid.style.display = '';
+      if(cart) cart.style.display = '';
+    }
+  }
+  window.addEventListener('resize', updatePosBtn);
+  window.addEventListener('load', updatePosBtn);
+  setTimeout(updatePosBtn, 500);
+})();
+
 function posUpdateTotal() {
   const remise = parseFloat(document.getElementById('cart-remise')?.value)||0;
   const subtotal = POS_CART.reduce((s,i)=>s+i.prix*i.qty,0);
@@ -1683,6 +1915,9 @@ function posUpdateTotal() {
   if(el) el.textContent = fmtFull(total) + ' GNF';
   const btnV = document.getElementById('btn-vendre');
   if(btnV) btnV.disabled = POS_CART.length === 0;
+  // Update mobile cart count badge
+  const countEl = document.getElementById('pos-cart-count');
+  if(countEl) countEl.textContent = POS_CART.reduce((s,i)=>s+i.qty,0);
 }
 
 function posValiderVente() {
