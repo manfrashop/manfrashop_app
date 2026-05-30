@@ -452,6 +452,8 @@ tbody tr:last-child td { border-bottom:none; }
     <a data-sec="pos"><span class="ico">🛒</span> Point de Vente</a>
     <a data-sec="ventes"><span class="ico">📋</span> Historique Ventes</a>
     <a data-sec="points"><span class="ico">🏪</span> Points de Vente</a>
+    <a data-sec="credits"><span class="ico">💳</span> Crédits Clients</a>
+    <a data-sec="rapports"><span class="ico">📊</span> Rapports</a>
     <a data-sec="admin" class="admin-only"><span class="ico">⚙️</span> Utilisateurs</a>
   </nav>
   <div class="sidebar-footer">
@@ -566,13 +568,114 @@ tbody tr:last-child td { border-bottom:none; }
   <!-- DEPENSES -->
   <div id="sec-depenses" class="section">
     <div class="page-header">
-      <div><div class="page-title">Dépenses</div><div class="page-sub">Charges et frais d'exploitation</div></div>
-      <div class="search-bar"><input type="text" id="dep-search" placeholder="Rechercher..."></div>
+      <div><div class="page-title">💸 Dépenses</div><div class="page-sub" id="dep-sub">Charges et frais d'exploitation</div></div>
+      <button class="btn-add" onclick="depToggleForm()">+ Nouvelle dépense</button>
+    </div>
+    <!-- Formulaire ajout dépense -->
+    <div id="dep-form" style="display:none;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px;margin-bottom:20px">
+      <h3 style="margin:0 0 16px;color:var(--or);font-size:15px">➕ Enregistrer une dépense</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Date *</label><input type="date" id="dep-form-date" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+        <div style="grid-column:span 2"><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Libellé *</label><input type="text" id="dep-form-lib" placeholder="Ex: Loyer boutique, Transport..." style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Montant (GNF) *</label><input type="number" id="dep-form-mnt" placeholder="0" min="0" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Catégorie</label><select id="dep-form-cat" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"><option>LOYER</option><option>TRANSPORT</option><option>SALAIRES</option><option>ELECTRICITE</option><option>TELEPHONE</option><option>FOURNITURES</option><option>MAINTENANCE</option><option>AUTRE</option></select></div>
+        <div style="grid-column:span 2"><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Note</label><input type="text" id="dep-form-note" placeholder="Note optionnelle..." style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Point de vente</label><select id="dep-form-pdv" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"><option value="">— Général —</option></select></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-add" onclick="depSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
+        <button onclick="depToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <span id="dep-form-msg" style="font-size:13px;color:var(--or)"></span>
+      </div>
+    </div>
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px" id="dep-kpis">
+      <div class="kpi-card"><div class="kpi-value" id="dep-kpi-total">0</div><div class="kpi-label">Total GNF</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="dep-kpi-nb">0</div><div class="kpi-label">Nb dépenses</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="dep-kpi-mois">0</div><div class="kpi-label">Ce mois</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="dep-kpi-moy">0</div><div class="kpi-label">Moyenne/dépense</div></div>
     </div>
     <div class="table-wrap">
-      <div class="table-toolbar"><div></div><div class="table-info" id="dep-info"></div></div>
-      <table><thead><tr><th>N°</th><th>Date</th><th>Libellé</th><th>Montant (GNF)</th></tr></thead><tbody id="dep-tbody"></tbody></table>
+      <div class="table-toolbar">
+        <div class="search-bar" style="margin:0"><input type="text" id="dep-search" placeholder="Rechercher..." oninput="depFilter()"></div>
+        <div class="table-info" id="dep-info"></div>
+      </div>
+      <table><thead><tr><th>N°</th><th>Date</th><th>Libellé</th><th>Catégorie</th><th>Montant (GNF)</th><th>Saisi par</th><th></th></tr></thead><tbody id="dep-tbody"></tbody></table>
       <div class="pagination"><div class="pag-info" id="dep-pag-info"></div><div class="pag-btns" id="dep-pag-btns"></div></div>
+    </div>
+  </div>
+
+  <!-- CREDITS CLIENTS -->
+  <div id="sec-credits" class="section">
+    <div class="page-header">
+      <div><div class="page-title">💳 Crédits Clients</div><div class="page-sub" id="cred-sub">Suivi des ventes à crédit</div></div>
+    </div>
+    <!-- KPIs -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px">
+      <div class="kpi-card"><div class="kpi-value" id="cred-kpi-total">0</div><div class="kpi-label">Total crédits GNF</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="cred-kpi-nb">0</div><div class="kpi-label">Clients à crédit</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="cred-kpi-rembourse">0</div><div class="kpi-label">Remboursé</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="cred-kpi-reste">0</div><div class="kpi-label">Reste à payer</div></div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <div class="search-bar" style="margin:0"><input type="text" id="cred-search" placeholder="Rechercher un client..." oninput="credFilter()"></div>
+        <div class="table-info" id="cred-info"></div>
+      </div>
+      <table>
+        <thead><tr><th>Ticket</th><th>Date</th><th>Client</th><th>Point de Vente</th><th>Total GNF</th><th>Remboursé</th><th>Reste</th><th>Statut</th><th></th></tr></thead>
+        <tbody id="cred-tbody"></tbody>
+      </table>
+      <div class="pagination"><div class="pag-info" id="cred-pag-info"></div><div class="pag-btns" id="cred-pag-btns"></div></div>
+    </div>
+  </div>
+
+  <!-- RAPPORTS -->
+  <div id="sec-rapports" class="section">
+    <div class="page-header">
+      <div><div class="page-title">📊 Rapports</div><div class="page-sub">Synthèses et exports</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <!-- Rapport ventes -->
+      <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px">
+        <h3 style="margin:0 0 16px;color:var(--or);font-size:15px">📋 Rapport des Ventes</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Du</label><input type="date" id="rpt-ventes-du" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+          <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Au</label><input type="date" id="rpt-ventes-au" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+        </div>
+        <button class="btn-add" onclick="rptGenererVentes()" style="width:100%;padding:10px;margin-bottom:8px">📄 Générer rapport</button>
+        <div id="rpt-ventes-result" style="margin-top:12px"></div>
+      </div>
+      <!-- Rapport dépenses -->
+      <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px">
+        <h3 style="margin:0 0 16px;color:var(--or);font-size:15px">💸 Rapport des Dépenses</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Du</label><input type="date" id="rpt-dep-du" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+          <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Au</label><input type="date" id="rpt-dep-au" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+        </div>
+        <button class="btn-add" onclick="rptGenererDepenses()" style="width:100%;padding:10px;margin-bottom:8px">📄 Générer rapport</button>
+        <div id="rpt-dep-result" style="margin-top:12px"></div>
+      </div>
+      <!-- Stock bas -->
+      <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px">
+        <h3 style="margin:0 0 16px;color:var(--or);font-size:15px">⚠️ Alertes Stock Bas</h3>
+        <div style="margin-bottom:16px">
+          <label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Seuil d'alerte (quantité)</label>
+          <input type="number" id="rpt-seuil" value="5" min="1" style="width:120px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px">
+        </div>
+        <button class="btn-add" onclick="rptStockBas()" style="width:100%;padding:10px;margin-bottom:8px">🔍 Voir stock bas</button>
+        <div id="rpt-stock-result" style="margin-top:12px"></div>
+      </div>
+      <!-- Export CSV -->
+      <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px">
+        <h3 style="margin:0 0 16px;color:var(--or);font-size:15px">📥 Export données</h3>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <button onclick="exportCSV('produits')" style="padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--txt);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;text-align:left">📦 Export Produits (CSV)</button>
+          <button onclick="exportCSV('ventes')" style="padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--txt);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;text-align:left">🛒 Export Ventes (CSV)</button>
+          <button onclick="exportCSV('depenses')" style="padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--txt);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;text-align:left">💸 Export Dépenses (CSV)</button>
+          <button onclick="exportCSV('credits')" style="padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--txt);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;text-align:left">💳 Export Crédits (CSV)</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -948,6 +1051,8 @@ document.querySelectorAll('nav a').forEach(a => {
     document.getElementById('sec-' + a.dataset.sec).classList.add('active');
     if (a.dataset.sec === 'admin') loadUsersList();
     if (a.dataset.sec === 'ventes') { ventesPage=0; initVentes(); }
+    if (a.dataset.sec === 'credits') { initCredits(); }
+    if (a.dataset.sec === 'rapports') { initRapports(); }
     if (a.dataset.sec === 'points') { initPointsDeVente(); }
   });
 });
@@ -994,7 +1099,7 @@ const ROLE_COLORS = { admin:'#D4AF37', gerant:'#2980B9', vendeur:'#3DA85A' };
 
 // ─── INIT ALL ──────────────────────────────────────────────────
 function initAllModules() {
-  initDashboard(); initProduits(); initAppros(); initClients(); initFournisseurs(); initDepenses();
+  initDashboard(); initProduits(); initAppros(); initClients(); initFournisseurs(); initDepenses(); initCredits(); initRapports();
   initPOS(); initPointsDeVente();
 }
 
@@ -1724,4 +1829,327 @@ installBtn.addEventListener('click', async () => { if(!deferredPrompt) return; d
 window.addEventListener('appinstalled', () => { installBtn.style.display='none'; deferredPrompt=null; });
 </script>
 </body>
-</html>
+</html><script>
+// ══════════════════════════════════════════════════════
+// MODULE DÉPENSES — Saisie + Firebase + localStorage
+// ══════════════════════════════════════════════════════
+let DEP_DATA = []; // dépenses live (localStorage + Firestore)
+let depPagerLive;
+
+function depToggleForm() {
+  const f = document.getElementById('dep-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  if (f.style.display === 'block') {
+    // Date du jour par défaut
+    document.getElementById('dep-form-date').value = new Date().toISOString().split('T')[0];
+    // Remplir select PDV
+    const sel = document.getElementById('dep-form-pdv');
+    while(sel.options.length > 1) sel.remove(1);
+    POINTS_DE_VENTE.forEach(p => {
+      const o = document.createElement('option');
+      o.value = p.id; o.textContent = p.nom;
+      sel.appendChild(o);
+    });
+  }
+}
+
+async function depSauvegarder() {
+  const date = document.getElementById('dep-form-date').value;
+  const lib  = document.getElementById('dep-form-lib').value.trim();
+  const mnt  = parseFloat(document.getElementById('dep-form-mnt').value);
+  const cat  = document.getElementById('dep-form-cat').value;
+  const note = document.getElementById('dep-form-note').value.trim();
+  const pdv  = document.getElementById('dep-form-pdv').value;
+  const msg  = document.getElementById('dep-form-msg');
+  if (!date || !lib || isNaN(mnt) || mnt <= 0) {
+    msg.style.color = 'var(--red)'; msg.textContent = '⚠ Date, libellé et montant requis.'; return;
+  }
+  const dep = {
+    id: 'DEP-' + Date.now(),
+    date, lib, mnt, cat, note,
+    pdvId: pdv,
+    pdvNom: POINTS_DE_VENTE.find(p=>p.id===pdv)?.nom || 'Général',
+    saisiepar: currentUser?.displayName || currentUser?.email || '—',
+    createdAt: new Date().toISOString()
+  };
+  DEP_DATA.unshift(dep);
+  depSaveLocal();
+  if (dataSource === 'firebase') {
+    try { await db.collection('depenses_live').doc(dep.id).set(dep); } catch(e) {}
+  }
+  msg.style.color = 'var(--or)'; msg.textContent = '✅ Dépense enregistrée !';
+  document.getElementById('dep-form-lib').value = '';
+  document.getElementById('dep-form-mnt').value = '';
+  document.getElementById('dep-form-note').value = '';
+  depRenderAll();
+  setTimeout(() => { msg.textContent = ''; }, 3000);
+}
+
+function depSaveLocal() {
+  try { localStorage.setItem('manfara_depenses', JSON.stringify(DEP_DATA)); } catch(e) {}
+}
+
+function depLoadLocal() {
+  try {
+    const d = localStorage.getItem('manfara_depenses');
+    if (d) DEP_DATA = JSON.parse(d);
+  } catch(e) {}
+}
+
+async function depLoadFirestore() {
+  if (dataSource !== 'firebase') return;
+  try {
+    const snap = await db.collection('depenses_live').orderBy('createdAt','desc').limit(500).get();
+    if (!snap.empty) {
+      DEP_DATA = snap.docs.map(d=>({id:d.id,...d.data()}));
+      depSaveLocal();
+    }
+  } catch(e) {}
+}
+
+async function depSupprimer(id) {
+  if (!confirm('Supprimer cette dépense ?')) return;
+  DEP_DATA = DEP_DATA.filter(d=>d.id!==id);
+  depSaveLocal();
+  if (dataSource === 'firebase') {
+    try { await db.collection('depenses_live').doc(id).delete(); } catch(e) {}
+  }
+  depRenderAll();
+}
+
+let depSearchStr = '';
+function depFilter() {
+  depSearchStr = document.getElementById('dep-search')?.value.toLowerCase() || '';
+  depRenderAll();
+}
+
+function depRenderAll() {
+  // Fusionner avec données statiques
+  const allDep = [...DEP_DATA, ...(DB_LOCAL.depenses||[])];
+  const now = new Date();
+  const moisCourant = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  const total = allDep.reduce((s,d)=>s+(parseFloat(d.mnt||d.m)||0), 0);
+  const nb = allDep.length;
+  const mois = allDep.filter(d=>(d.date||d.d||'').startsWith(moisCourant.replace('-','/'))||
+    (d.date||d.d||'').startsWith(moisCourant)).reduce((s,d)=>s+(parseFloat(d.mnt||d.m)||0),0);
+  document.getElementById('dep-kpi-total').textContent = fmt(total);
+  document.getElementById('dep-kpi-nb').textContent = nb.toLocaleString('fr-FR');
+  document.getElementById('dep-kpi-mois').textContent = fmt(mois);
+  document.getElementById('dep-kpi-moy').textContent = nb>0 ? fmt(total/nb) : '0';
+  document.getElementById('dep-sub').textContent = `${nb.toLocaleString('fr-FR')} dépenses — Total: ${fmtFull(total)} GNF`;
+  let filtered = allDep;
+  if (depSearchStr) filtered = filtered.filter(d=>(d.lib||d.l||'').toLowerCase().includes(depSearchStr)||(d.cat||'').toLowerCase().includes(depSearchStr));
+  if (!depPagerLive) depPagerLive = makePager(filtered, 50);
+  else depPagerLive.setData(filtered);
+  const rows = depPagerLive.page();
+  const tbody = document.getElementById('dep-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = rows.map((d,i) => {
+    const isLive = !!d.createdAt;
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${d.id||d.i||i+1}</td>
+      <td>${d.date ? d.date.split('-').reverse().join('/') : fmtDate(d.d||'')}</td>
+      <td>${d.lib||d.l||'—'}</td>
+      <td>${d.cat ? `<span class="badge badge-or">${d.cat}</span>` : '—'}</td>
+      <td class="amount amount-neg">${fmtFull(d.mnt||d.m||0)} GNF</td>
+      <td style="font-size:12px;color:var(--txt3)">${d.saisiepar||'—'}</td>
+      <td>${isLive ? `<button onclick="depSupprimer('${d.id}')" style="background:none;border:none;cursor:pointer;color:var(--red);font-size:14px">🗑</button>` : ''}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('dep-info').textContent = `${filtered.length.toLocaleString('fr-FR')} dépenses`;
+  renderPagination(depPagerLive, document.getElementById('dep-pag-info'), document.getElementById('dep-pag-btns'), depRenderAll);
+}
+
+async function initDepenses() {
+  depLoadLocal();
+  await depLoadFirestore();
+  depPagerLive = null;
+  depRenderAll();
+}
+
+// ══════════════════════════════════════════════════════
+// MODULE CRÉDITS CLIENTS
+// ══════════════════════════════════════════════════════
+let CRED_REMBOURSES = {};
+let credPager;
+
+function credLoadLocal() {
+  try {
+    const d = localStorage.getItem('manfara_credits');
+    if (d) CRED_REMBOURSES = JSON.parse(d);
+  } catch(e) {}
+}
+
+function credSaveLocal() {
+  try { localStorage.setItem('manfara_credits', JSON.stringify(CRED_REMBOURSES)); } catch(e) {}
+}
+
+async function credRembourser(ticketId, total) {
+  const montant = parseFloat(prompt(`Montant remboursé pour le ticket ${ticketId} (GNF) :`) || '0');
+  if (isNaN(montant) || montant <= 0) return;
+  if (!CRED_REMBOURSES[ticketId]) CRED_REMBOURSES[ticketId] = 0;
+  CRED_REMBOURSES[ticketId] = Math.min(CRED_REMBOURSES[ticketId] + montant, total);
+  credSaveLocal();
+  if (dataSource === 'firebase') {
+    try { await db.collection('credits_remboursements').doc(ticketId).set({ rembourse: CRED_REMBOURSES[ticketId], updatedAt: new Date().toISOString() }); } catch(e) {}
+  }
+  credRenderAll();
+}
+
+let credSearchStr = '';
+function credFilter() {
+  credSearchStr = document.getElementById('cred-search')?.value.toLowerCase() || '';
+  credRenderAll();
+}
+
+function credRenderAll() {
+  const credits = POS_VENTES.filter(v=>v.paiement==='CREDIT');
+  let filtered = credits;
+  if (credSearchStr) filtered = filtered.filter(v=>(v.client||'').toLowerCase().includes(credSearchStr)||(v.id||'').toLowerCase().includes(credSearchStr));
+  const totalCredit = credits.reduce((s,v)=>s+v.total,0);
+  const totalRembourse = credits.reduce((s,v)=>s+(CRED_REMBOURSES[v.id]||0),0);
+  const totalReste = totalCredit - totalRembourse;
+  const nbClients = [...new Set(credits.map(v=>v.client||'—'))].length;
+  document.getElementById('cred-kpi-total').textContent = fmt(totalCredit);
+  document.getElementById('cred-kpi-nb').textContent = nbClients;
+  document.getElementById('cred-kpi-rembourse').textContent = fmt(totalRembourse);
+  document.getElementById('cred-kpi-reste').textContent = fmt(totalReste);
+  document.getElementById('cred-sub').textContent = `${credits.length} ventes à crédit — Reste: ${fmtFull(totalReste)} GNF`;
+  if (!credPager) credPager = makePager(filtered, 30);
+  else credPager.setData(filtered);
+  const rows = credPager.page();
+  const tbody = document.getElementById('cred-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = rows.map(v => {
+    const rembourse = CRED_REMBOURSES[v.id] || 0;
+    const reste = v.total - rembourse;
+    const pct = v.total > 0 ? Math.round((rembourse/v.total)*100) : 0;
+    const statut = reste <= 0 ? '<span class="badge badge-grn">✓ Soldé</span>' :
+                   rembourse > 0 ? `<span class="badge badge-or">Partiel ${pct}%</span>` :
+                   '<span class="badge" style="background:#ff000022;color:#ff4444">En attente</span>';
+    return `<tr>
+      <td><span style="font-family:'JetBrains Mono',monospace;color:var(--or)">${v.id}</span></td>
+      <td>${v.dateStr||'—'}</td>
+      <td><strong>${v.client||'—'}</strong></td>
+      <td>${v.pointNom||'—'}</td>
+      <td class="amount">${fmtFull(v.total)}</td>
+      <td class="amount amount-pos">${fmtFull(rembourse)}</td>
+      <td class="amount ${reste>0?'amount-neg':'amount-pos'}">${fmtFull(Math.max(0,reste))}</td>
+      <td>${statut}</td>
+      <td>${reste>0 ? `<button onclick="credRembourser('${v.id}',${v.total})" class="btn-add" style="padding:4px 10px;font-size:11px">Rembourser</button>` : ''}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--txt3);padding:32px">Aucune vente à crédit</td></tr>';
+  document.getElementById('cred-info').textContent = `${filtered.length} crédits`;
+  renderPagination(credPager, document.getElementById('cred-pag-info'), document.getElementById('cred-pag-btns'), credRenderAll);
+}
+
+function initCredits() {
+  credLoadLocal();
+  credPager = null;
+  credRenderAll();
+}
+
+// ══════════════════════════════════════════════════════
+// MODULE RAPPORTS
+// ══════════════════════════════════════════════════════
+function initRapports() {
+  const today = new Date().toISOString().split('T')[0];
+  const firstDay = today.substring(0,7) + '-01';
+  ['rpt-ventes-du','rpt-dep-du'].forEach(id => { const el=document.getElementById(id); if(el) el.value=firstDay; });
+  ['rpt-ventes-au','rpt-dep-au'].forEach(id => { const el=document.getElementById(id); if(el) el.value=today; });
+}
+
+function rptGenererVentes() {
+  const du = document.getElementById('rpt-ventes-du').value;
+  const au = document.getElementById('rpt-ventes-au').value;
+  const filtered = POS_VENTES.filter(v => {
+    const d = v.date ? v.date.substring(0,10) : '';
+    return d >= du && d <= au;
+  });
+  const total = filtered.reduce((s,v)=>s+v.total,0);
+  const especes = filtered.filter(v=>v.paiement==='ESPECES').reduce((s,v)=>s+v.total,0);
+  const mobile = filtered.filter(v=>v.paiement==='MOBILE').reduce((s,v)=>s+v.total,0);
+  const credit = filtered.filter(v=>v.paiement==='CREDIT').reduce((s,v)=>s+v.total,0);
+  const nbArticles = filtered.reduce((s,v)=>s+(v.articles?.length||0),0);
+  document.getElementById('rpt-ventes-result').innerHTML = `
+    <div style="background:var(--bg3);border-radius:8px;padding:16px;font-size:13px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="color:var(--txt3)">Période</div><div style="color:var(--or)">${du} → ${au}</div>
+        <div style="color:var(--txt3)">Nb ventes</div><div><strong>${filtered.length}</strong></div>
+        <div style="color:var(--txt3)">Nb articles</div><div>${nbArticles}</div>
+        <div style="color:var(--txt3)">Total GNF</div><div style="color:var(--or);font-weight:700">${fmtFull(total)}</div>
+        <div style="color:var(--txt3)">Espèces</div><div style="color:#3DA85A">${fmtFull(especes)}</div>
+        <div style="color:var(--txt3)">Mobile Money</div><div style="color:#48CAE4">${fmtFull(mobile)}</div>
+        <div style="color:var(--txt3)">Crédit</div><div style="color:#ff4444">${fmtFull(credit)}</div>
+      </div>
+    </div>`;
+}
+
+function rptGenererDepenses() {
+  const du = document.getElementById('rpt-dep-du').value;
+  const au = document.getElementById('rpt-dep-au').value;
+  const allDep = [...DEP_DATA, ...(DB_LOCAL.depenses||[])];
+  const filtered = allDep.filter(d => {
+    const date = d.date || (d.d ? d.d.split('/').reverse().join('-') : '');
+    return date >= du && date <= au;
+  });
+  const total = filtered.reduce((s,d)=>s+(parseFloat(d.mnt||d.m)||0),0);
+  // Par catégorie
+  const parCat = {};
+  filtered.forEach(d => { const c=d.cat||'AUTRE'; parCat[c]=(parCat[c]||0)+(parseFloat(d.mnt||d.m)||0); });
+  const catRows = Object.entries(parCat).sort((a,b)=>b[1]-a[1]).map(([c,v])=>`<div style="color:var(--txt3)">${c}</div><div>${fmtFull(v)} GNF</div>`).join('');
+  document.getElementById('rpt-dep-result').innerHTML = `
+    <div style="background:var(--bg3);border-radius:8px;padding:16px;font-size:13px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="color:var(--txt3)">Période</div><div style="color:var(--or)">${du} → ${au}</div>
+        <div style="color:var(--txt3)">Nb dépenses</div><div><strong>${filtered.length}</strong></div>
+        <div style="color:var(--txt3)">Total GNF</div><div style="color:#ff4444;font-weight:700">${fmtFull(total)}</div>
+        ${catRows}
+      </div>
+    </div>`;
+}
+
+function rptStockBas() {
+  const seuil = parseInt(document.getElementById('rpt-seuil').value) || 5;
+  const bas = DB_LOCAL.produits.filter(p=>parseInt(p.s||0)<=seuil).sort((a,b)=>parseInt(a.s||0)-parseInt(b.s||0));
+  document.getElementById('rpt-stock-result').innerHTML = bas.length === 0
+    ? `<p style="color:#3DA85A;font-size:13px">✅ Aucun produit sous le seuil de ${seuil}</p>`
+    : `<div style="max-height:200px;overflow-y:auto">
+        <table style="width:100%;font-size:12px">
+          <thead><tr><th style="text-align:left;padding:4px;color:var(--txt3)">Produit</th><th style="text-align:right;padding:4px;color:var(--txt3)">Stock</th></tr></thead>
+          <tbody>${bas.map(p=>`<tr><td style="padding:4px">${p.l||'—'}</td><td style="text-align:right;padding:4px;color:${parseInt(p.s||0)===0?'#ff4444':'#E88C20'};font-weight:700">${p.s||0}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>
+      <p style="font-size:12px;color:var(--txt3);margin-top:8px">${bas.length} produit(s) sous le seuil</p>`;
+}
+
+function exportCSV(type) {
+  let rows = [], filename = '', headers = [];
+  if (type === 'produits') {
+    headers = ['Code','Libellé','Famille','Prix GNF','Stock','Fournisseur'];
+    rows = DB_LOCAL.produits.map(p=>[p.c,p.l,p.f,p.p,p.s,p.fr]);
+    filename = 'manfara_produits.csv';
+  } else if (type === 'ventes') {
+    headers = ['Ticket','Date','Point de Vente','Client','Articles','Total GNF','Paiement','Vendeur'];
+    rows = POS_VENTES.map(v=>[v.id,v.dateStr,v.pointNom,v.client,v.articles?.length||0,v.total,v.paiement,v.vendeur]);
+    filename = 'manfara_ventes.csv';
+  } else if (type === 'depenses') {
+    headers = ['ID','Date','Libellé','Catégorie','Montant GNF','Saisi par'];
+    rows = [...DEP_DATA,...(DB_LOCAL.depenses||[])].map(d=>[d.id||d.i,d.date||d.d,d.lib||d.l,d.cat||'',d.mnt||d.m,d.saisiepar||'']);
+    filename = 'manfara_depenses.csv';
+  } else if (type === 'credits') {
+    headers = ['Ticket','Date','Client','Point de Vente','Total GNF','Remboursé','Reste'];
+    rows = POS_VENTES.filter(v=>v.paiement==='CREDIT').map(v=>{
+      const r=CRED_REMBOURSES[v.id]||0;
+      return [v.id,v.dateStr,v.client,v.pointNom,v.total,r,Math.max(0,v.total-r)];
+    });
+    filename = 'manfara_credits.csv';
+  }
+  const csv = [headers, ...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
