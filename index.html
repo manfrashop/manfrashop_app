@@ -108,6 +108,74 @@ body { font-family:'Raleway',sans-serif; background:var(--bg); color:var(--txt);
 .sync-dot.error { background:var(--red); }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
 
+
+/* ═══════════════════════════════════════
+   MODULE ACHATS
+═══════════════════════════════════════ */
+.achat-form-grid { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; margin-bottom:12px; }
+.achat-form-grid label { font-size:11px; color:var(--txt3); display:block; margin-bottom:4px; letter-spacing:.5px; text-transform:uppercase; }
+.achat-form-grid input, .achat-form-grid select, .achat-form-grid textarea {
+  width:100%; background:var(--bg3); border:1px solid var(--brd); border-radius:6px;
+  padding:8px 10px; color:var(--txt); font-family:'Raleway',sans-serif; font-size:13px; outline:none; transition:border .2s;
+}
+.achat-form-grid input:focus, .achat-form-grid select:focus { border-color:var(--or); }
+.achat-form-grid select option { background:var(--bg3); }
+.achat-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
+.achat-kpi { background:var(--bg2); border:1px solid var(--brd); border-radius:var(--radius); padding:18px; position:relative; overflow:hidden; }
+.achat-kpi::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; background:linear-gradient(90deg,var(--or),transparent); }
+.achat-kpi .kpi-label { font-size:11px; color:var(--txt3); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:8px; }
+.achat-kpi .kpi-value { font-family:'Cinzel',serif; font-size:20px; color:var(--or); font-weight:600; }
+.achat-kpi.kpi-red .kpi-value { color:var(--red); }
+.achat-kpi.kpi-grn .kpi-value { color:var(--grn); }
+@media(max-width:768px){
+  .achat-form-grid { grid-template-columns:1fr 1fr; }
+  .achat-kpis { grid-template-columns:repeat(2,1fr); }
+}
+
+/* ═══════════════════════════════════════
+   MODULE STOCK
+═══════════════════════════════════════ */
+.stock-kpis { display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:22px; }
+.stock-kpi { background:var(--bg2); border:1px solid var(--brd); border-radius:var(--radius); padding:16px; position:relative; overflow:hidden; }
+.stock-kpi::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; background:linear-gradient(90deg,var(--or),transparent); }
+.stock-kpi.kpi-red::before { background:linear-gradient(90deg,var(--red),transparent); }
+.stock-kpi.kpi-grn::before { background:linear-gradient(90deg,var(--grn),transparent); }
+.stock-kpi.kpi-or::before  { background:linear-gradient(90deg,var(--or),transparent); }
+.stock-kpi .sk-label { font-size:10px; color:var(--txt3); letter-spacing:1.5px; text-transform:uppercase; margin-bottom:6px; }
+.stock-kpi .sk-val { font-family:'Cinzel',serif; font-size:20px; color:var(--or); font-weight:600; }
+.stock-kpi.kpi-red .sk-val { color:var(--red); }
+.stock-kpi.kpi-grn .sk-val { color:var(--grn); }
+.stock-kpi .sk-sub { font-size:10px; color:var(--txt3); margin-top:4px; }
+
+.stock-tabs { display:flex; gap:6px; margin-bottom:18px; }
+.stock-tab { padding:7px 18px; border-radius:20px; border:1px solid var(--brd); background:transparent; color:var(--txt3); font-size:12px; cursor:pointer; font-family:'Raleway',sans-serif; font-weight:500; transition:all .2s; }
+.stock-tab:hover { border-color:var(--or); color:var(--or); }
+.stock-tab.active { background:var(--or); color:var(--bg); border-color:var(--or); font-weight:700; }
+
+.stock-alert-badge { display:inline-block; padding:2px 7px; border-radius:10px; font-size:10px; font-weight:700; }
+.sab-rupture { background:rgba(192,57,43,.2); color:var(--red); }
+.sab-bas     { background:rgba(232,140,32,.2); color:#E88C20; }
+.sab-ok      { background:rgba(61,168,90,.2);  color:var(--grn); }
+
+.mvt-badge { display:inline-block; padding:3px 8px; border-radius:10px; font-size:10px; font-weight:700; }
+.mvt-entree  { background:rgba(61,168,90,.15);  color:var(--grn); }
+.mvt-sortie  { background:rgba(192,57,43,.15);  color:var(--red); }
+.mvt-ajust   { background:rgba(41,128,185,.15); color:var(--blu); }
+
+.stock-form-inline { background:var(--bg2); border:1px solid var(--brd); border-radius:10px; padding:18px; margin-bottom:18px; }
+.stock-form-row { display:grid; grid-template-columns:2fr 1fr 1fr 1fr auto; gap:10px; align-items:end; }
+.stock-form-row label { font-size:10px; color:var(--txt3); letter-spacing:.5px; text-transform:uppercase; display:block; margin-bottom:4px; }
+.stock-form-row input, .stock-form-row select {
+  width:100%; background:var(--bg3); border:1px solid var(--brd); border-radius:6px;
+  padding:8px 10px; color:var(--txt); font-family:'Raleway',sans-serif; font-size:13px; outline:none; transition:border .2s;
+}
+.stock-form-row input:focus, .stock-form-row select:focus { border-color:var(--or); }
+
+@media(max-width:768px){
+  .stock-kpis { grid-template-columns:repeat(2,1fr); }
+  .stock-form-row { grid-template-columns:1fr 1fr; }
+  .stock-tabs { flex-wrap:wrap; }
+}
 @media(max-width:768px){
   #topbar { left:0; }
 }
@@ -453,6 +521,8 @@ tbody tr:last-child td { border-bottom:none; }
     <a data-sec="ventes"><span class="ico">📋</span> Historique Ventes</a>
     <a data-sec="points"><span class="ico">🏪</span> Points de Vente</a>
     <a data-sec="credits"><span class="ico">💳</span> Crédits Clients</a>
+    <a data-sec="stock"><span class="ico">📊</span> Stock</a>
+    <a data-sec="achats"><span class="ico">🛍️</span> Achats</a>
     <a data-sec="rapports"><span class="ico">📊</span> Rapports</a>
     <a data-sec="admin" class="admin-only"><span class="ico">⚙️</span> Utilisateurs</a>
   </nav>
@@ -602,6 +672,278 @@ tbody tr:last-child td { border-bottom:none; }
       </div>
       <table><thead><tr><th>N°</th><th>Date</th><th>Libellé</th><th>Catégorie</th><th>Montant (GNF)</th><th>Saisi par</th><th></th></tr></thead><tbody id="dep-tbody"></tbody></table>
       <div class="pagination"><div class="pag-info" id="dep-pag-info"></div><div class="pag-btns" id="dep-pag-btns"></div></div>
+    </div>
+  </div>
+
+  <!-- ACHATS -->
+  <div id="sec-achats" class="section">
+    <div class="page-header">
+      <div>
+        <div class="page-title">🛍️ Achats</div>
+        <div class="page-sub" id="achat-sub">Bons de commande fournisseurs</div>
+      </div>
+      <button class="btn-add" onclick="achatToggleForm()">+ Nouvel Achat</button>
+    </div>
+
+    <!-- Formulaire -->
+    <div id="achat-form" style="display:none;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px;margin-bottom:20px">
+      <h3 style="margin:0 0 16px;color:var(--or);font-size:15px">➕ Enregistrer un achat</h3>
+      <div class="achat-form-grid">
+        <div>
+          <label>Date *</label>
+          <input type="date" id="achat-date">
+        </div>
+        <div>
+          <label>N° Bon de commande</label>
+          <input type="text" id="achat-num" placeholder="Auto si vide">
+        </div>
+        <div style="grid-column:span 2">
+          <label>Fournisseur *</label>
+          <input type="text" id="achat-frs" placeholder="Nom du fournisseur" list="achat-frs-list">
+          <datalist id="achat-frs-list"></datalist>
+        </div>
+        <div style="grid-column:span 4">
+          <label>Description / Articles</label>
+          <textarea id="achat-desc" rows="2" placeholder="Ex: 10 cartons Nivea, 5 pcs TV Samsung 32..." style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;resize:vertical;outline:none"></textarea>
+        </div>
+        <div>
+          <label>Montant Total (GNF) *</label>
+          <input type="number" id="achat-total" placeholder="0" min="0" style="font-family:'JetBrains Mono',monospace" oninput="achatCalcReste()">
+        </div>
+        <div>
+          <label>Montant Payé (GNF)</label>
+          <input type="number" id="achat-paye" placeholder="0" min="0" style="font-family:'JetBrains Mono',monospace" oninput="achatCalcReste()">
+        </div>
+        <div>
+          <label>Reste à Payer</label>
+          <input type="number" id="achat-reste" placeholder="0" readonly style="font-family:'JetBrains Mono',monospace;color:var(--red);background:var(--bg4)">
+        </div>
+        <div>
+          <label>Statut</label>
+          <select id="achat-statut">
+            <option value="EN COURS">EN COURS</option>
+            <option value="SOLDE">SOLDÉ</option>
+            <option value="PARTIEL">PARTIEL</option>
+            <option value="ANNULE">ANNULÉ</option>
+          </select>
+        </div>
+        <div style="grid-column:span 2">
+          <label>Famille / Catégorie</label>
+          <select id="achat-famille">
+            <option value="">— Toutes familles —</option>
+            <option>COSMETIQUE</option>
+            <option>ELECTRONIQUE</option>
+            <option>ELECTRO MENAGER</option>
+            <option>ALIMENTATION</option>
+            <option>DEVISES</option>
+            <option>NUTRITION BEBE</option>
+            <option>AUTRE</option>
+          </select>
+        </div>
+        <div style="grid-column:span 2">
+          <label>Note / Référence</label>
+          <input type="text" id="achat-note" placeholder="Référence interne, remarque...">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+        <button class="btn-add" onclick="achatSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
+        <button onclick="achatToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <span id="achat-form-msg" style="font-size:13px;color:var(--or)"></span>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="achat-kpis">
+      <div class="achat-kpi"><div class="kpi-label">Total Engagé</div><div class="kpi-value" id="achat-kpi-total">0</div></div>
+      <div class="achat-kpi kpi-grn"><div class="kpi-label">Total Payé</div><div class="kpi-value" id="achat-kpi-paye">0</div></div>
+      <div class="achat-kpi kpi-red"><div class="kpi-label">Reste à Payer</div><div class="kpi-value" id="achat-kpi-reste">0</div></div>
+      <div class="achat-kpi"><div class="kpi-label">Nb Achats</div><div class="kpi-value" id="achat-kpi-nb">0</div></div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-toolbar" style="flex-wrap:wrap;gap:8px">
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="achat-filters">
+          <button class="fbtn active" data-achat-f="ALL">Tous</button>
+          <button class="fbtn" data-achat-f="EN COURS">En cours</button>
+          <button class="fbtn" data-achat-f="PARTIEL">Partiel</button>
+          <button class="fbtn" data-achat-f="SOLDE">Soldé</button>
+          <button class="fbtn" data-achat-f="ANNULE">Annulé</button>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div class="search-bar" style="margin:0"><input type="text" id="achat-search" placeholder="Rechercher..." oninput="achatFilter()"></div>
+          <div class="table-info" id="achat-info"></div>
+        </div>
+      </div>
+      <table>
+        <thead><tr>
+          <th>N° Bon</th><th>Date</th><th>Fournisseur</th><th>Famille</th>
+          <th>Total (GNF)</th><th>Payé (GNF)</th><th>Reste (GNF)</th>
+          <th>Statut</th><th>Saisi par</th><th></th>
+        </tr></thead>
+        <tbody id="achat-tbody"></tbody>
+      </table>
+      <div class="pagination">
+        <div class="pag-info" id="achat-pag-info"></div>
+        <div class="pag-btns" id="achat-pag-btns"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STOCK -->
+  <div id="sec-stock" class="section">
+    <div class="page-header">
+      <div>
+        <div class="page-title">📊 Stock</div>
+        <div class="page-sub" id="stock-sub">Inventaire en temps réel</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn-add" onclick="stockToggleForm()" id="btn-ajust">⚖️ Ajustement</button>
+        <button class="btn-add" onclick="stockRecalculer()" style="background:linear-gradient(135deg,var(--blu),#3498DB)">🔄 Recalculer</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="stock-kpis">
+      <div class="stock-kpi">
+        <div class="sk-label">Articles suivis</div>
+        <div class="sk-val" id="stock-kpi-articles">0</div>
+        <div class="sk-sub">références actives</div>
+      </div>
+      <div class="stock-kpi kpi-grn">
+        <div class="sk-label">Valeur Stock</div>
+        <div class="sk-val" id="stock-kpi-valeur">0</div>
+        <div class="sk-sub">GNF au prix achat</div>
+      </div>
+      <div class="stock-kpi kpi-red">
+        <div class="sk-label">En Rupture</div>
+        <div class="sk-val" id="stock-kpi-rupture">0</div>
+        <div class="sk-sub">articles à 0</div>
+      </div>
+      <div class="stock-kpi kpi-or">
+        <div class="sk-label">Stock Bas</div>
+        <div class="sk-val" id="stock-kpi-bas">0</div>
+        <div class="sk-sub">en dessous du seuil</div>
+      </div>
+      <div class="stock-kpi">
+        <div class="sk-label">Mouvements</div>
+        <div class="sk-val" id="stock-kpi-mvts">0</div>
+        <div class="sk-sub">total enregistrés</div>
+      </div>
+    </div>
+
+    <!-- Formulaire ajustement manuel -->
+    <div id="stock-form" style="display:none">
+      <div class="stock-form-inline">
+        <h3 style="margin:0 0 14px;color:var(--or);font-size:14px">⚖️ Ajustement manuel de stock</h3>
+        <div class="stock-form-row">
+          <div>
+            <label>Article *</label>
+            <input type="text" id="stock-adj-art" placeholder="Code ou nom de l'article" list="stock-art-list">
+            <datalist id="stock-art-list"></datalist>
+          </div>
+          <div>
+            <label>Type *</label>
+            <select id="stock-adj-type">
+              <option value="ENTREE">➕ Entrée</option>
+              <option value="SORTIE">➖ Sortie</option>
+              <option value="AJUST">⚖️ Correction</option>
+            </select>
+          </div>
+          <div>
+            <label>Quantité *</label>
+            <input type="number" id="stock-adj-qty" placeholder="0" min="1" style="font-family:'JetBrains Mono',monospace">
+          </div>
+          <div>
+            <label>Motif</label>
+            <input type="text" id="stock-adj-motif" placeholder="Inventaire, retour, perte...">
+          </div>
+          <div style="display:flex;gap:6px;padding-bottom:1px">
+            <button class="btn-add" onclick="stockAjustSauver()" style="padding:8px 14px;white-space:nowrap">✓ OK</button>
+            <button onclick="stockToggleForm()" style="padding:8px 10px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-size:13px">✕</button>
+          </div>
+        </div>
+        <div id="stock-adj-msg" style="margin-top:8px;font-size:13px;color:var(--or)"></div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="stock-tabs">
+      <button class="stock-tab active" data-stab="inventaire">📦 Inventaire</button>
+      <button class="stock-tab" data-stab="mouvements">🔄 Mouvements</button>
+      <button class="stock-tab" data-stab="alertes">🔔 Alertes</button>
+    </div>
+
+    <!-- TAB: INVENTAIRE -->
+    <div id="stab-inventaire">
+      <div class="table-wrap">
+        <div class="table-toolbar" style="flex-wrap:wrap;gap:8px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap" id="stock-fam-filters"></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div class="search-bar" style="margin:0"><input type="text" id="stock-search" placeholder="Rechercher..." oninput="stockInvFilter()"></div>
+            <div class="table-info" id="stock-inv-info"></div>
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Code</th><th>Article</th><th>Famille</th>
+            <th>Stock Init.</th><th>Entrées</th><th>Sorties</th>
+            <th>Stock Actuel</th><th>Seuil Min</th><th>État</th>
+            <th>Valeur (GNF)</th>
+          </tr></thead>
+          <tbody id="stock-inv-tbody"></tbody>
+        </table>
+        <div class="pagination">
+          <div class="pag-info" id="stock-inv-pag-info"></div>
+          <div class="pag-btns" id="stock-inv-pag-btns"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: MOUVEMENTS -->
+    <div id="stab-mouvements" style="display:none">
+      <div class="table-wrap">
+        <div class="table-toolbar" style="flex-wrap:wrap;gap:8px">
+          <div style="display:flex;gap:6px">
+            <button class="fbtn active" data-smvt="ALL">Tous</button>
+            <button class="fbtn" data-smvt="ENTREE">Entrées</button>
+            <button class="fbtn" data-smvt="SORTIE">Sorties</button>
+            <button class="fbtn" data-smvt="AJUST">Ajustements</button>
+          </div>
+          <div class="table-info" id="stock-mvt-info"></div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Date</th><th>Article</th><th>Type</th>
+            <th>Qté</th><th>Référence</th><th>Motif / Source</th><th>Par</th>
+          </tr></thead>
+          <tbody id="stock-mvt-tbody"></tbody>
+        </table>
+        <div class="pagination">
+          <div class="pag-info" id="stock-mvt-pag-info"></div>
+          <div class="pag-btns" id="stock-mvt-pag-btns"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: ALERTES -->
+    <div id="stab-alertes" style="display:none">
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <div style="font-size:13px;color:var(--txt2)">Articles en rupture ou stock bas</div>
+          <div>
+            <label style="font-size:11px;color:var(--txt3);margin-right:8px">Seuil d'alerte global :</label>
+            <input type="number" id="stock-seuil-global" value="5" min="0" style="width:60px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;padding:4px 8px;color:var(--or);font-family:'JetBrains Mono',monospace;font-size:13px" onchange="stockRenderAlertes()">
+          </div>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Code</th><th>Article</th><th>Famille</th>
+            <th>Stock Actuel</th><th>Seuil Min</th><th>État</th><th>Fournisseur</th>
+          </tr></thead>
+          <tbody id="stock-alert-tbody"></tbody>
+        </table>
+      </div>
     </div>
   </div>
 
@@ -1051,6 +1393,8 @@ document.querySelectorAll('nav a').forEach(a => {
     document.getElementById('sec-' + a.dataset.sec).classList.add('active');
     if (a.dataset.sec === 'admin') loadUsersList();
     if (a.dataset.sec === 'ventes') { ventesPage=0; initVentes(); }
+    if (a.dataset.sec === 'stock') { initStock(); }
+    if (a.dataset.sec === 'achats') { initAchats(); }
     if (a.dataset.sec === 'credits') { initCredits(); }
     if (a.dataset.sec === 'rapports') { initRapports(); }
     if (a.dataset.sec === 'points') { initPointsDeVente(); }
@@ -1099,7 +1443,7 @@ const ROLE_COLORS = { admin:'#D4AF37', gerant:'#2980B9', vendeur:'#3DA85A' };
 
 // ─── INIT ALL ──────────────────────────────────────────────────
 function initAllModules() {
-  initDashboard(); initProduits(); initAppros(); initClients(); initFournisseurs(); initDepenses(); initCredits(); initRapports();
+  initDashboard(); initProduits(); initAppros(); initClients(); initFournisseurs(); initDepenses(); initStock(); initAchats(); initCredits(); initRapports();
   initPOS(); initPointsDeVente();
 }
 
@@ -1367,6 +1711,7 @@ function posValiderVente() {
     vendeur: currentUser?.displayName || currentUser?.email || 'Vendeur'
   };
   POS_VENTES.unshift(vente);
+  stockEnregistrerSortieVente(vente);
   posSaveStorage();
   posShowTicket(vente);
   posClearCart();
@@ -1827,6 +2172,631 @@ const installBtn = document.getElementById('pwa-install-btn');
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt=e; installBtn.style.display='flex'; });
 installBtn.addEventListener('click', async () => { if(!deferredPrompt) return; deferredPrompt.prompt(); const {outcome}=await deferredPrompt.userChoice; deferredPrompt=null; installBtn.style.display='none'; });
 window.addEventListener('appinstalled', () => { installBtn.style.display='none'; deferredPrompt=null; });
+// ─── MODULE ACHATS ────────────────────────────────────────────
+let ACHAT_DATA = [];
+let achatPager;
+let achatActiveFilter = 'ALL';
+
+function achatToggleForm() {
+  const f = document.getElementById('achat-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  if(f.style.display === 'block') {
+    // Date du jour par défaut
+    document.getElementById('achat-date').value = new Date().toISOString().split('T')[0];
+    // Populate fournisseurs datalist
+    const dl = document.getElementById('achat-frs-list');
+    dl.innerHTML = '';
+    DB_LOCAL.fournisseurs.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f.n || '';
+      dl.appendChild(opt);
+    });
+    document.getElementById('achat-form-msg').textContent = '';
+  }
+}
+
+function achatCalcReste() {
+  const total = parseFloat(document.getElementById('achat-total').value) || 0;
+  const paye  = parseFloat(document.getElementById('achat-paye').value)  || 0;
+  const reste = Math.max(0, total - paye);
+  document.getElementById('achat-reste').value = reste;
+  // Auto-statut
+  const statSel = document.getElementById('achat-statut');
+  if(total > 0) {
+    if(reste === 0) statSel.value = 'SOLDE';
+    else if(paye > 0) statSel.value = 'PARTIEL';
+    else statSel.value = 'EN COURS';
+  }
+}
+
+async function achatSauvegarder() {
+  const date   = document.getElementById('achat-date').value;
+  const frs    = document.getElementById('achat-frs').value.trim();
+  const total  = parseFloat(document.getElementById('achat-total').value) || 0;
+  const paye   = parseFloat(document.getElementById('achat-paye').value)  || 0;
+  const reste  = Math.max(0, total - paye);
+  const statut = document.getElementById('achat-statut').value;
+  const desc   = document.getElementById('achat-desc').value.trim();
+  const note   = document.getElementById('achat-note').value.trim();
+  const fam    = document.getElementById('achat-famille').value;
+  const numRaw = document.getElementById('achat-num').value.trim();
+  const msg    = document.getElementById('achat-form-msg');
+
+  if(!date || !frs || total <= 0) {
+    msg.style.color = 'var(--red)';
+    msg.textContent = 'Date, Fournisseur et Montant total sont obligatoires.';
+    return;
+  }
+
+  const num = numRaw || 'ACH-' + Date.now();
+  const achat = {
+    id: 'achat-' + Date.now(),
+    num, date, frs, total, paye, reste, statut,
+    desc, note, fam,
+    saisiepar: currentUser?.displayName || '—',
+    createdAt: new Date().toISOString()
+  };
+
+  ACHAT_DATA.unshift(achat);
+  achatSaveStorage();
+
+  // Sync Firebase si configuré
+  if(dataSource === 'firebase') {
+    try {
+      await db.collection('achats').doc(achat.id).set(achat);
+    } catch(e) { console.warn('Firebase sync achat:', e); }
+  }
+
+  msg.style.color = 'var(--grn)';
+  msg.textContent = '✓ Achat enregistré : ' + num;
+  // Reset form
+  ['achat-date','achat-num','achat-frs','achat-desc','achat-total','achat-paye','achat-reste','achat-note'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  document.getElementById('achat-statut').value = 'EN COURS';
+  document.getElementById('achat-famille').value = '';
+  achatRenderAll();
+  setTimeout(() => { document.getElementById('achat-form').style.display = 'none'; }, 1200);
+}
+
+function achatSaveStorage() {
+  try { localStorage.setItem('manfara_achats', JSON.stringify(ACHAT_DATA)); } catch(e) {}
+}
+
+function achatLoadStorage() {
+  try {
+    const raw = localStorage.getItem('manfara_achats');
+    if(raw) ACHAT_DATA = JSON.parse(raw);
+  } catch(e) { ACHAT_DATA = []; }
+}
+
+async function achatLoadFirestore() {
+  if(dataSource !== 'firebase') return;
+  try {
+    const snap = await db.collection('achats').orderBy('createdAt','desc').get();
+    if(!snap.empty) {
+      ACHAT_DATA = snap.docs.map(d => d.data());
+      achatSaveStorage();
+    }
+  } catch(e) { console.warn('Achats Firestore:', e); }
+}
+
+function achatFilter() {
+  achatRenderAll();
+}
+
+function achatRenderAll() {
+  const q = (document.getElementById('achat-search')?.value || '').trim().toLowerCase();
+  let data = [...ACHAT_DATA];
+  if(achatActiveFilter !== 'ALL') data = data.filter(a => a.statut === achatActiveFilter);
+  if(q) data = data.filter(a =>
+    (a.num||'').toLowerCase().includes(q) ||
+    (a.frs||'').toLowerCase().includes(q) ||
+    (a.desc||'').toLowerCase().includes(q)
+  );
+
+  // KPIs
+  const kTotal = data.reduce((s,a) => s + (a.total||0), 0);
+  const kPaye  = data.reduce((s,a) => s + (a.paye||0),  0);
+  const kReste = data.reduce((s,a) => s + (a.reste||0), 0);
+  document.getElementById('achat-kpi-total').textContent = fmt(kTotal) + ' GNF';
+  document.getElementById('achat-kpi-paye').textContent  = fmt(kPaye)  + ' GNF';
+  document.getElementById('achat-kpi-reste').textContent = fmt(kReste) + ' GNF';
+  document.getElementById('achat-kpi-nb').textContent    = data.length;
+  document.getElementById('achat-sub').textContent       = ACHAT_DATA.length + ' bons de commande';
+
+  if(!achatPager) achatPager = makePager(data, 50);
+  else achatPager.setData(data);
+
+  achatRenderTable();
+}
+
+function achatRenderTable() {
+  const rows = achatPager.page();
+  const STAT_CLS = { 'EN COURS':'badge-or', 'SOLDE':'badge-grn', 'PARTIEL':'badge-blu', 'ANNULE':'badge-red' };
+  document.getElementById('achat-tbody').innerHTML = rows.map(a => {
+    const cls = STAT_CLS[a.statut] || 'badge-or';
+    const resteCls = (a.reste||0) > 0 ? 'amount-neg' : 'amount-pos';
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--or)">${a.num||'—'}</td>
+      <td style="font-size:12px">${a.date||'—'}</td>
+      <td>${a.frs||'—'}</td>
+      <td>${a.fam ? '<span class="badge badge-blu">'+a.fam+'</span>' : '—'}</td>
+      <td class="amount">${fmtFull(a.total)}</td>
+      <td class="amount amount-pos">${fmtFull(a.paye)}</td>
+      <td class="amount ${resteCls}">${fmtFull(a.reste)}</td>
+      <td><span class="badge ${cls}">${a.statut||'—'}</span></td>
+      <td style="font-size:11px;color:var(--txt3)">${a.saisiepar||'—'}</td>
+      <td>
+        <button onclick="achatSupprimer('${a.id}')" style="padding:3px 8px;border:1px solid var(--brd);border-radius:4px;background:none;color:var(--txt3);cursor:pointer;font-size:11px" title="Supprimer">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+  document.getElementById('achat-info').textContent = achatPager.total() + ' achats';
+  renderPagination(achatPager, document.getElementById('achat-pag-info'), document.getElementById('achat-pag-btns'), achatRenderTable);
+}
+
+async function achatSupprimer(id) {
+  if(!confirm('Supprimer cet achat ?')) return;
+  ACHAT_DATA = ACHAT_DATA.filter(a => a.id !== id);
+  achatSaveStorage();
+  if(dataSource === 'firebase') {
+    try { await db.collection('achats').doc(id).delete(); } catch(e) {}
+  }
+  achatRenderAll();
+}
+
+function initAchats() {
+  achatLoadStorage();
+  achatLoadFirestore();
+  // Filtres
+  document.getElementById('achat-filters')?.addEventListener('click', e => {
+    const f = e.target.dataset.achatF;
+    if(!f) return;
+    document.querySelectorAll('#achat-filters .fbtn').forEach(b => b.classList.remove('active'));
+    e.target.classList.add('active');
+    achatActiveFilter = f;
+    achatRenderAll();
+  });
+  achatRenderAll();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE STOCK — Inventaire temps réel
+// ═══════════════════════════════════════════════════════════════
+
+let STOCK_MVT = [];         // historique des mouvements
+let STOCK_INV = {};         // { code: { stock_actuel, seuil_min, ... } }
+let stockInvPager, stockMvtPager;
+let stockTabActive   = 'inventaire';
+let stockMvtFilter   = 'ALL';
+let stockFamFilter   = 'ALL';
+let stockInvSearch   = '';
+
+// ─── INIT ──────────────────────────────────────────────────────
+function initStock() {
+  stockLoadStorage();
+  stockLoadFirestore();
+  stockBuildInventaire();
+  stockRenderAll();
+
+  // Tabs
+  document.querySelectorAll('.stock-tab').forEach(t => {
+    t.addEventListener('click', () => {
+      document.querySelectorAll('.stock-tab').forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      stockTabActive = t.dataset.stab;
+      ['inventaire','mouvements','alertes'].forEach(n => {
+        const el = document.getElementById('stab-'+n);
+        if(el) el.style.display = n === stockTabActive ? 'block' : 'none';
+      });
+      if(stockTabActive === 'mouvements') stockRenderMvt();
+      if(stockTabActive === 'alertes')    stockRenderAlertes();
+    });
+  });
+
+  // Filtre mvt
+  document.querySelectorAll('[data-smvt]').forEach(b => {
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-smvt]').forEach(x => x.classList.remove('active'));
+      b.classList.add('active');
+      stockMvtFilter = b.dataset.smvt;
+      stockRenderMvt();
+    });
+  });
+
+  // Familles
+  const famFilters = document.getElementById('stock-fam-filters');
+  if(famFilters) {
+    const fams = [...new Set(DB_LOCAL.produits.map(p=>p.f).filter(Boolean))].sort();
+    famFilters.innerHTML = '<button class="fbtn active" data-sfam="ALL">Toutes</button>' +
+      fams.map(f => `<button class="fbtn" data-sfam="${f}">${f}</button>`).join('');
+    famFilters.addEventListener('click', e => {
+      const f = e.target.dataset.sfam;
+      if(!f) return;
+      famFilters.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      stockFamFilter = f;
+      stockRenderInv();
+    });
+  }
+}
+
+// ─── STORAGE ────────────────────────────────────────────────────
+function stockSaveStorage() {
+  try {
+    localStorage.setItem('manfara_stock_mvt', JSON.stringify(STOCK_MVT));
+    localStorage.setItem('manfara_stock_inv', JSON.stringify(STOCK_INV));
+  } catch(e) {}
+}
+
+function stockLoadStorage() {
+  try {
+    const m = localStorage.getItem('manfara_stock_mvt');
+    const i = localStorage.getItem('manfara_stock_inv');
+    if(m) STOCK_MVT = JSON.parse(m);
+    if(i) STOCK_INV = JSON.parse(i);
+  } catch(e) { STOCK_MVT = []; STOCK_INV = {}; }
+}
+
+async function stockLoadFirestore() {
+  if(dataSource !== 'firebase') return;
+  try {
+    const [mvtSnap, invSnap] = await Promise.all([
+      db.collection('stock_mvt').orderBy('date','desc').limit(2000).get(),
+      db.collection('stock_inv').get()
+    ]);
+    if(!mvtSnap.empty) STOCK_MVT = mvtSnap.docs.map(d=>d.data());
+    if(!invSnap.empty) {
+      STOCK_INV = {};
+      invSnap.docs.forEach(d => { STOCK_INV[d.id] = d.data(); });
+    }
+    stockSaveStorage();
+    stockBuildInventaire();
+    stockRenderAll();
+  } catch(e) { console.warn('Stock Firestore:', e); }
+}
+
+async function stockSaveFirestore(mvt) {
+  if(dataSource !== 'firebase') return;
+  try {
+    await db.collection('stock_mvt').doc(mvt.id).set(mvt);
+    // Mettre à jour l'inventaire Firestore
+    const inv = STOCK_INV[mvt.code];
+    if(inv) await db.collection('stock_inv').doc(mvt.code).set(inv);
+  } catch(e) { console.warn('Stock save Firestore:', e); }
+}
+
+// ─── BUILD INVENTAIRE depuis produits + mouvements ─────────────
+function stockBuildInventaire() {
+  // Initialiser depuis DB_LOCAL.produits
+  DB_LOCAL.produits.forEach(p => {
+    if(!STOCK_INV[p.c]) {
+      STOCK_INV[p.c] = {
+        code: p.c,
+        nom: p.l,
+        famille: p.f,
+        fournisseur: p.fr || '',
+        prix_achat: parseFloat(p.p) || 0,
+        stock_initial: parseInt(p.s) || 0,
+        seuil_min: 5,
+        entrees: 0,
+        sorties: 0
+      };
+    } else {
+      // Mettre à jour les infos statiques
+      STOCK_INV[p.c].nom = p.l;
+      STOCK_INV[p.c].famille = p.f;
+      STOCK_INV[p.c].prix_achat = parseFloat(p.p) || 0;
+      if(!STOCK_INV[p.c].stock_initial) STOCK_INV[p.c].stock_initial = parseInt(p.s) || 0;
+    }
+  });
+
+  // Recalculer entrées/sorties depuis les mouvements
+  Object.keys(STOCK_INV).forEach(code => {
+    const mvts = STOCK_MVT.filter(m => m.code === code);
+    STOCK_INV[code].entrees = mvts.filter(m=>m.type==='ENTREE').reduce((s,m)=>s+(m.qty||0),0);
+    STOCK_INV[code].sorties = mvts.filter(m=>m.type==='SORTIE').reduce((s,m)=>s+(m.qty||0),0);
+    const ajust = mvts.filter(m=>m.type==='AJUST');
+    // Pour les ajustements : on remplace le stock_initial
+    if(ajust.length > 0) {
+      const dernierAjust = ajust.sort((a,b)=>b.date.localeCompare(a.date))[0];
+      STOCK_INV[code].stock_apres_ajust = dernierAjust.stock_apres;
+      STOCK_INV[code].ajust_date = dernierAjust.date;
+    }
+  });
+}
+
+function stockGetActuel(code) {
+  const inv = STOCK_INV[code];
+  if(!inv) return 0;
+  // Si un ajustement existe, partir de là
+  if(inv.stock_apres_ajust !== undefined) {
+    // Compter les mvts APRÈS l'ajustement
+    const adjDate = inv.ajust_date || '';
+    const mvtsApres = STOCK_MVT.filter(m => m.code===code && m.date > adjDate);
+    const e = mvtsApres.filter(m=>m.type==='ENTREE').reduce((s,m)=>s+m.qty,0);
+    const s = mvtsApres.filter(m=>m.type==='SORTIE').reduce((s,m)=>s+m.qty,0);
+    return inv.stock_apres_ajust + e - s;
+  }
+  return (inv.stock_initial||0) + (inv.entrees||0) - (inv.sorties||0);
+}
+
+// ─── RECALCULER (raz depuis produits + mouvements) ─────────────
+function stockRecalculer() {
+  stockBuildInventaire();
+  stockRenderAll();
+  const msg = document.getElementById('stock-adj-msg');
+  if(msg) { msg.textContent = '✓ Stock recalculé'; setTimeout(()=>msg.textContent='',2000); }
+}
+
+// ─── ENREGISTRER SORTIE DEPUIS UNE VENTE ───────────────────────
+function stockEnregistrerSortieVente(vente) {
+  if(!vente?.articles) return;
+  const now = new Date().toISOString();
+  vente.articles.forEach(art => {
+    if(!art.code || !art.qty) return;
+    const mvt = {
+      id: 'mvt-' + Date.now() + '-' + Math.random().toString(36).slice(2,6),
+      date: now,
+      code: art.code,
+      nom: art.nom || art.code,
+      type: 'SORTIE',
+      qty: art.qty,
+      ref: vente.id,
+      motif: 'Vente POS — ' + (vente.pointNom || ''),
+      par: vente.vendeur || '—'
+    };
+    STOCK_MVT.unshift(mvt);
+    if(STOCK_INV[art.code]) {
+      STOCK_INV[art.code].sorties = (STOCK_INV[art.code].sorties||0) + art.qty;
+    }
+    stockSaveFirestore(mvt);
+  });
+  stockSaveStorage();
+}
+
+// ─── ENREGISTRER ENTRÉE DEPUIS UN ACHAT ────────────────────────
+function stockEnregistrerEntreeAchat(achat) {
+  if(!achat?.frs || !achat?.desc) return;
+  // On ne peut pas lier article par article sans détail, donc on enregistre un mvt global
+  const now = new Date().toISOString();
+  const mvt = {
+    id: 'mvt-' + Date.now(),
+    date: now,
+    code: achat.fam || 'DIVERS',
+    nom: achat.desc ? achat.desc.substring(0,60) : achat.fam || 'Achat',
+    type: 'ENTREE',
+    qty: 1,
+    ref: achat.num,
+    motif: 'Achat — ' + achat.frs,
+    par: achat.saisiepar || '—'
+  };
+  STOCK_MVT.unshift(mvt);
+  stockSaveStorage();
+  stockSaveFirestore(mvt);
+}
+
+// ─── TOGGLE FORMULAIRE AJUSTEMENT ──────────────────────────────
+function stockToggleForm() {
+  const f = document.getElementById('stock-form');
+  f.style.display = f.style.display === 'none' ? 'block' : 'none';
+  if(f.style.display === 'block') {
+    // Populate datalist
+    const dl = document.getElementById('stock-art-list');
+    if(dl) {
+      dl.innerHTML = '';
+      DB_LOCAL.produits.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.c + ' — ' + p.l;
+        dl.appendChild(opt);
+      });
+    }
+    document.getElementById('stock-adj-msg').textContent = '';
+  }
+}
+
+function stockAjustSauver() {
+  const artRaw = (document.getElementById('stock-adj-art').value||'').trim();
+  const type   = document.getElementById('stock-adj-type').value;
+  const qty    = parseInt(document.getElementById('stock-adj-qty').value) || 0;
+  const motif  = document.getElementById('stock-adj-motif').value.trim();
+  const msg    = document.getElementById('stock-adj-msg');
+
+  if(!artRaw || qty <= 0) {
+    msg.style.color='var(--red)'; msg.textContent='Article et quantité requis.'; return;
+  }
+
+  // Résoudre code produit depuis "CODE — NOM" ou nom direct
+  const codePart = artRaw.split('—')[0].trim();
+  const prod = DB_LOCAL.produits.find(p=>p.c===codePart) ||
+               DB_LOCAL.produits.find(p=>(p.l||'').toLowerCase()===artRaw.toLowerCase()) ||
+               DB_LOCAL.produits.find(p=>(p.l||'').toLowerCase().includes(artRaw.toLowerCase()));
+
+  const code = prod?.c || codePart || artRaw;
+  const nom  = prod?.l || artRaw;
+  const now  = new Date().toISOString();
+
+  // Pour AJUST : on définit le nouveau stock
+  let stockApres = undefined;
+  if(type === 'AJUST') {
+    const actuel = stockGetActuel(code);
+    stockApres = actuel + qty; // qty = delta
+  }
+
+  const mvt = {
+    id: 'mvt-' + Date.now(),
+    date: now,
+    code, nom, type, qty,
+    ref: 'ADJ-MANUEL',
+    motif: motif || 'Ajustement manuel',
+    par: currentUser?.displayName || '—',
+    ...(stockApres !== undefined && { stock_apres: stockApres })
+  };
+
+  STOCK_MVT.unshift(mvt);
+
+  if(!STOCK_INV[code]) {
+    STOCK_INV[code] = { code, nom, famille: prod?.f||'', fournisseur:prod?.fr||'', prix_achat:parseFloat(prod?.p)||0, stock_initial:0, seuil_min:5, entrees:0, sorties:0 };
+  }
+  if(type === 'ENTREE') STOCK_INV[code].entrees = (STOCK_INV[code].entrees||0) + qty;
+  if(type === 'SORTIE') STOCK_INV[code].sorties = (STOCK_INV[code].sorties||0) + qty;
+  if(type === 'AJUST' && stockApres !== undefined) {
+    STOCK_INV[code].stock_apres_ajust = stockApres;
+    STOCK_INV[code].ajust_date = now;
+  }
+
+  stockSaveStorage();
+  stockSaveFirestore(mvt);
+  stockRenderAll();
+
+  msg.style.color='var(--grn)';
+  msg.textContent = `✓ ${type} enregistré — ${nom} : ${type==='SORTIE'?'-':'+'}${qty}`;
+  document.getElementById('stock-adj-art').value='';
+  document.getElementById('stock-adj-qty').value='';
+  document.getElementById('stock-adj-motif').value='';
+}
+
+// ─── RENDER ALL ────────────────────────────────────────────────
+function stockRenderAll() {
+  const seuil = parseInt(document.getElementById('stock-seuil-global')?.value||'5');
+  const codes = Object.keys(STOCK_INV);
+  let rupture=0, bas=0, valeur=0;
+
+  codes.forEach(code => {
+    const actuel = stockGetActuel(code);
+    const inv = STOCK_INV[code];
+    const s = inv.seuil_min || seuil;
+    if(actuel <= 0) rupture++;
+    else if(actuel <= s) bas++;
+    valeur += actuel * (inv.prix_achat||0);
+  });
+
+  document.getElementById('stock-kpi-articles').textContent = codes.length;
+  document.getElementById('stock-kpi-valeur').textContent   = fmt(valeur) + ' GNF';
+  document.getElementById('stock-kpi-rupture').textContent  = rupture;
+  document.getElementById('stock-kpi-bas').textContent      = bas;
+  document.getElementById('stock-kpi-mvts').textContent     = STOCK_MVT.length;
+  document.getElementById('stock-sub').textContent          = codes.length + ' références — ' + STOCK_MVT.length + ' mouvements';
+
+  stockRenderInv();
+  if(stockTabActive === 'mouvements') stockRenderMvt();
+  if(stockTabActive === 'alertes')    stockRenderAlertes();
+}
+
+// ─── RENDER INVENTAIRE ─────────────────────────────────────────
+function stockInvFilter() {
+  stockInvSearch = (document.getElementById('stock-search')?.value||'').toLowerCase();
+  stockRenderInv();
+}
+
+function stockRenderInv() {
+  const seuil = parseInt(document.getElementById('stock-seuil-global')?.value||'5');
+  let data = Object.values(STOCK_INV);
+  if(stockFamFilter !== 'ALL') data = data.filter(i=>i.famille===stockFamFilter);
+  if(stockInvSearch) data = data.filter(i=>(i.code||'').toLowerCase().includes(stockInvSearch)||(i.nom||'').toLowerCase().includes(stockInvSearch));
+  data.sort((a,b)=>(a.nom||'').localeCompare(b.nom||''));
+
+  if(!stockInvPager) stockInvPager = makePager(data, 50);
+  else stockInvPager.setData(data);
+
+  const rows = stockInvPager.page();
+  const FAM_COLORS_LOCAL = {COSMETIQUE:'#C77DFF',ELECTRONIQUE:'#D4AF37','ELECTRO MENAGER':'#48CAE4',ALIMENTATION:'#3DA85A',DEVISES:'#E88C20','NUTRITION BEBE':'#FF6B6B'};
+  document.getElementById('stock-inv-tbody').innerHTML = rows.map(inv => {
+    const actuel = stockGetActuel(inv.code);
+    const s = inv.seuil_min || seuil;
+    const color = FAM_COLORS_LOCAL[inv.famille] || '#888';
+    let etatCls, etatLbl;
+    if(actuel <= 0)  { etatCls='sab-rupture'; etatLbl='RUPTURE'; }
+    else if(actuel<=s){ etatCls='sab-bas';     etatLbl='BAS'; }
+    else              { etatCls='sab-ok';       etatLbl='OK'; }
+    const valRow = actuel * (inv.prix_achat||0);
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${inv.code||'—'}</td>
+      <td>${inv.nom||'—'}</td>
+      <td><span class="badge" style="background:${color}22;color:${color};font-size:10px">${inv.famille||'—'}</span></td>
+      <td class="amount" style="color:var(--txt3)">${inv.stock_initial||0}</td>
+      <td class="amount amount-pos">+${inv.entrees||0}</td>
+      <td class="amount amount-neg">-${inv.sorties||0}</td>
+      <td class="amount" style="font-size:14px;font-weight:700;color:${actuel<=0?'var(--red)':actuel<=s?'#E88C20':'var(--txt)'}">${actuel}</td>
+      <td>
+        <input type="number" value="${s}" min="0" style="width:50px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;padding:3px 6px;color:var(--txt3);font-size:11px;font-family:'JetBrains Mono',monospace"
+          onchange="stockSetSeuil('${inv.code}',this.value)">
+      </td>
+      <td><span class="stock-alert-badge ${etatCls}">${etatLbl}</span></td>
+      <td class="amount" style="color:var(--txt3)">${fmt(valRow)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('stock-inv-info').textContent = data.length + ' articles';
+  renderPagination(stockInvPager, document.getElementById('stock-inv-pag-info'), document.getElementById('stock-inv-pag-btns'), stockRenderInv);
+}
+
+function stockSetSeuil(code, val) {
+  if(STOCK_INV[code]) {
+    STOCK_INV[code].seuil_min = parseInt(val)||0;
+    stockSaveStorage();
+  }
+}
+
+// ─── RENDER MOUVEMENTS ─────────────────────────────────────────
+function stockRenderMvt() {
+  let data = [...STOCK_MVT];
+  if(stockMvtFilter !== 'ALL') data = data.filter(m=>m.type===stockMvtFilter);
+
+  if(!stockMvtPager) stockMvtPager = makePager(data, 50);
+  else stockMvtPager.setData(data);
+
+  const rows = stockMvtPager.page();
+  const TYPE_CLS = { ENTREE:'mvt-entree', SORTIE:'mvt-sortie', AJUST:'mvt-ajust' };
+  const TYPE_LBL = { ENTREE:'➕ ENTRÉE', SORTIE:'➖ SORTIE', AJUST:'⚖️ AJUST.' };
+  document.getElementById('stock-mvt-tbody').innerHTML = rows.map(m => {
+    const dt = new Date(m.date);
+    const dateStr = isNaN(dt) ? m.date : dt.toLocaleDateString('fr-FR')+' '+dt.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    return `<tr>
+      <td style="font-size:11px;color:var(--txt3)">${dateStr}</td>
+      <td style="font-size:12px">${m.nom||m.code||'—'}</td>
+      <td><span class="mvt-badge ${TYPE_CLS[m.type]||''}">${TYPE_LBL[m.type]||m.type}</span></td>
+      <td class="amount" style="font-weight:700">${m.type==='SORTIE'?'-':'+'} ${m.qty}</td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--or)">${m.ref||'—'}</td>
+      <td style="font-size:12px;color:var(--txt3)">${m.motif||'—'}</td>
+      <td style="font-size:11px;color:var(--txt3)">${m.par||'—'}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('stock-mvt-info').textContent = data.length + ' mouvements';
+  renderPagination(stockMvtPager, document.getElementById('stock-mvt-pag-info'), document.getElementById('stock-mvt-pag-btns'), stockRenderMvt);
+}
+
+// ─── RENDER ALERTES ────────────────────────────────────────────
+function stockRenderAlertes() {
+  const seuil = parseInt(document.getElementById('stock-seuil-global')?.value||'5');
+  const alertes = Object.values(STOCK_INV).filter(inv => {
+    const actuel = stockGetActuel(inv.code);
+    return actuel <= (inv.seuil_min||seuil);
+  }).sort((a,b) => stockGetActuel(a.code) - stockGetActuel(b.code));
+
+  const FAM_COLORS_LOCAL = {COSMETIQUE:'#C77DFF',ELECTRONIQUE:'#D4AF37','ELECTRO MENAGER':'#48CAE4',ALIMENTATION:'#3DA85A',DEVISES:'#E88C20','NUTRITION BEBE':'#FF6B6B'};
+  document.getElementById('stock-alert-tbody').innerHTML = alertes.length === 0
+    ? '<tr><td colspan="7" style="text-align:center;padding:30px;color:var(--grn)">✓ Aucune alerte — tous les stocks sont au-dessus du seuil</td></tr>'
+    : alertes.map(inv => {
+        const actuel = stockGetActuel(inv.code);
+        const s = inv.seuil_min || seuil;
+        const color = FAM_COLORS_LOCAL[inv.famille]||'#888';
+        let etatCls, etatLbl;
+        if(actuel<=0){ etatCls='sab-rupture'; etatLbl='🔴 RUPTURE'; }
+        else          { etatCls='sab-bas';     etatLbl='🟠 STOCK BAS'; }
+        return `<tr>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${inv.code||'—'}</td>
+          <td>${inv.nom||'—'}</td>
+          <td><span class="badge" style="background:${color}22;color:${color};font-size:10px">${inv.famille||'—'}</span></td>
+          <td class="amount" style="font-size:15px;font-weight:700;color:${actuel<=0?'var(--red)':'#E88C20'}">${actuel}</td>
+          <td class="amount" style="color:var(--txt3)">${s}</td>
+          <td><span class="stock-alert-badge ${etatCls}">${etatLbl}</span></td>
+          <td style="font-size:12px;color:var(--txt3)">${inv.fournisseur||'—'}</td>
+        </tr>`;
+      }).join('');
+}
+
 </script>
 </body>
 </html><script>
