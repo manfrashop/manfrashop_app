@@ -399,6 +399,8 @@ tbody tr:last-child td { border-bottom:none; }
 .vente-badge.especes { background:rgba(61,168,90,.15); color:#3DA85A; }
 .vente-badge.credit { background:rgba(192,57,43,.15); color:#C0392B; }
 .vente-badge.mobile { background:rgba(41,128,185,.15); color:#2980B9; }
+.vente-badge.orange { background:rgba(255,102,0,.15); color:#FF6600; }
+.vente-badge.banque { background:rgba(108,52,131,.15); color:#6C3483; }
 
 /* Points de vente (multi-POS) */
 .pdv-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; margin-top:20px; }
@@ -448,6 +450,112 @@ tbody tr:last-child td { border-bottom:none; }
 .loader-txt { font-family:'Cinzel',serif; color:var(--or); font-size:13px; letter-spacing:2px; }
 #pwa-install-btn { display:none; align-items:center; gap:8px; padding:8px 16px; border-radius:20px; background:linear-gradient(135deg,var(--or),var(--or2)); color:var(--bg); border:none; cursor:pointer; font-family:'Raleway',sans-serif; font-size:12px; font-weight:700; letter-spacing:.5px; box-shadow:0 2px 12px rgba(212,175,55,.4); transition:all .2s; position:fixed; bottom:24px; right:24px; z-index:200; text-transform:uppercase; }
 #pwa-install-btn:hover { transform:translateY(-2px); box-shadow:0 4px 20px rgba(212,175,55,.6); }
+
+/* ═══════════════════════════════════════
+   MODULE ACTIVITÉS COMMERCIALES
+═══════════════════════════════════════ */
+.act-period-bar {
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  background:var(--bg2); border:1px solid var(--brd); border-radius:var(--radius);
+  padding:14px 18px; margin-bottom:20px;
+}
+.act-period-bar label { font-size:11px; color:var(--txt3); text-transform:uppercase; letter-spacing:.5px; }
+.act-period-bar input[type=date], .act-period-bar select {
+  background:var(--bg3); border:1px solid var(--brd); border-radius:6px;
+  color:var(--txt); padding:7px 10px; font-family:'Raleway',sans-serif; font-size:13px;
+}
+.act-period-bar input[type=date]:focus, .act-period-bar select:focus { outline:none; border-color:var(--or); }
+.act-period-shortcuts { display:flex; gap:5px; flex-wrap:wrap; }
+.act-shortcut {
+  padding:5px 11px; border-radius:20px; border:1px solid var(--brd);
+  background:transparent; color:var(--txt3); font-size:11px; cursor:pointer;
+  font-family:'Raleway',sans-serif; transition:all .15s;
+}
+.act-shortcut:hover, .act-shortcut.active { background:var(--or); color:var(--bg); border-color:var(--or); font-weight:600; }
+.act-kpi-row { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin-bottom:20px; }
+.act-kpi {
+  background:var(--bg2); border:1px solid var(--brd); border-radius:var(--radius);
+  padding:16px; position:relative; overflow:hidden;
+}
+.act-kpi::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; background:linear-gradient(90deg,var(--or),transparent); }
+.act-kpi.act-grn::before { background:linear-gradient(90deg,var(--grn),transparent); }
+.act-kpi.act-red::before { background:linear-gradient(90deg,var(--red),transparent); }
+.act-kpi.act-blu::before { background:linear-gradient(90deg,var(--blu),transparent); }
+.act-kpi .ak-label { font-size:10px; color:var(--txt3); text-transform:uppercase; letter-spacing:1.2px; margin-bottom:6px; }
+.act-kpi .ak-val { font-family:'Cinzel',serif; font-size:18px; color:var(--or); font-weight:600; }
+.act-kpi.act-grn .ak-val { color:var(--grn); }
+.act-kpi.act-red .ak-val { color:var(--red); }
+.act-kpi.act-blu .ak-val { color:var(--blu); }
+.act-kpi .ak-sub { font-size:10px; color:var(--txt3); margin-top:4px; }
+.act-kpi .ak-trend { font-size:11px; margin-top:4px; }
+.act-kpi .ak-trend.up { color:var(--grn); }
+.act-kpi .ak-trend.down { color:var(--red); }
+
+.act-charts-row { display:grid; grid-template-columns:1.6fr 1fr; gap:16px; margin-bottom:20px; }
+.act-chart-card { background:var(--bg2); border:1px solid var(--brd); border-radius:var(--radius); padding:18px; }
+.act-chart-title { font-family:'Cinzel',serif; font-size:12px; color:var(--txt2); margin-bottom:14px; letter-spacing:.5px; display:flex; align-items:center; justify-content:space-between; }
+
+/* Bar chart journalier */
+.act-bar-chart { display:flex; align-items:flex-end; gap:3px; height:130px; overflow-x:auto; padding-bottom:4px; }
+.act-bar-col { flex-shrink:0; min-width:28px; display:flex; flex-direction:column; align-items:center; gap:3px; cursor:pointer; }
+.act-bar-col:hover .act-bar { opacity:.75; }
+.act-bar { width:100%; border-radius:3px 3px 0 0; min-height:3px; transition:opacity .15s; }
+.act-bar.ventes { background:linear-gradient(180deg,var(--or) 0%,rgba(212,175,55,.4) 100%); }
+.act-bar.depenses { background:linear-gradient(180deg,var(--red) 0%,rgba(192,57,43,.3) 100%); }
+.act-bar-lbl { font-size:8px; color:var(--txt3); white-space:nowrap; }
+.act-bar-val { font-size:8px; color:var(--txt2); font-family:'JetBrains Mono',monospace; }
+
+/* Donut paiements */
+.act-donut-wrap { display:flex; align-items:center; gap:16px; }
+.act-donut-legend { flex:1; }
+.act-donut-item { display:flex; align-items:center; gap:8px; margin-bottom:8px; font-size:12px; color:var(--txt2); }
+.act-donut-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+.act-donut-pct { margin-left:auto; color:var(--txt3); font-family:'JetBrains Mono',monospace; font-size:11px; }
+
+/* Tableau journal */
+.act-journal-row { display:flex; gap:6px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
+.act-journal-row .search-bar input { width:220px; }
+
+/* Classement vendeurs / PDV */
+.act-rank-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+.act-rank-card { background:var(--bg2); border:1px solid var(--brd); border-radius:var(--radius); padding:18px; }
+.act-rank-title { font-family:'Cinzel',serif; font-size:12px; color:var(--or); margin-bottom:14px; }
+.act-rank-item { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid rgba(42,42,54,.5); }
+.act-rank-item:last-child { border:none; }
+.act-rank-nb { font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--txt3); width:18px; }
+.act-rank-bar-wrap { flex:1; height:6px; background:var(--bg4); border-radius:3px; overflow:hidden; }
+.act-rank-bar { height:100%; border-radius:3px; background:linear-gradient(90deg,var(--or),var(--or2)); }
+.act-rank-name { font-size:12px; color:var(--txt); min-width:110px; }
+.act-rank-val { font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--or); white-space:nowrap; }
+
+/* Heatmap horaire (mini) */
+.act-heatmap { display:grid; grid-template-columns:repeat(24,1fr); gap:2px; margin-top:8px; }
+.act-heat-cell { height:20px; border-radius:2px; background:var(--bg4); transition:opacity .2s; cursor:default; position:relative; }
+.act-heat-cell:hover::after { content:attr(title); position:absolute; bottom:24px; left:50%; transform:translateX(-50%); background:var(--bg); border:1px solid var(--brd); padding:3px 7px; border-radius:4px; font-size:10px; color:var(--txt); white-space:nowrap; z-index:10; }
+.act-heatmap-labels { display:grid; grid-template-columns:repeat(24,1fr); gap:2px; }
+.act-heatmap-lbl { font-size:8px; color:var(--txt3); text-align:center; }
+
+/* Tabs internes */
+.act-tabs { display:flex; gap:6px; margin-bottom:18px; border-bottom:1px solid var(--brd); padding-bottom:12px; flex-wrap:wrap; }
+.act-tab { padding:7px 16px; border-radius:20px; border:1px solid var(--brd); background:transparent; color:var(--txt3); font-size:12px; cursor:pointer; font-family:'Raleway',sans-serif; transition:all .15s; }
+.act-tab:hover { border-color:var(--or); color:var(--or); }
+.act-tab.active { background:var(--or); color:var(--bg); border-color:var(--or); font-weight:700; }
+.act-tabcontent { display:none; }
+.act-tabcontent.active { display:block; }
+
+/* Responsive */
+@media(max-width:900px){
+  .act-kpi-row { grid-template-columns:repeat(3,1fr); }
+  .act-charts-row { grid-template-columns:1fr; }
+  .act-rank-grid { grid-template-columns:1fr; }
+}
+@media(max-width:768px){
+  .act-kpi-row { grid-template-columns:repeat(2,1fr); gap:8px; }
+  .act-period-bar { flex-direction:column; align-items:flex-start; }
+}
+@media(max-width:480px){
+  .act-kpi-row { grid-template-columns:1fr 1fr; }
+}
 
 /* ═══════════════════════════════════════
    HAMBURGER BUTTON
@@ -680,6 +788,7 @@ tbody tr:last-child td { border-bottom:none; }
     <a data-sec="stock"><span class="ico">📊</span> Stock</a>
     <a data-sec="achats"><span class="ico">🛍️</span> Achats</a>
     <a data-sec="rapports"><span class="ico">📊</span> Rapports</a>
+    <a data-sec="activites"><span class="ico">📈</span> Activités Comm.</a>
     <a data-sec="admin" class="admin-only"><span class="ico">⚙️</span> Utilisateurs</a>
   </nav>
   <div class="sidebar-footer">
@@ -1237,6 +1346,8 @@ tbody tr:last-child td { border-bottom:none; }
               <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Mode</label>
               <select id="cart-paiement">
                 <option value="ESPECES">💵 Espèces</option>
+                <option value="ORANGE">🟠 Orange Money</option>
+                <option value="BANQUE">🏦 Virement Banque</option>
                 <option value="MOBILE">📱 Mobile Money</option>
                 <option value="CREDIT">🔖 Crédit</option>
               </select>
@@ -1268,6 +1379,8 @@ tbody tr:last-child td { border-bottom:none; }
       <div class="kpi-card"><div class="kpi-value" id="vkpi-nb">0</div><div class="kpi-label">Ventes</div></div>
       <div class="kpi-card"><div class="kpi-value" id="vkpi-total">0</div><div class="kpi-label">Total GNF</div></div>
       <div class="kpi-card"><div class="kpi-value" id="vkpi-especes">0</div><div class="kpi-label">Espèces</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="vkpi-orange">0</div><div class="kpi-label">Orange Money</div></div>
+      <div class="kpi-card"><div class="kpi-value" id="vkpi-banque">0</div><div class="kpi-label">Banque</div></div>
       <div class="kpi-card"><div class="kpi-value" id="vkpi-credit">0</div><div class="kpi-label">Crédits</div></div>
     </div>
     <div class="table-wrap">
@@ -1305,38 +1418,334 @@ tbody tr:last-child td { border-bottom:none; }
     <div class="pdv-grid" id="pdv-grid"></div>
   </div>
 
+  <!-- ACTIVITÉS COMMERCIALES -->
+  <div id="sec-activites" class="section">
+    <div class="page-header">
+      <div>
+        <div class="page-title">📈 Activités Commerciales</div>
+        <div class="page-sub" id="act-sub">Analyse des performances — Ets Manfara & Fils</div>
+      </div>
+      <button class="btn-add" onclick="actExportCSV()" style="padding:8px 16px;font-size:12px">📥 Export CSV</button>
+    </div>
+
+    <!-- Barre période -->
+    <div class="act-period-bar">
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <label>Du</label>
+        <input type="date" id="act-du" onchange="actRefresh()">
+        <label>au</label>
+        <input type="date" id="act-au" onchange="actRefresh()">
+        <label style="margin-left:10px">Point de vente</label>
+        <select id="act-pdv-filter" onchange="actRefresh()">
+          <option value="">Tous</option>
+        </select>
+      </div>
+      <div class="act-period-shortcuts">
+        <button class="act-shortcut" onclick="actShortcut('today',this)">Aujourd'hui</button>
+        <button class="act-shortcut active" onclick="actShortcut('week',this)">7 jours</button>
+        <button class="act-shortcut" onclick="actShortcut('month',this)">30 jours</button>
+        <button class="act-shortcut" onclick="actShortcut('quarter',this)">3 mois</button>
+        <button class="act-shortcut" onclick="actShortcut('year',this)">12 mois</button>
+        <button class="act-shortcut" onclick="actShortcut('all',this)">Tout</button>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="act-kpi-row">
+      <div class="act-kpi">
+        <div class="ak-label">Ventes (CA)</div>
+        <div class="ak-val" id="act-kpi-ca">—</div>
+        <div class="ak-sub" id="act-kpi-ca-sub">GNF</div>
+        <div class="ak-trend" id="act-kpi-ca-trend"></div>
+      </div>
+      <div class="act-kpi act-grn">
+        <div class="ak-label">Nbre de ventes</div>
+        <div class="ak-val" id="act-kpi-nb">—</div>
+        <div class="ak-sub" id="act-kpi-nb-sub">tickets</div>
+        <div class="ak-trend" id="act-kpi-moy"></div>
+      </div>
+      <div class="act-kpi act-blu">
+        <div class="ak-label">Panier moyen</div>
+        <div class="ak-val" id="act-kpi-panier">—</div>
+        <div class="ak-sub">GNF / vente</div>
+      </div>
+      <div class="act-kpi act-red">
+        <div class="ak-label">Crédits accordés</div>
+        <div class="ak-val" id="act-kpi-credit">—</div>
+        <div class="ak-sub">GNF</div>
+      </div>
+      <div class="act-kpi">
+        <div class="ak-label">Articles vendus</div>
+        <div class="ak-val" id="act-kpi-articles">—</div>
+        <div class="ak-sub">unités totales</div>
+      </div>
+    </div>
+
+    <!-- Onglets -->
+    <div class="act-tabs">
+      <button class="act-tab active" onclick="actTab('vue',this)">📊 Vue générale</button>
+      <button class="act-tab" onclick="actTab('journal',this)">📋 Journal des ventes</button>
+      <button class="act-tab" onclick="actTab('classement',this)">🏆 Classements</button>
+      <button class="act-tab" onclick="actTab('horaires',this)">🕐 Analyse horaire</button>
+    </div>
+
+    <!-- TAB: Vue générale -->
+    <div class="act-tabcontent active" id="acttab-vue">
+      <div class="act-charts-row">
+        <div class="act-chart-card">
+          <div class="act-chart-title">
+            <span>Évolution des ventes (GNF)</span>
+            <select id="act-chart-granularity" onchange="actDrawTimeline()" style="background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:4px 8px;color:var(--txt3);font-size:11px;font-family:'Raleway',sans-serif">
+              <option value="day">Par jour</option>
+              <option value="week">Par semaine</option>
+              <option value="month">Par mois</option>
+            </select>
+          </div>
+          <div class="act-bar-chart" id="act-timeline-chart"></div>
+          <div style="display:flex;gap:12px;margin-top:8px">
+            <div style="display:flex;align-items:center;gap:5px"><div style="width:10px;height:10px;border-radius:2px;background:var(--or)"></div><span style="font-size:10px;color:var(--txt3)">Ventes</span></div>
+          </div>
+        </div>
+        <div class="act-chart-card">
+          <div class="act-chart-title">Répartition modes de paiement</div>
+          <div class="act-donut-wrap">
+            <svg width="100" height="100" viewBox="0 0 100 100" id="act-donut-svg"></svg>
+            <div class="act-donut-legend" id="act-donut-legend"></div>
+          </div>
+          <div style="margin-top:16px;border-top:1px solid var(--brd);padding-top:12px">
+            <div class="act-chart-title" style="margin-bottom:10px">Top 5 articles</div>
+            <ul class="top-list" id="act-top-articles"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Journal des ventes -->
+    <div class="act-tabcontent" id="acttab-journal">
+      <div class="act-journal-row">
+        <div class="search-bar" style="flex:1"><input type="text" id="act-search" placeholder="🔍 Rechercher ticket, client, produit..." oninput="actJournalRender()"></div>
+        <select id="act-mode-filter" onchange="actJournalRender()" style="background:var(--bg2);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px">
+          <option value="">Tous modes</option>
+          <option value="ESPECES">💵 Espèces</option>
+          <option value="ORANGE">🟠 Orange Money</option>
+          <option value="BANQUE">🏦 Virement Banque</option>
+          <option value="MOBILE">📱 Mobile Money</option>
+          <option value="CREDIT">🔖 Crédit</option>
+        </select>
+        <div class="table-info" id="act-journal-info" style="white-space:nowrap"></div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Ticket</th><th>Date/Heure</th><th>Point de vente</th>
+            <th>Client</th><th>Articles</th><th>Total GNF</th>
+            <th>Mode</th><th>Vendeur</th>
+          </tr></thead>
+          <tbody id="act-journal-tbody"></tbody>
+        </table>
+        <div class="pagination">
+          <div class="pag-info" id="act-pag-info"></div>
+          <div class="pag-btns" id="act-pag-btns"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Classements -->
+    <div class="act-tabcontent" id="acttab-classement">
+      <div class="act-rank-grid">
+        <div class="act-rank-card">
+          <div class="act-rank-title">🏪 Performance par point de vente</div>
+          <div id="act-rank-pdv"></div>
+        </div>
+        <div class="act-rank-card">
+          <div class="act-rank-title">👤 Top vendeurs</div>
+          <div id="act-rank-vendeur"></div>
+        </div>
+        <div class="act-rank-card">
+          <div class="act-rank-title">📦 Top articles vendus (volume)</div>
+          <div id="act-rank-articles-vol"></div>
+        </div>
+        <div class="act-rank-card">
+          <div class="act-rank-title">💰 Top articles (chiffre d'affaires)</div>
+          <div id="act-rank-articles-ca"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB: Analyse horaire -->
+    <div class="act-tabcontent" id="acttab-horaires">
+      <div class="act-chart-card" style="margin-bottom:16px">
+        <div class="act-chart-title">Distribution horaire des ventes (0h–23h)</div>
+        <div class="act-bar-chart" id="act-hourly-chart" style="height:110px;gap:4px"></div>
+        <div class="act-heatmap-labels" style="margin-top:4px" id="act-hourly-labels"></div>
+      </div>
+      <div class="act-rank-grid">
+        <div class="act-rank-card">
+          <div class="act-rank-title">📅 Ventes par jour de la semaine</div>
+          <div class="act-bar-chart" id="act-weekday-chart" style="height:90px;gap:6px"></div>
+          <div class="act-heatmap-labels" style="margin-top:4px;grid-template-columns:repeat(7,1fr)" id="act-weekday-labels"></div>
+        </div>
+        <div class="act-rank-card">
+          <div class="act-rank-title">📊 Statistiques période</div>
+          <div id="act-stats-box" style="display:flex;flex-direction:column;gap:10px;margin-top:8px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- ADMIN — GESTION UTILISATEURS (admin seulement) -->
   <div id="sec-admin" class="section">
     <div class="page-header">
-      <div><div class="page-title">⚙️ Gestion Utilisateurs</div><div class="page-sub">Accès réservé aux administrateurs</div></div>
+      <div><div class="page-title">⚙️ Administration</div><div class="page-sub">Accès réservé aux administrateurs</div></div>
     </div>
-    <div class="admin-grid">
-      <!-- Créer un compte -->
-      <div class="admin-card">
-        <div class="admin-card-title">➕ Créer un compte</div>
-        <div class="user-form">
-          <input type="text" id="new-displayname" placeholder="Nom complet (ex: Mamadou Diallo)">
-          <div class="form-row">
-            <input type="email" id="new-email" placeholder="email@manfara.gn">
-            <input type="password" id="new-pwd" placeholder="Mot de passe (min 6 car.)">
+
+    <!-- Onglets admin -->
+    <div class="act-tabs" style="margin-bottom:20px">
+      <button class="act-tab active" onclick="adminTab('users',this)">👥 Utilisateurs</button>
+      <button class="act-tab" onclick="adminTab('sms',this)">📱 Notifications SMS</button>
+    </div>
+
+    <!-- TAB: Utilisateurs -->
+    <div id="admintab-users" class="act-tabcontent active">
+      <div class="admin-grid">
+        <!-- Créer un compte -->
+        <div class="admin-card">
+          <div class="admin-card-title">➕ Créer un compte</div>
+          <div class="user-form">
+            <input type="text" id="new-displayname" placeholder="Nom complet (ex: Mamadou Diallo)">
+            <div class="form-row">
+              <input type="email" id="new-email" placeholder="email@manfara.gn">
+              <input type="password" id="new-pwd" placeholder="Mot de passe (min 6 car.)">
+            </div>
+            <select id="new-role">
+              <option value="vendeur">👤 Vendeur</option>
+              <option value="gerant">👔 Gérant</option>
+              <option value="admin">🔑 Administrateur</option>
+            </select>
+            <button class="btn-add" id="btn-create-user" onclick="createUser()">Créer le compte</button>
+            <div class="admin-msg" id="admin-msg"></div>
           </div>
-          <select id="new-role">
-            <option value="vendeur">👤 Vendeur</option>
-            <option value="gerant">👔 Gérant</option>
-            <option value="admin">🔑 Administrateur</option>
-          </select>
-          <button class="btn-add" id="btn-create-user" onclick="createUser()">Créer le compte</button>
-          <div class="admin-msg" id="admin-msg"></div>
+        </div>
+        <!-- Liste des utilisateurs -->
+        <div class="admin-card">
+          <div class="admin-card-title">👥 Comptes existants</div>
+          <ul class="users-list" id="users-list">
+            <li style="color:var(--txt3);font-size:13px;padding:12px 0">Chargement...</li>
+          </ul>
         </div>
       </div>
-      <!-- Liste des utilisateurs -->
-      <div class="admin-card">
-        <div class="admin-card-title">👥 Comptes existants</div>
-        <ul class="users-list" id="users-list">
-          <li style="color:var(--txt3);font-size:13px;padding:12px 0">Chargement...</li>
-        </ul>
+    </div>
+
+    <!-- TAB: SMS -->
+    <div id="admintab-sms" class="act-tabcontent">
+      <div class="admin-grid">
+        <!-- Config provider -->
+        <div class="admin-card" style="grid-column:1/-1">
+          <div class="admin-card-title">📱 Configuration Notifications SMS</div>
+          <div style="display:grid;gap:14px;margin-top:12px">
+
+            <!-- Provider -->
+            <div>
+              <label style="font-size:12px;color:var(--txt3);display:block;margin-bottom:5px">Provider SMS</label>
+              <select id="sms-provider" onchange="smsProviderChange()" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px">
+                <option value="">— Désactivé —</option>
+                <option value="twilio">Twilio</option>
+                <option value="infobip">Infobip</option>
+                <option value="orange">Orange SMS API (Guinée)</option>
+                <option value="webhook">Webhook personnalisé</option>
+              </select>
+            </div>
+
+            <!-- Twilio fields -->
+            <div id="sms-fields-twilio" style="display:none;display:grid;gap:10px">
+              <div style="font-size:11px;color:var(--txt3);background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:6px;padding:8px">
+                ℹ️ Twilio : créez un compte sur <strong>twilio.com</strong>, obtenez un numéro SMS, puis copiez vos identifiants depuis la console.
+              </div>
+              <div class="form-row">
+                <div style="flex:1"><label style="font-size:11px;color:var(--txt3)">Account SID</label><input type="text" id="sms-twilio-sid" placeholder="ACxxxxxxxxxxxxxxxx" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+                <div style="flex:1"><label style="font-size:11px;color:var(--txt3)">Auth Token</label><input type="password" id="sms-twilio-token" placeholder="Auth Token" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+              </div>
+              <div><label style="font-size:11px;color:var(--txt3)">Numéro Twilio expéditeur</label><input type="text" id="sms-twilio-from" placeholder="+12345678901" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+            </div>
+
+            <!-- Infobip fields -->
+            <div id="sms-fields-infobip" style="display:none;display:grid;gap:10px">
+              <div style="font-size:11px;color:var(--txt3);background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:6px;padding:8px">
+                ℹ️ Infobip : créez un compte sur <strong>infobip.com</strong> et copiez votre clé API depuis le portail.
+              </div>
+              <div class="form-row">
+                <div style="flex:1"><label style="font-size:11px;color:var(--txt3)">API Key</label><input type="password" id="sms-infobip-key" placeholder="Votre clé API" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+                <div style="flex:1"><label style="font-size:11px;color:var(--txt3)">Base URL</label><input type="text" id="sms-infobip-base" placeholder="xxxxx.api.infobip.com" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+              </div>
+              <div><label style="font-size:11px;color:var(--txt3)">Nom expéditeur (From)</label><input type="text" id="sms-infobip-from" placeholder="Manfara" maxlength="11" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+            </div>
+
+            <!-- Orange fields -->
+            <div id="sms-fields-orange" style="display:none;display:grid;gap:10px">
+              <div style="font-size:11px;color:var(--txt3);background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:6px;padding:8px">
+                ℹ️ Orange SMS API : contactez Orange Guinée Business pour obtenir votre Bearer Token et enregistrer votre nom d'expéditeur.
+              </div>
+              <div><label style="font-size:11px;color:var(--txt3)">Bearer Token</label><input type="password" id="sms-orange-token" placeholder="Bearer Token Orange" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+              <div><label style="font-size:11px;color:var(--txt3)">Nom expéditeur (From)</label><input type="text" id="sms-orange-from" placeholder="Manfara" maxlength="11" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+            </div>
+
+            <!-- Webhook fields -->
+            <div id="sms-fields-webhook" style="display:none;display:grid;gap:10px">
+              <div style="font-size:11px;color:var(--txt3);background:rgba(212,175,55,.08);border:1px solid rgba(212,175,55,.2);border-radius:6px;padding:8px">
+                ℹ️ Webhook : l'app envoie un POST JSON <code style="background:rgba(0,0,0,.3);padding:1px 4px;border-radius:3px">{to, message, type}</code> à l'URL configurée.
+              </div>
+              <div><label style="font-size:11px;color:var(--txt3)">URL Webhook</label><input type="url" id="sms-webhook-url" placeholder="https://mon-serveur.com/sms" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+              <div><label style="font-size:11px;color:var(--txt3)">Header Authorization (optionnel)</label><input type="text" id="sms-webhook-auth" placeholder="Bearer votre-token" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+            </div>
+
+            <!-- Triggers -->
+            <div style="border-top:1px solid var(--brd);padding-top:14px">
+              <div style="font-size:12px;color:var(--txt3);margin-bottom:10px">Déclencheurs</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer">
+                  <input type="checkbox" id="sms-trig-vente" style="width:16px;height:16px;accent-color:var(--or)">
+                  <span>📧 SMS de confirmation après chaque vente</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer">
+                  <input type="checkbox" id="sms-trig-credit" style="width:16px;height:16px;accent-color:var(--or)">
+                  <span>🔖 SMS lors de l'accord d'un crédit (paiement CREDIT)</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:10px;font-size:13px;cursor:pointer">
+                  <input type="checkbox" id="sms-trig-remb" style="width:16px;height:16px;accent-color:var(--or)">
+                  <span>✅ SMS de confirmation de remboursement</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Préfixe pays -->
+            <div>
+              <label style="font-size:12px;color:var(--txt3);display:block;margin-bottom:5px">Préfixe pays par défaut (si numéro local)</label>
+              <input type="text" id="sms-country-prefix" placeholder="+224" value="+224" style="max-width:140px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px">
+            </div>
+
+            <!-- Boutons -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn-add" onclick="smsSaveConfig()" style="padding:10px 20px;font-size:13px">💾 Sauvegarder config</button>
+              <button onclick="smsTest()" style="padding:10px 20px;font-size:13px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;color:var(--txt);cursor:pointer;font-family:'Raleway',sans-serif;font-weight:600">📤 Tester (SMS de test)</button>
+            </div>
+            <div id="sms-msg" style="font-size:12px;min-height:18px"></div>
+
+          </div>
+        </div>
+
+        <!-- Historique SMS -->
+        <div class="admin-card" style="grid-column:1/-1">
+          <div class="admin-card-title">📋 Historique des envois SMS <span id="sms-hist-count" style="font-size:11px;color:var(--txt3);margin-left:8px"></span></div>
+          <div class="table-wrap" style="margin-top:10px">
+            <table>
+              <thead><tr><th>Heure</th><th>Destinataire</th><th>Type</th><th>Message</th><th>Statut</th></tr></thead>
+              <tbody id="sms-hist-tbody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
+
   </div>
 
 </div><!-- /main -->
@@ -1590,6 +1999,7 @@ document.querySelectorAll('nav a').forEach(a => {
     if (a.dataset.sec === 'achats') { initAchats(); }
     if (a.dataset.sec === 'credits') { initCredits(); }
     if (a.dataset.sec === 'rapports') { initRapports(); }
+    if (a.dataset.sec === 'activites') { initActivites(); }
     if (a.dataset.sec === 'points') { initPointsDeVente(); }
   });
 });
@@ -1636,6 +2046,7 @@ const ROLE_COLORS = { admin:'#D4AF37', gerant:'#2980B9', vendeur:'#3DA85A' };
 
 // ─── INIT ALL ──────────────────────────────────────────────────
 function initAllModules() {
+  smsLoadConfig();
   initDashboard(); initProduits(); initAppros(); initClients(); initFournisseurs(); initDepenses(); initStock(); initAchats(); initCredits(); initRapports();
   initPOS(); initPointsDeVente();
 }
@@ -1949,6 +2360,20 @@ function posValiderVente() {
   stockEnregistrerSortieVente(vente);
   posSaveStorage();
   posShowTicket(vente);
+  // SMS notifications
+  const clientObj = (DB_LOCAL.clients||[]).find(c=>c.n===vente.client||c.i===vente.client);
+  const clientTel = clientObj?.t || '';
+  if (clientTel) {
+    if (SMS_CONFIG.trigVente) {
+      const items = vente.articles.map(a=>`${a.nom} ×${a.qty}`).join(', ');
+      const msg = `Manfara & Fils - Ticket ${vente.id}: ${fmtFull(vente.total)} GNF (${vente.paiement}). Articles: ${items.substring(0,60)}. Merci!`;
+      smsEnvoyer(clientTel, msg, 'vente');
+    }
+    if (SMS_CONFIG.trigCredit && vente.paiement === 'CREDIT') {
+      const msg = `Manfara & Fils - Crédit accordé: ${fmtFull(vente.total)} GNF (Réf. ${vente.id}). Merci de régulariser dès que possible.`;
+      smsEnvoyer(clientTel, msg, 'credit');
+    }
+  }
   posClearCart();
   document.getElementById('cart-remise').value = '';
   ventesRender();
@@ -2010,9 +2435,13 @@ function ventesRender() {
   const totalAmt = data.reduce((s,v)=>s+v.total,0);
   const especes = data.filter(v=>v.paiement==='ESPECES').reduce((s,v)=>s+v.total,0);
   const credit = data.filter(v=>v.paiement==='CREDIT').reduce((s,v)=>s+v.total,0);
+  const orange = data.filter(v=>v.paiement==='ORANGE').reduce((s,v)=>s+v.total,0);
+  const banque = data.filter(v=>v.paiement==='BANQUE').reduce((s,v)=>s+v.total,0);
   document.getElementById('vkpi-nb').textContent = data.length;
   document.getElementById('vkpi-total').textContent = fmt(totalAmt);
   document.getElementById('vkpi-especes').textContent = fmt(especes);
+  document.getElementById('vkpi-orange') && (document.getElementById('vkpi-orange').textContent = fmt(orange));
+  document.getElementById('vkpi-banque') && (document.getElementById('vkpi-banque').textContent = fmt(banque));
   document.getElementById('vkpi-credit').textContent = fmt(credit);
   // Table
   const page = ventesPage;
@@ -2031,7 +2460,7 @@ function ventesRender() {
         <td>${v.client||'—'}</td>
         <td>${v.articles.length} art.</td>
         <td style="font-family:'JetBrains Mono',monospace">${fmtFull(v.total)}</td>
-        <td><span class="vente-badge ${v.paiement.toLowerCase()}">${v.paiement}</span></td>
+        <td><span class="vente-badge ${v.paiement.toLowerCase()}">${{ESPECES:'💵 Espèces',ORANGE:'🟠 Orange Money',BANQUE:'🏦 Banque',MOBILE:'📱 Mobile',CREDIT:'🔖 Crédit'}[v.paiement]||v.paiement}</span></td>
         <td style="color:var(--txt3)">${v.vendeur}</td>
       </tr>`).join('');
   }
@@ -3198,6 +3627,21 @@ async function credRembourser(ticketId, total) {
   if (dataSource === 'firebase') {
     try { await db.collection('credits_remboursements').doc(ticketId).set({ rembourse: CRED_REMBOURSES[ticketId], updatedAt: new Date().toISOString() }); } catch(e) {}
   }
+  // SMS notification remboursement
+  if (SMS_CONFIG.trigRemb) {
+    const vente = POS_VENTES.find(v=>v.id===ticketId);
+    if (vente) {
+      const clientObj = (DB_LOCAL.clients||[]).find(c=>c.n===vente.client||c.i===vente.client);
+      const clientTel = clientObj?.t || '';
+      if (clientTel) {
+        const reste = Math.max(0, vente.total - (CRED_REMBOURSES[ticketId]||0));
+        const msg = reste <= 0
+          ? `Manfara & Fils - Merci! Votre crédit (${vente.id}) est entièrement remboursé.`
+          : `Manfara & Fils - Remboursement reçu: ${fmtFull(montant)} GNF. Reste dû: ${fmtFull(reste)} GNF (Réf. ${vente.id}).`;
+        smsEnvoyer(clientTel, msg, 'remb');
+      }
+    }
+  }
   credRenderAll();
 }
 
@@ -3326,6 +3770,625 @@ function rptStockBas() {
         </table>
       </div>
       <p style="font-size:12px;color:var(--txt3);margin-top:8px">${bas.length} produit(s) sous le seuil</p>`;
+}
+
+
+// ═══════════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════════
+// MODULE SMS NOTIFICATIONS
+// ═══════════════════════════════════════════════════════════════
+
+let SMS_CONFIG = {};
+let SMS_HISTORY = []; // { ts, to, type, msg, ok, err }
+
+function smsLoadConfig() {
+  try {
+    const d = localStorage.getItem('manfara_sms_config');
+    if (d) SMS_CONFIG = JSON.parse(d);
+    const h = localStorage.getItem('manfara_sms_history');
+    if (h) SMS_HISTORY = JSON.parse(h);
+  } catch(e) {}
+}
+
+function smsSaveConfig() {
+  const provider = document.getElementById('sms-provider')?.value || '';
+  SMS_CONFIG = {
+    provider,
+    trigVente:  document.getElementById('sms-trig-vente')?.checked || false,
+    trigCredit: document.getElementById('sms-trig-credit')?.checked || false,
+    trigRemb:   document.getElementById('sms-trig-remb')?.checked || false,
+    countryPrefix: document.getElementById('sms-country-prefix')?.value || '+224',
+  };
+  if (provider === 'twilio') {
+    SMS_CONFIG.twilio = {
+      sid:   document.getElementById('sms-twilio-sid')?.value || '',
+      token: document.getElementById('sms-twilio-token')?.value || '',
+      from:  document.getElementById('sms-twilio-from')?.value || '',
+    };
+  } else if (provider === 'infobip') {
+    SMS_CONFIG.infobip = {
+      key:  document.getElementById('sms-infobip-key')?.value || '',
+      base: document.getElementById('sms-infobip-base')?.value || '',
+      from: document.getElementById('sms-infobip-from')?.value || 'Manfara',
+    };
+  } else if (provider === 'orange') {
+    SMS_CONFIG.orange = {
+      token: document.getElementById('sms-orange-token')?.value || '',
+      from:  document.getElementById('sms-orange-from')?.value || 'Manfara',
+    };
+  } else if (provider === 'webhook') {
+    SMS_CONFIG.webhook = {
+      url:  document.getElementById('sms-webhook-url')?.value || '',
+      auth: document.getElementById('sms-webhook-auth')?.value || '',
+    };
+  }
+  try { localStorage.setItem('manfara_sms_config', JSON.stringify(SMS_CONFIG)); } catch(e) {}
+  const msg = document.getElementById('sms-msg');
+  if (msg) { msg.style.color='#3DA85A'; msg.textContent = '✅ Configuration sauvegardée.'; setTimeout(()=>msg.textContent='', 3000); }
+}
+
+function smsLoadUI() {
+  if (!SMS_CONFIG.provider) return;
+  const el = id => document.getElementById(id);
+  el('sms-provider') && (el('sms-provider').value = SMS_CONFIG.provider || '');
+  el('sms-trig-vente') && (el('sms-trig-vente').checked = SMS_CONFIG.trigVente || false);
+  el('sms-trig-credit') && (el('sms-trig-credit').checked = SMS_CONFIG.trigCredit || false);
+  el('sms-trig-remb') && (el('sms-trig-remb').checked = SMS_CONFIG.trigRemb || false);
+  el('sms-country-prefix') && (el('sms-country-prefix').value = SMS_CONFIG.countryPrefix || '+224');
+  smsProviderChange();
+  const p = SMS_CONFIG.provider;
+  if (p === 'twilio' && SMS_CONFIG.twilio) {
+    el('sms-twilio-sid') && (el('sms-twilio-sid').value = SMS_CONFIG.twilio.sid||'');
+    el('sms-twilio-token') && (el('sms-twilio-token').value = SMS_CONFIG.twilio.token||'');
+    el('sms-twilio-from') && (el('sms-twilio-from').value = SMS_CONFIG.twilio.from||'');
+  } else if (p === 'infobip' && SMS_CONFIG.infobip) {
+    el('sms-infobip-key') && (el('sms-infobip-key').value = SMS_CONFIG.infobip.key||'');
+    el('sms-infobip-base') && (el('sms-infobip-base').value = SMS_CONFIG.infobip.base||'');
+    el('sms-infobip-from') && (el('sms-infobip-from').value = SMS_CONFIG.infobip.from||'Manfara');
+  } else if (p === 'orange' && SMS_CONFIG.orange) {
+    el('sms-orange-token') && (el('sms-orange-token').value = SMS_CONFIG.orange.token||'');
+    el('sms-orange-from') && (el('sms-orange-from').value = SMS_CONFIG.orange.from||'Manfara');
+  } else if (p === 'webhook' && SMS_CONFIG.webhook) {
+    el('sms-webhook-url') && (el('sms-webhook-url').value = SMS_CONFIG.webhook.url||'');
+    el('sms-webhook-auth') && (el('sms-webhook-auth').value = SMS_CONFIG.webhook.auth||'');
+  }
+}
+
+function smsProviderChange() {
+  const p = document.getElementById('sms-provider')?.value || '';
+  ['twilio','infobip','orange','webhook'].forEach(name => {
+    const el = document.getElementById('sms-fields-'+name);
+    if (el) el.style.display = (p === name) ? 'grid' : 'none';
+  });
+}
+
+function smsNormalizePhone(num) {
+  if (!num) return null;
+  num = num.replace(/\s/g,'');
+  if (num.startsWith('+')) return num;
+  const prefix = SMS_CONFIG.countryPrefix || '+224';
+  // Remove leading 0 if any
+  if (num.startsWith('0')) num = num.slice(1);
+  return prefix + num;
+}
+
+function smsAddHistory(to, type, msg, ok, err) {
+  SMS_HISTORY.unshift({ ts: new Date().toISOString(), to, type, msg, ok, err: err||'' });
+  if (SMS_HISTORY.length > 100) SMS_HISTORY.length = 100;
+  try { localStorage.setItem('manfara_sms_history', JSON.stringify(SMS_HISTORY)); } catch(e) {}
+  smsRenderHistory();
+}
+
+function smsRenderHistory() {
+  const tbody = document.getElementById('sms-hist-tbody');
+  if (!tbody) return;
+  const countEl = document.getElementById('sms-hist-count');
+  if (countEl) countEl.textContent = SMS_HISTORY.length ? `(${SMS_HISTORY.length} entrées)` : '';
+  const types = { vente:'📧 Vente', credit:'🔖 Crédit', remb:'✅ Remb.', test:'🧪 Test' };
+  tbody.innerHTML = SMS_HISTORY.slice(0,30).map(h => {
+    const d = new Date(h.ts);
+    const ds = d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    return `<tr>
+      <td style="font-size:11px;white-space:nowrap">${ds}</td>
+      <td>${h.to||'—'}</td>
+      <td>${types[h.type]||h.type}</td>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:11px" title="${h.msg}">${h.msg}</td>
+      <td><span class="badge ${h.ok?'badge-grn':'badge-red'}">${h.ok?'OK':'Erreur'}</span>${h.err?`<div style="font-size:10px;color:var(--txt3)">${h.err}</div>`:''}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--txt3)">Aucun SMS envoyé</td></tr>';
+}
+
+async function smsEnvoyer(to, message, type) {
+  const phone = smsNormalizePhone(to);
+  if (!phone) { smsAddHistory(to||'?', type, message, false, 'Numéro manquant'); return; }
+  const p = SMS_CONFIG.provider;
+  if (!p) { smsAddHistory(phone, type, message, false, 'Provider non configuré'); return; }
+
+  let ok = false, errMsg = '';
+  try {
+    if (p === 'twilio') {
+      const { sid, token, from } = SMS_CONFIG.twilio || {};
+      if (!sid || !token || !from) throw new Error('Config Twilio incomplète');
+      const creds = btoa(sid + ':' + token);
+      const body = new URLSearchParams({ To: phone, From: from, Body: message });
+      const r = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+        method: 'POST',
+        headers: { Authorization: 'Basic ' + creds, 'Content-Type': 'application/x-www-form-urlencoded' },
+        body,
+      });
+      const json = await r.json();
+      if (!r.ok) throw new Error(json.message || r.status);
+      ok = true;
+    } else if (p === 'infobip') {
+      const { key, base, from } = SMS_CONFIG.infobip || {};
+      if (!key || !base) throw new Error('Config Infobip incomplète');
+      const r = await fetch(`https://${base}/sms/2/text/advanced`, {
+        method: 'POST',
+        headers: { Authorization: 'App ' + key, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ messages: [{ from: from||'Manfara', destinations: [{ to: phone }], text: message }] }),
+      });
+      const json = await r.json();
+      if (!r.ok) throw new Error(JSON.stringify(json));
+      ok = true;
+    } else if (p === 'orange') {
+      const { token, from } = SMS_CONFIG.orange || {};
+      if (!token) throw new Error('Config Orange incomplète');
+      const r = await fetch('https://api.orange.com/smsmessaging/v1/outbound/'+encodeURIComponent('tel:'+from)+'/requests', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ outboundSMSMessageRequest: { address: 'tel:'+phone, senderAddress: 'tel:'+from, outboundSMSTextMessage: { message } } }),
+      });
+      if (!r.ok) { const t = await r.text(); throw new Error(t.slice(0,80)); }
+      ok = true;
+    } else if (p === 'webhook') {
+      const { url, auth } = SMS_CONFIG.webhook || {};
+      if (!url) throw new Error('URL Webhook manquante');
+      const headers = { 'Content-Type': 'application/json' };
+      if (auth) headers['Authorization'] = auth;
+      const r = await fetch(url, { method: 'POST', headers, body: JSON.stringify({ to: phone, message, type }) });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      ok = true;
+    }
+  } catch(e) {
+    errMsg = e.message || String(e);
+    console.warn('SMS error:', errMsg);
+  }
+  smsAddHistory(phone, type, message, ok, errMsg);
+}
+
+async function smsTest() {
+  const testNum = prompt('Numéro de test (ex: 622123456) :');
+  if (!testNum) return;
+  const msg = document.getElementById('sms-msg');
+  if (msg) { msg.style.color='var(--txt3)'; msg.textContent='📤 Envoi en cours...'; }
+  await smsEnvoyer(testNum, 'Test SMS depuis Manfara & Fils. Bonne journée !', 'test');
+  const last = SMS_HISTORY[0];
+  if (msg) {
+    if (last?.ok) { msg.style.color='#3DA85A'; msg.textContent='✅ SMS envoyé avec succès !'; }
+    else { msg.style.color='#C0392B'; msg.textContent='❌ Échec : ' + (last?.err||'Erreur inconnue'); }
+    setTimeout(()=>msg.textContent='', 5000);
+  }
+  smsRenderHistory();
+}
+
+function adminTab(name, btn) {
+  document.querySelectorAll('.act-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.act-tabcontent').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  const el = document.getElementById('admintab-'+name);
+  if (el) el.classList.add('active');
+  if (name === 'sms') { smsLoadUI(); smsRenderHistory(); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE ACTIVITÉS COMMERCIALES
+// ═══════════════════════════════════════════════════════════════
+
+let ACT_PAGE = 0;
+const ACT_PER_PAGE = 30;
+let ACT_FILTERED = [];
+
+function initActivites() {
+  // Pré-remplir les dates (7 derniers jours par défaut)
+  const today = new Date();
+  const ago7  = new Date(); ago7.setDate(today.getDate() - 6);
+  document.getElementById('act-au').value = today.toISOString().slice(0,10);
+  document.getElementById('act-du').value = ago7.toISOString().slice(0,10);
+
+  // Remplir le filtre PDV
+  const sel = document.getElementById('act-pdv-filter');
+  sel.innerHTML = '<option value="">Tous</option>';
+  (POS_POINTS || []).forEach(p => {
+    const o = document.createElement('option');
+    o.value = p.id; o.textContent = p.nom || p.id;
+    sel.appendChild(o);
+  });
+
+  actRefresh();
+}
+
+function actGetFiltered() {
+  const du  = document.getElementById('act-du').value;
+  const au  = document.getElementById('act-au').value;
+  const pdv = document.getElementById('act-pdv-filter').value;
+  const duD = du ? new Date(du + 'T00:00:00') : null;
+  const auD = au ? new Date(au + 'T23:59:59') : null;
+
+  return POS_VENTES.filter(v => {
+    const d = new Date(v.date || v.dateStr);
+    if (duD && d < duD) return false;
+    if (auD && d > auD) return false;
+    if (pdv && v.pointId !== pdv) return false;
+    return true;
+  });
+}
+
+function actRefresh() {
+  ACT_FILTERED = actGetFiltered();
+  actDrawKPIs();
+  actDrawTimeline();
+  actDrawDonut();
+  actJournalRender();
+  actDrawClassements();
+  actDrawHoraires();
+  // Update subtitle
+  const du = document.getElementById('act-du').value;
+  const au = document.getElementById('act-au').value;
+  document.getElementById('act-sub').textContent =
+    `Période : ${du ? new Date(du).toLocaleDateString('fr-FR') : '—'} → ${au ? new Date(au).toLocaleDateString('fr-FR') : '—'} — ${ACT_FILTERED.length} vente(s)`;
+}
+
+function actShortcut(range, btn) {
+  document.querySelectorAll('.act-shortcut').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const today = new Date();
+  const fmt = d => d.toISOString().slice(0,10);
+  const ago = n => { const d = new Date(); d.setDate(d.getDate() - n); return d; };
+  document.getElementById('act-au').value = fmt(today);
+  if (range === 'today')   document.getElementById('act-du').value = fmt(today);
+  else if (range === 'week')    document.getElementById('act-du').value = fmt(ago(6));
+  else if (range === 'month')   document.getElementById('act-du').value = fmt(ago(29));
+  else if (range === 'quarter') document.getElementById('act-du').value = fmt(ago(89));
+  else if (range === 'year')    document.getElementById('act-du').value = fmt(ago(364));
+  else if (range === 'all') {
+    document.getElementById('act-du').value = '';
+    document.getElementById('act-au').value = '';
+  }
+  actRefresh();
+}
+
+function actDrawKPIs() {
+  const ventes = ACT_FILTERED;
+  const ca = ventes.reduce((s,v) => s + (parseFloat(v.total)||0), 0);
+  const nb = ventes.length;
+  const panier = nb ? Math.round(ca / nb) : 0;
+  const credit = ventes.filter(v => v.paiement === 'CREDIT').reduce((s,v)=>s+(parseFloat(v.total)||0),0);
+  const articles = ventes.reduce((s,v) => s + (v.items ? v.items.reduce((a,i)=>a+(parseInt(i.qty)||0),0) : 0), 0);
+
+  document.getElementById('act-kpi-ca').textContent   = fmtFull(ca);
+  document.getElementById('act-kpi-nb').textContent   = nb.toLocaleString('fr-FR');
+  document.getElementById('act-kpi-panier').textContent = fmtFull(panier);
+  document.getElementById('act-kpi-credit').textContent = fmtFull(credit);
+  document.getElementById('act-kpi-articles').textContent = articles.toLocaleString('fr-FR');
+
+  // Tendance vs période précédente
+  const du = document.getElementById('act-du').value;
+  const au = document.getElementById('act-au').value;
+  if (du && au) {
+    const duD = new Date(du); const auD = new Date(au);
+    const diff = auD - duD;
+    const prevAu = new Date(duD); prevAu.setDate(prevAu.getDate()-1);
+    const prevDu = new Date(prevAu); prevDu.setTime(prevDu.getTime() - diff);
+    const prev = POS_VENTES.filter(v => {
+      const d = new Date(v.date||v.dateStr);
+      return d >= prevDu && d <= prevAu;
+    });
+    const prevCa = prev.reduce((s,v)=>s+(parseFloat(v.total)||0),0);
+    const trend = document.getElementById('act-kpi-ca-trend');
+    if (prevCa > 0) {
+      const pct = Math.round((ca - prevCa) / prevCa * 100);
+      trend.textContent = (pct>=0?'▲ +':'▼ ') + pct + '% vs période préc.';
+      trend.className = 'ak-trend ' + (pct>=0?'up':'down');
+    } else { trend.textContent = ''; }
+  }
+  document.getElementById('act-kpi-nb-sub').textContent = `Moy. ${nb && du && au ? Math.round(nb / Math.max(1,Math.ceil((new Date(au)-new Date(du))/(86400000))+1)*10)/10 : nb} / jour`;
+}
+
+function actDrawTimeline() {
+  const gran = document.getElementById('act-chart-granularity').value;
+  const ventes = ACT_FILTERED;
+  const buckets = {};
+
+  ventes.forEach(v => {
+    const d = new Date(v.date || v.dateStr);
+    let key;
+    if (gran === 'day') key = d.toISOString().slice(0,10);
+    else if (gran === 'week') {
+      const wk = new Date(d); wk.setDate(d.getDate() - d.getDay());
+      key = wk.toISOString().slice(0,10);
+    } else {
+      key = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+    }
+    buckets[key] = (buckets[key]||0) + (parseFloat(v.total)||0);
+  });
+
+  const keys = Object.keys(buckets).sort();
+  const vals = keys.map(k => buckets[k]);
+  const maxV = Math.max(...vals, 1);
+
+  const cont = document.getElementById('act-timeline-chart');
+  cont.innerHTML = '';
+  keys.forEach((k,i) => {
+    const pct = Math.round((vals[i]/maxV)*100);
+    const col = document.createElement('div');
+    col.className = 'act-bar-col';
+    col.style.minWidth = gran === 'day' ? '22px' : gran === 'week' ? '32px' : '44px';
+    const lbl = gran === 'day' ? k.slice(5) : gran === 'week' ? 'S'+k.slice(5) : k.slice(0,7);
+    col.innerHTML = `<div class="act-bar ventes" style="height:${Math.max(pct,2)}%" title="${fmtFull(vals[i])} GNF"></div>
+      <div class="act-bar-lbl">${lbl}</div>`;
+    cont.appendChild(col);
+  });
+  if (!keys.length) cont.innerHTML = '<div style="color:var(--txt3);font-size:12px;padding:20px">Aucune vente sur la période</div>';
+}
+
+function actDrawDonut() {
+  const ventes = ACT_FILTERED;
+  const modes = { ESPECES:0, MOBILE:0, CREDIT:0 };
+  ventes.forEach(v => { const m = v.paiement||'ESPECES'; modes[m] = (modes[m]||0) + (parseFloat(v.total)||0); });
+  const total = Object.values(modes).reduce((a,b)=>a+b,0)||1;
+  const colors = { ESPECES:'#3DA85A', MOBILE:'#2980B9', CREDIT:'#C0392B' };
+  const labels = { ESPECES:'Espèces', ORANGE:'Orange Money', BANQUE:'Virement Banque', MOBILE:'Mobile Money', CREDIT:'Crédit' };
+
+  const svg = document.getElementById('act-donut-svg');
+  const leg = document.getElementById('act-donut-legend');
+  svg.innerHTML = ''; leg.innerHTML = '';
+
+  const cx=50, cy=50, r=36, ir=22;
+  let angle = -Math.PI/2;
+  Object.entries(modes).forEach(([m,v]) => {
+    if (!v) return;
+    const pct = v/total;
+    const a2 = angle + pct * 2 * Math.PI;
+    const x1=cx+r*Math.cos(angle), y1=cy+r*Math.sin(angle);
+    const x2=cx+r*Math.cos(a2), y2=cy+r*Math.sin(a2);
+    const ix1=cx+ir*Math.cos(angle), iy1=cy+ir*Math.sin(angle);
+    const ix2=cx+ir*Math.cos(a2), iy2=cy+ir*Math.sin(a2);
+    const lg = pct>0.5?1:0;
+    const path = document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M ${ix1} ${iy1} L ${x1} ${y1} A ${r} ${r} 0 ${lg} 1 ${x2} ${y2} L ${ix2} ${iy2} A ${ir} ${ir} 0 ${lg} 0 ${ix1} ${iy1} Z`);
+    path.setAttribute('fill', colors[m]); path.setAttribute('opacity','0.85');
+    svg.appendChild(path);
+    angle = a2;
+
+    const pctTxt = Math.round(pct*100);
+    leg.innerHTML += `<div class="act-donut-item">
+      <div class="act-donut-dot" style="background:${colors[m]}"></div>
+      <span>${labels[m]}</span>
+      <span class="act-donut-pct">${pctTxt}%</span>
+    </div>`;
+  });
+
+  // Top articles
+  const artMap = {};
+  ventes.forEach(v => (v.items||[]).forEach(it => {
+    const n = it.nom||it.name||'?';
+    if (!artMap[n]) artMap[n]={qty:0,ca:0};
+    artMap[n].qty += parseInt(it.qty)||0;
+    artMap[n].ca  += (parseFloat(it.prix)||0)*(parseInt(it.qty)||0);
+  }));
+  const top5 = Object.entries(artMap).sort((a,b)=>b[1].ca-a[1].ca).slice(0,5);
+  const tl = document.getElementById('act-top-articles');
+  tl.innerHTML = top5.map(([n,d],i)=>`<li class="top-item">
+    <span class="top-rank">#${i+1}</span>
+    <span class="top-name" style="font-size:12px">${n}</span>
+    <span class="top-count">${fmtFull(d.ca)} GNF</span>
+  </li>`).join('') || '<li style="color:var(--txt3);font-size:12px;padding:8px 0">Aucune donnée</li>';
+}
+
+function actJournalRender() {
+  const q  = (document.getElementById('act-search')?.value||'').toLowerCase();
+  const mode = document.getElementById('act-mode-filter')?.value||'';
+  let list = ACT_FILTERED.filter(v => {
+    if (mode && v.paiement !== mode) return false;
+    if (q) {
+      const hay = [(v.id||''),(v.client||''),(v.vendeur||''),(v.pointNom||''),(v.items||[]).map(i=>i.nom||'').join(' ')].join(' ').toLowerCase();
+      if (!hay.includes(q)) return false;
+    }
+    return true;
+  }).sort((a,b) => new Date(b.date||b.dateStr) - new Date(a.date||a.dateStr));
+
+  const total = list.length;
+  const pages = Math.max(1, Math.ceil(total / ACT_PER_PAGE));
+  ACT_PAGE = Math.min(ACT_PAGE, pages-1);
+  const slice = list.slice(ACT_PAGE * ACT_PER_PAGE, (ACT_PAGE+1) * ACT_PER_PAGE);
+
+  const modeLabels = { ESPECES:'💵 Espèces', ORANGE:'🟠 Orange Money', BANQUE:'🏦 Banque', MOBILE:'📱 Mobile', CREDIT:'🔖 Crédit' };
+  const modeBadge  = { ESPECES:'badge-grn', ORANGE:'badge-or', BANQUE:'badge-blu', MOBILE:'badge-blu', CREDIT:'badge-red' };
+
+  const tbody = document.getElementById('act-journal-tbody');
+  tbody.innerHTML = slice.map(v => {
+    const d = new Date(v.date||v.dateStr);
+    const dateStr = d.toLocaleDateString('fr-FR') + ' ' + d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    const items = (v.items||[]).map(i=>`${i.nom||'?'} ×${i.qty||1}`).join(', ');
+    const m = v.paiement||'ESPECES';
+    return `<tr>
+      <td><span class="amount" style="color:var(--or)">${v.id||'—'}</span></td>
+      <td>${dateStr}</td>
+      <td>${v.pointNom||v.pointId||'—'}</td>
+      <td>${v.client||'Passage'}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${items}">${items||'—'}</td>
+      <td class="amount amount-pos">${fmtFull(parseFloat(v.total)||0)}</td>
+      <td><span class="badge ${modeBadge[m]||'badge-or'}">${modeLabels[m]||m}</span></td>
+      <td>${v.vendeur||'—'}</td>
+    </tr>`;
+  }).join('') || `<tr><td colspan="8" style="text-align:center;padding:24px;color:var(--txt3)">Aucune vente sur la période sélectionnée</td></tr>`;
+
+  document.getElementById('act-journal-info').textContent = `${total.toLocaleString('fr-FR')} vente(s)`;
+
+  // Pagination
+  const pInfo = document.getElementById('act-pag-info');
+  const pBtns = document.getElementById('act-pag-btns');
+  pInfo.textContent = `Page ${ACT_PAGE+1} / ${pages}`;
+  pBtns.innerHTML = '';
+  const mkBtn = (label,page,disabled) => {
+    const b = document.createElement('button');
+    b.className = 'pbtn' + (page===ACT_PAGE?' active':'');
+    b.textContent = label; b.disabled = disabled||false;
+    b.onclick = () => { ACT_PAGE = page; actJournalRender(); };
+    return b;
+  };
+  pBtns.appendChild(mkBtn('‹', ACT_PAGE-1, ACT_PAGE===0));
+  const start = Math.max(0, ACT_PAGE-2);
+  for (let i=start; i<Math.min(pages,start+5); i++) pBtns.appendChild(mkBtn(i+1, i));
+  pBtns.appendChild(mkBtn('›', ACT_PAGE+1, ACT_PAGE>=pages-1));
+}
+
+function actDrawClassements() {
+  const ventes = ACT_FILTERED;
+
+  // PDV
+  const pdvMap = {};
+  ventes.forEach(v => {
+    const k = v.pointNom || v.pointId || 'N/D';
+    if (!pdvMap[k]) pdvMap[k] = {ca:0, nb:0};
+    pdvMap[k].ca += parseFloat(v.total)||0;
+    pdvMap[k].nb++;
+  });
+  actDrawRank('act-rank-pdv', pdvMap, 'ca', v => `${fmtFull(v.ca)} GNF · ${v.nb} vente(s)`);
+
+  // Vendeurs
+  const vendMap = {};
+  ventes.forEach(v => {
+    const k = v.vendeur||'Inconnu';
+    if (!vendMap[k]) vendMap[k] = {ca:0, nb:0};
+    vendMap[k].ca += parseFloat(v.total)||0;
+    vendMap[k].nb++;
+  });
+  actDrawRank('act-rank-vendeur', vendMap, 'ca', v => `${fmtFull(v.ca)} GNF · ${v.nb} vente(s)`);
+
+  // Articles volume
+  const artVol = {}, artCA = {};
+  ventes.forEach(v => (v.items||[]).forEach(it => {
+    const n = it.nom||it.name||'?';
+    if (!artVol[n]) artVol[n] = {ca:0};
+    if (!artCA[n])  artCA[n]  = {ca:0};
+    const qty = parseInt(it.qty)||0;
+    const val = (parseFloat(it.prix)||0)*qty;
+    artVol[n].ca += qty;
+    artCA[n].ca  += val;
+  }));
+  actDrawRank('act-rank-articles-vol', artVol, 'ca', v => `${v.ca.toLocaleString('fr-FR')} unités`);
+  actDrawRank('act-rank-articles-ca', artCA, 'ca', v => `${fmtFull(v.ca)} GNF`);
+}
+
+function actDrawRank(containerId, map, sortKey, labelFn) {
+  const cont = document.getElementById(containerId);
+  if (!cont) return;
+  const sorted = Object.entries(map).sort((a,b)=>b[1][sortKey]-a[1][sortKey]).slice(0,8);
+  if (!sorted.length) { cont.innerHTML='<div style="color:var(--txt3);font-size:12px;padding:8px 0">Aucune donnée</div>'; return; }
+  const max = sorted[0][1][sortKey]||1;
+  cont.innerHTML = sorted.map(([name, data],i) => `
+    <div class="act-rank-item">
+      <span class="act-rank-nb">#${i+1}</span>
+      <span class="act-rank-name">${name}</span>
+      <div class="act-rank-bar-wrap"><div class="act-rank-bar" style="width:${Math.round(data[sortKey]/max*100)}%"></div></div>
+      <span class="act-rank-val">${labelFn(data)}</span>
+    </div>`).join('');
+}
+
+function actDrawHoraires() {
+  const ventes = ACT_FILTERED;
+
+  // Heures
+  const hourBuckets = Array(24).fill(0);
+  ventes.forEach(v => {
+    const d = new Date(v.date||v.dateStr);
+    if (!isNaN(d)) hourBuckets[d.getHours()] += parseFloat(v.total)||0;
+  });
+  const maxH = Math.max(...hourBuckets, 1);
+  const hCont = document.getElementById('act-hourly-chart');
+  const hLabels = document.getElementById('act-hourly-labels');
+  hCont.innerHTML = ''; hLabels.innerHTML = '';
+  hourBuckets.forEach((v,h) => {
+    const pct = Math.round(v/maxH*100);
+    const col = document.createElement('div');
+    col.className = 'act-bar-col'; col.style.flex = '1';
+    col.innerHTML = `<div class="act-bar ventes" style="height:${Math.max(pct,1)}%" title="${h}h : ${fmtFull(v)} GNF"></div>`;
+    hCont.appendChild(col);
+    const lbl = document.createElement('div');
+    lbl.className = 'act-heatmap-lbl'; lbl.textContent = h;
+    hLabels.appendChild(lbl);
+  });
+
+  // Jours de la semaine
+  const days = ['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'];
+  const dayBuckets = Array(7).fill(0);
+  ventes.forEach(v => {
+    const d = new Date(v.date||v.dateStr);
+    if (!isNaN(d)) dayBuckets[d.getDay()] += parseFloat(v.total)||0;
+  });
+  const maxD = Math.max(...dayBuckets, 1);
+  const wCont = document.getElementById('act-weekday-chart');
+  const wLabels = document.getElementById('act-weekday-labels');
+  wCont.innerHTML = ''; wLabels.innerHTML = '';
+  dayBuckets.forEach((v,i) => {
+    const pct = Math.round(v/maxD*100);
+    const col = document.createElement('div');
+    col.className = 'act-bar-col'; col.style.flex = '1';
+    col.innerHTML = `<div class="act-bar ventes" style="height:${Math.max(pct,1)}%" title="${days[i]} : ${fmtFull(v)} GNF"></div>`;
+    wCont.appendChild(col);
+    const lbl = document.createElement('div');
+    lbl.className = 'act-heatmap-lbl'; lbl.textContent = days[i];
+    wLabels.appendChild(lbl);
+  });
+
+  // Stats box
+  const ca = ventes.reduce((s,v)=>s+(parseFloat(v.total)||0),0);
+  const nb = ventes.length;
+  const du = document.getElementById('act-du').value;
+  const au = document.getElementById('act-au').value;
+  const nbJours = du&&au ? Math.max(1,Math.ceil((new Date(au)-new Date(du))/86400000)+1) : 1;
+  const peakHour = hourBuckets.indexOf(Math.max(...hourBuckets));
+  const peakDay = days[dayBuckets.indexOf(Math.max(...dayBuckets))];
+  const stats = [
+    ['📅 Jours analysés', nbJours],
+    ['🛒 Ventes / jour', (nb/nbJours).toFixed(1)],
+    ['💰 CA / jour', fmtFull(Math.round(ca/nbJours)) + ' GNF'],
+    ['⏰ Heure de pointe', peakHour + 'h'],
+    ['📅 Jour de pointe', peakDay],
+    ['🎯 Taux crédit', nb ? Math.round(ventes.filter(v=>v.paiement==='CREDIT').length/nb*100)+'%' : '0%'],
+  ];
+  document.getElementById('act-stats-box').innerHTML = stats.map(([l,v])=>`
+    <div style="display:flex;justify-content:space-between;border-bottom:1px solid rgba(42,42,54,.4);padding:6px 0">
+      <span style="font-size:12px;color:var(--txt3)">${l}</span>
+      <span style="font-size:13px;color:var(--or);font-family:'JetBrains Mono',monospace">${v}</span>
+    </div>`).join('');
+}
+
+function actTab(name, btn) {
+  document.querySelectorAll('.act-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.act-tabcontent').forEach(c=>c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('acttab-'+name).classList.add('active');
+}
+
+function actExportCSV() {
+  const ventes = ACT_FILTERED;
+  if (!ventes.length) { alert('Aucune vente à exporter.'); return; }
+  const rows = [['Ticket','Date','Heure','Point de vente','Client','Articles','Total GNF','Mode paiement','Vendeur']];
+  ventes.forEach(v => {
+    const d = new Date(v.date||v.dateStr);
+    const items = (v.items||[]).map(i=>`${i.nom||'?'}×${i.qty||1}`).join('; ');
+    rows.push([
+      v.id||'', d.toLocaleDateString('fr-FR'), d.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}),
+      v.pointNom||v.pointId||'',v.client||'Passage',items,parseFloat(v.total)||0,v.paiement||'',v.vendeur||''
+    ]);
+  });
+  const csv = rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download='activites-manfara.csv'; a.click();
+  URL.revokeObjectURL(url);
 }
 
 function exportCSV(type) {
