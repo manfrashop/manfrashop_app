@@ -24,6 +24,9 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+/* ═══════════════════════════════════════════════════════
+   THÈME PAR DÉFAUT : OR NOIR (Manfara Classic)
+═══════════════════════════════════════════════════════ */
 :root {
   --or: #C9A227; --or2: #E8C547; --or3: rgba(201,162,39,0.12);
   --bg: #08080A; --bg2: #111115; --bg3: #18181F; --bg4: #1F1F28;
@@ -38,6 +41,140 @@
   --topbar-h: 52px;
   --transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
 }
+
+/* ── THÈME : MINUIT BLEU (Cobalt Night) ── */
+html[data-theme="cobalt"] {
+  --or: #4A9EFF; --or2: #74B8FF; --or3: rgba(74,158,255,0.12);
+  --bg: #03060F; --bg2: #080E1E; --bg3: #0D1528; --bg4: #121D33;
+  --txt: #D6E8FF; --txt2: #6B8FAF; --txt3: #3A5470;
+  --brd: #0F1E35; --brd2: #172844;
+  --grn: #1EBF7A; --red: #E05C5C; --blu: #4A9EFF;
+  --grn2: rgba(30,191,122,0.12); --red2: rgba(224,92,92,0.12); --blu2: rgba(74,158,255,0.12);
+  --shadow: 0 8px 32px rgba(0,0,0,0.7);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.5);
+}
+
+/* ── THÈME : ÉMERAUDE (Jungle Pro) ── */
+html[data-theme="emeraude"] {
+  --or: #00D48A; --or2: #3BFAAD; --or3: rgba(0,212,138,0.11);
+  --bg: #030C09; --bg2: #071410; --bg3: #0C1E17; --bg4: #102619;
+  --txt: #D0F5E8; --txt2: #528A6E; --txt3: #2E5040;
+  --brd: #0D2018; --brd2: #152E22;
+  --grn: #00D48A; --red: #F05A5A; --blu: #3A9EE0;
+  --grn2: rgba(0,212,138,0.12); --red2: rgba(240,90,90,0.12); --blu2: rgba(58,158,224,0.12);
+  --shadow: 0 8px 32px rgba(0,0,0,0.65);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+/* ── THÈME : VIOLET CRÉPUSCULE (Dusk) ── */
+html[data-theme="dusk"] {
+  --or: #B06CF5; --or2: #CC96FF; --or3: rgba(176,108,245,0.12);
+  --bg: #07030F; --bg2: #0F0819; --bg3: #160C24; --bg4: #1C102E;
+  --txt: #EAD6FF; --txt2: #7A5A99; --txt3: #4A3465;
+  --brd: #1A0F2E; --brd2: #22143C;
+  --grn: #4CC97A; --red: #E05C5C; --blu: #5B8FFF;
+  --grn2: rgba(76,201,122,0.12); --red2: rgba(224,92,92,0.12); --blu2: rgba(91,143,255,0.12);
+  --shadow: 0 8px 32px rgba(0,0,0,0.7);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+/* ── THÈME : CERISE NOIR (Cherry) ── */
+html[data-theme="cherry"] {
+  --or: #FF4D6D; --or2: #FF7A93; --or3: rgba(255,77,109,0.12);
+  --bg: #0A0305; --bg2: #150509; --bg3: #1E080E; --bg4: #270B13;
+  --txt: #FFE0E6; --txt2: #9A5E68; --txt3: #5C343B;
+  --brd: #221018; --brd2: #2E151F;
+  --grn: #3DCC7A; --red: #FF4D4D; --blu: #4A9EFF;
+  --grn2: rgba(61,204,122,0.12); --red2: rgba(255,77,77,0.12); --blu2: rgba(74,158,255,0.12);
+  --shadow: 0 8px 32px rgba(0,0,0,0.7);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+/* ── THÈME : CLAIR IVOIRE (Light Ivory) ── */
+html[data-theme="ivory"] {
+  --or: #B07A1A; --or2: #D49A2A; --or3: rgba(176,122,26,0.10);
+  --bg: #F5F1EA; --bg2: #FDFAF4; --bg3: #EDE8DE; --bg4: #E4DDD0;
+  --txt: #2A2318; --txt2: #6B5E44; --txt3: #9A8E78;
+  --brd: #D8D0BC; --brd2: #C8BFA8;
+  --grn: #2A8A4A; --red: #C03030; --blu: #1A6AAA;
+  --grn2: rgba(42,138,74,0.10); --red2: rgba(192,48,48,0.10); --blu2: rgba(26,106,170,0.10);
+  --shadow: 0 8px 32px rgba(0,0,0,0.12);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* ── THÈME : ARDOISE GRISE (Slate) ── */
+html[data-theme="slate"] {
+  --or: #E0A840; --or2: #F5C660; --or3: rgba(224,168,64,0.12);
+  --bg: #0E0F12; --bg2: #161820; --bg3: #1D2028; --bg4: #242730;
+  --txt: #E8EAF0; --txt2: #7A8090; --txt3: #454850;
+  --brd: #252830; --brd2: #30333D;
+  --grn: #4AB870; --red: #D05050; --blu: #4A80D0;
+  --grn2: rgba(74,184,112,0.12); --red2: rgba(208,80,80,0.12); --blu2: rgba(74,128,208,0.12);
+  --shadow: 0 8px 32px rgba(0,0,0,0.6);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+/* ── THÈME : CAFÉ MARRON (Espresso) ── */
+html[data-theme="espresso"] {
+  --or: #D4845A; --or2: #EAA080; --or3: rgba(212,132,90,0.12);
+  --bg: #0C0804; --bg2: #18100A; --bg3: #221710; --bg4: #2C1E15;
+  --txt: #F0E4D4; --txt2: #8A6E56; --txt3: #4E3C2A;
+  --brd: #2A1E14; --brd2: #36271A;
+  --grn: #5CA87A; --red: #CC4444; --blu: #5A90D4;
+  --grn2: rgba(92,168,122,0.12); --red2: rgba(204,68,68,0.12); --blu2: rgba(90,144,212,0.12);
+  --shadow: 0 8px 32px rgba(0,0,0,0.65);
+  --shadow-sm: 0 2px 10px rgba(0,0,0,0.4);
+}
+
+/* ══════════════════════════════════════════
+   SÉLECTEUR DE THÈME
+══════════════════════════════════════════ */
+#theme-panel {
+  padding: 12px 16px 14px;
+  border-top: 1px solid var(--brd);
+  background: var(--bg2);
+}
+#theme-panel-title {
+  font-size: 9px; color: var(--txt3); letter-spacing: 2px;
+  text-transform: uppercase; font-weight: 700;
+  margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+}
+#theme-panel-title::after {
+  content: ''; flex: 1; height: 1px; background: var(--brd2);
+}
+.theme-swatches {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px;
+}
+.theme-swatch {
+  position: relative; border-radius: 8px; overflow: hidden;
+  cursor: pointer; aspect-ratio: 1 / 1;
+  border: 2px solid transparent;
+  transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+.theme-swatch:hover { transform: scale(1.08); box-shadow: 0 4px 14px rgba(0,0,0,0.5); }
+.theme-swatch.active {
+  border-color: var(--or);
+  box-shadow: 0 0 0 3px var(--or3), 0 4px 14px rgba(0,0,0,0.5);
+  transform: scale(1.06);
+}
+.theme-swatch-inner {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+}
+.theme-swatch-top { flex: 1.5; }
+.theme-swatch-bottom { flex: 1; display: flex; }
+.theme-swatch-bottom span { flex: 1; }
+.theme-swatch-label {
+  position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; font-size: 8.5px; font-weight: 700;
+  color: rgba(255,255,255,0.85); text-align: center; line-height: 1.2;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.6); letter-spacing: 0.3px;
+  padding: 2px;
+  opacity: 0; transition: opacity 0.15s ease;
+}
+.theme-swatch:hover .theme-swatch-label,
+.theme-swatch.active .theme-swatch-label { opacity: 1; }
 * { box-sizing:border-box; margin:0; padding:0; }
 body {
   font-family:'Raleway',sans-serif;
@@ -1429,9 +1566,101 @@ textarea:focus {
     <a onclick="rptAlertesCredits()" style="cursor:pointer"><span class="ico">⚠️</span> Alertes Crédits</a>
     <a data-sec="admin" class="admin-only"><span class="ico">⚙️</span> Utilisateurs</a>
   </nav>
+  <div id="theme-panel">
+    <div id="theme-panel-title">Thème</div>
+    <div class="theme-swatches">
+      <!-- Or Noir (défaut) -->
+      <div class="theme-swatch active" data-theme="" title="Or Noir — Classique Manfara" onclick="setTheme('')">
+        <div class="theme-swatch-inner">
+          <div class="theme-swatch-top" style="background:#111115"></div>
+          <div class="theme-swatch-bottom">
+            <span style="background:#08080A"></span>
+            <span style="background:#C9A227"></span>
+          </div>
+        </div>
+        <div class="theme-swatch-label">Or Noir</div>
+      </div>
+      <!-- Cobalt -->
+      <div class="theme-swatch" data-theme="cobalt" title="Cobalt Night" onclick="setTheme('cobalt')">
+        <div class="theme-swatch-inner">
+          <div class="theme-swatch-top" style="background:#080E1E"></div>
+          <div class="theme-swatch-bottom">
+            <span style="background:#03060F"></span>
+            <span style="background:#4A9EFF"></span>
+          </div>
+        </div>
+        <div class="theme-swatch-label">Cobalt</div>
+      </div>
+      <!-- Émeraude -->
+      <div class="theme-swatch" data-theme="emeraude" title="Jungle Pro" onclick="setTheme('emeraude')">
+        <div class="theme-swatch-inner">
+          <div class="theme-swatch-top" style="background:#071410"></div>
+          <div class="theme-swatch-bottom">
+            <span style="background:#030C09"></span>
+            <span style="background:#00D48A"></span>
+          </div>
+        </div>
+        <div class="theme-swatch-label">Émeraude</div>
+      </div>
+      <!-- Dusk -->
+      <div class="theme-swatch" data-theme="dusk" title="Violet Crépuscule" onclick="setTheme('dusk')">
+        <div class="theme-swatch-inner">
+          <div class="theme-swatch-top" style="background:#0F0819"></div>
+          <div class="theme-swatch-bottom">
+            <span style="background:#07030F"></span>
+            <span style="background:#B06CF5"></span>
+          </div>
+        </div>
+        <div class="theme-swatch-label">Dusk</div>
+      </div>
+      <!-- Cherry -->
+      <div class="theme-swatch" data-theme="cherry" title="Cerise Noir" onclick="setTheme('cherry')">
+        <div class="theme-swatch-inner">
+          <div class="theme-swatch-top" style="background:#150509"></div>
+          <div class="theme-swatch-bottom">
+            <span style="background:#0A0305"></span>
+            <span style="background:#FF4D6D"></span>
+          </div>
+        </div>
+        <div class="theme-swatch-label">Cherry</div>
+      </div>
+      <!-- Ivory -->
+      <div class="theme-swatch" data-theme="ivory" title="Clair Ivoire" onclick="setTheme('ivory')">
+        <div class="theme-swatch-inner">
+          <div class="theme-swatch-top" style="background:#FDFAF4"></div>
+          <div class="theme-swatch-bottom">
+            <span style="background:#EDE8DE"></span>
+            <span style="background:#B07A1A"></span>
+          </div>
+        </div>
+        <div class="theme-swatch-label" style="color:rgba(0,0,0,0.7);text-shadow:none">Ivoire</div>
+      </div>
+      <!-- Slate -->
+      <div class="theme-swatch" data-theme="slate" title="Ardoise" onclick="setTheme('slate')">
+        <div class="theme-swatch-inner">
+          <div class="theme-swatch-top" style="background:#161820"></div>
+          <div class="theme-swatch-bottom">
+            <span style="background:#0E0F12"></span>
+            <span style="background:#E0A840"></span>
+          </div>
+        </div>
+        <div class="theme-swatch-label">Ardoise</div>
+      </div>
+      <!-- Espresso -->
+      <div class="theme-swatch" data-theme="espresso" title="Espresso" onclick="setTheme('espresso')">
+        <div class="theme-swatch-inner">
+          <div class="theme-swatch-top" style="background:#18100A"></div>
+          <div class="theme-swatch-bottom">
+            <span style="background:#0C0804"></span>
+            <span style="background:#D4845A"></span>
+          </div>
+        </div>
+        <div class="theme-swatch-label">Espresso</div>
+      </div>
+    </div>
+  </div>
   <div class="sidebar-footer">
   </div>
-</div>
 
 <!-- MAIN -->
 <div id="main" style="display:none">
@@ -3126,7 +3355,7 @@ const ROLE_COLORS = { admin:'#D4AF37', gerant:'#2980B9', vendeur:'#3DA85A' };
 // ─── INIT ALL ──────────────────────────────────────────────────
 function initAllModules() {
   smsLoadConfig(); clotureCaisseLoadLocal(); retoursLoadLocal();
-  initDashboard(); initProduits(); initAppros(); initClients(); initFournisseurs(); initDepenses(); initStock(); initAchats(); initCredits(); initRapports();
+  initDashboard(); initProduits(); initAppros(); initClients(); initFournisseurs(); initDepenses(); initStock(); initAchats(); initCredits(); initRapports(); initTheme();
   initPOS(); initPointsDeVente();
 }
 
@@ -7138,6 +7367,38 @@ function resetForm(formId) {
   const margeHint = document.getElementById('prod-marge-hint');
   if (margeHint && container.contains(margeHint)) margeHint.textContent = '';
   showToast('🔄 Formulaire réinitialisé', 'info');
+}
+
+// ─── SYSTÈME DE THÈMES ─────────────────────────────────────────
+const THEMES = ['', 'cobalt', 'emeraude', 'dusk', 'cherry', 'ivory', 'slate', 'espresso'];
+const THEME_NAMES = {
+  '': 'Or Noir', 'cobalt': 'Cobalt', 'emeraude': 'Émeraude',
+  'dusk': 'Dusk', 'cherry': 'Cherry', 'ivory': 'Ivoire',
+  'slate': 'Ardoise', 'espresso': 'Espresso'
+};
+
+function setTheme(theme) {
+  // Appliquer sur <html>
+  if (theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+  } else {
+    document.documentElement.removeAttribute('data-theme');
+  }
+  // Mettre à jour la swatch active
+  document.querySelectorAll('.theme-swatch').forEach(sw => {
+    sw.classList.toggle('active', sw.dataset.theme === theme);
+  });
+  // Sauvegarder
+  try { localStorage.setItem('manfara_theme', theme); } catch(e) {}
+  // Toast discret
+  showToast('Thème : ' + (THEME_NAMES[theme] || 'Or Noir'), 'info');
+}
+
+function initTheme() {
+  try {
+    const saved = localStorage.getItem('manfara_theme') || '';
+    if (THEMES.includes(saved)) setTheme(saved);
+  } catch(e) {}
 }
 
 function showToast(msg, type='info') {
