@@ -2095,10 +2095,21 @@ nav a.active::before {
           <button onclick="rstStockZero()" style="padding:9px 22px;background:rgba(220,50,50,.15);border:1px solid var(--red);border-radius:8px;color:var(--red);cursor:pointer;font-size:13px;font-weight:700">⚠️ Remettre stock à 0</button>
         </div>
 
+        <!-- Bloc: Reset données statiques (hardcodées) -->
+        <div class="admin-card" style="border-color:rgba(220,140,0,.35)">
+          <div class="admin-card-title" style="color:#E88C20">⚠️ Vider le catalogue & clients hardcodés</div>
+          <p style="font-size:12px;color:var(--txt3);margin:10px 0 14px">Vide les données <strong>STATIC_DB</strong> chargées au démarrage (produits, clients, fournisseurs). L'application redémarrera avec un catalogue vierge. Rechargez la page pour confirmer l'état.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button onclick="rstStaticProduits()" style="padding:9px 18px;background:rgba(220,140,0,.15);border:1px solid #E88C20;border-radius:8px;color:#E88C20;cursor:pointer;font-size:13px;font-weight:700">🗂️ Vider produits hardcodés</button>
+            <button onclick="rstStaticClients()" style="padding:9px 18px;background:rgba(220,140,0,.15);border:1px solid #E88C20;border-radius:8px;color:#E88C20;cursor:pointer;font-size:13px;font-weight:700">👥 Vider clients hardcodés</button>
+            <button onclick="rstStaticAll()" style="padding:9px 18px;background:rgba(220,50,50,.15);border:1px solid var(--red);border-radius:8px;color:var(--red);cursor:pointer;font-size:13px;font-weight:700">🔥 Vider tout le STATIC_DB</button>
+          </div>
+        </div>
+
         <!-- Bloc: Reset complet -->
         <div class="admin-card" style="border-color:rgba(220,50,50,.35)">
           <div class="admin-card-title" style="color:var(--red)">☢️ Réinitialisation complète</div>
-          <p style="font-size:12px;color:var(--txt3);margin:10px 0 14px">Efface <strong>toutes</strong> les données locales de l'application (localStorage complet <code style="color:var(--or)">manfara_*</code>). Action irréversible.</p>
+          <p style="font-size:12px;color:var(--txt3);margin:10px 0 14px">Efface <strong>toutes</strong> les données locales de l'application (localStorage complet <code style="color:var(--or)">manfara_*</code>) ET vide le STATIC_DB en mémoire. Action irréversible.</p>
           <button onclick="rstAll()" style="padding:9px 22px;background:rgba(220,50,50,.25);border:2px solid var(--red);border-radius:8px;color:var(--red);cursor:pointer;font-size:13px;font-weight:700">☢️ TOUT RÉINITIALISER</button>
         </div>
 
@@ -5186,14 +5197,59 @@ function rstStockZero() {
   showToast('✅ Stocks remis à zéro', 'success');
 }
 
+function rstStaticProduits() {
+  if (!confirm('⚠️ Vider tous les produits hardcodés (STATIC_DB.produits) ?\nAucun produit préchargé ne sera visible.')) return;
+  if (typeof STATIC_DB !== 'undefined') STATIC_DB.produits = [];
+  if (DB_LOCAL) DB_LOCAL.produits = [];
+  rstLog('✅ Catalogue produits hardcodé vidé en mémoire.');
+  showToast('✅ Produits hardcodés supprimés', 'success');
+}
+
+function rstStaticClients() {
+  if (!confirm('⚠️ Vider tous les clients hardcodés (STATIC_DB.clients) ?')) return;
+  if (typeof STATIC_DB !== 'undefined') STATIC_DB.clients = [];
+  if (DB_LOCAL) DB_LOCAL.clients = [];
+  rstLog('✅ Clients hardcodés vidés en mémoire.');
+  showToast('✅ Clients hardcodés supprimés', 'success');
+}
+
+function rstStaticAll() {
+  if (!confirm('🔥 Vider tout le STATIC_DB (produits, clients, fournisseurs, appros) ?\n\nAction irréversible jusqu au rechargement de la page.')) return;
+  if (typeof STATIC_DB !== 'undefined') {
+    STATIC_DB.produits = [];
+    STATIC_DB.clients = [];
+    STATIC_DB.fournisseurs = [];
+    STATIC_DB.appros = [];
+    STATIC_DB.depenses = [];
+  }
+  if (DB_LOCAL) {
+    DB_LOCAL.produits = [];
+    DB_LOCAL.clients = [];
+    DB_LOCAL.fournisseurs = [];
+    DB_LOCAL.appros = [];
+    DB_LOCAL.depenses = [];
+  }
+  rstLog('✅ STATIC_DB entièrement vidé en mémoire.');
+  showToast('✅ Données statiques supprimées', 'success');
+}
+
 function rstAll() {
-  if (!confirm('☢️ RÉINITIALISATION COMPLÈTE\n\nToutes les données locales manfara_* seront supprimées.\n\nCette action est IRRÉVERSIBLE.')) return;
+  if (!confirm('☢️ RÉINITIALISATION COMPLÈTE\n\nToutes les données locales manfara_* seront supprimées ET le STATIC_DB vidé.\n\nCette action est IRRÉVERSIBLE.')) return;
   if (!confirm('⚠️ Confirmer une deuxième fois : supprimer TOUTES les données ?')) return;
   const keys = Object.keys(localStorage).filter(k => k.startsWith('manfara_'));
   keys.forEach(k => localStorage.removeItem(k));
   rstReloadMemory(['ventes','depenses','credits','clotures','retours','stock','achats','sms']);
-  rstLog('✅ ' + keys.length + ' clé(s) supprimée(s). Application réinitialisée.');
-  showToast('✅ Application réinitialisée', 'success');
+  // Vider STATIC_DB
+  if (typeof STATIC_DB !== 'undefined') {
+    STATIC_DB.produits = []; STATIC_DB.clients = [];
+    STATIC_DB.fournisseurs = []; STATIC_DB.appros = []; STATIC_DB.depenses = [];
+  }
+  if (DB_LOCAL) {
+    DB_LOCAL.produits = []; DB_LOCAL.clients = [];
+    DB_LOCAL.fournisseurs = []; DB_LOCAL.appros = []; DB_LOCAL.depenses = [];
+  }
+  rstLog('✅ ' + keys.length + ' clé(s) supprimée(s) + STATIC_DB vidé. Application réinitialisée.');
+  showToast('✅ Application entièrement réinitialisée', 'success');
 }
 
 function rstReloadMemory(modules) {
