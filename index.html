@@ -1531,19 +1531,108 @@ textarea:focus {
   <!-- APPROS -->
   <div id="sec-appros" class="section">
     <div class="page-header">
-      <div><div class="page-title">Approvisionnements</div><div class="page-sub">Historique des achats fournisseurs</div></div>
-      <div class="search-bar"><input type="text" id="appro-search" placeholder="Rechercher..."></div>
+      <div><div class="page-title">🚚 Approvisionnements</div><div class="page-sub" id="appro-sub-lbl">Historique des achats fournisseurs</div></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="search-bar"><input type="text" id="appro-search" placeholder="Rechercher..."></div>
+        <button class="btn-add" onclick="approToggleForm()">+ Nouvel Appro</button>
+      </div>
     </div>
+
+    <!-- Formulaire ajout appro -->
+    <div id="appro-form" style="display:none;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px;margin-bottom:20px">
+      <h3 id="appro-form-title" style="margin:0 0 16px;color:var(--or);font-size:15px">➕ Enregistrer un approvisionnement</h3>
+      <div class="achat-form-grid">
+        <div>
+          <label>Date *</label>
+          <input type="date" id="appro-date">
+        </div>
+        <div>
+          <label>N° Bon / Référence</label>
+          <input type="text" id="appro-num" placeholder="Auto si vide">
+        </div>
+        <div style="grid-column:span 2">
+          <label>Fournisseur *</label>
+          <input type="text" id="appro-frs" placeholder="Nom du fournisseur" list="appro-frs-list">
+          <datalist id="appro-frs-list"></datalist>
+        </div>
+        <div style="grid-column:span 4">
+          <label>Description / Articles</label>
+          <textarea id="appro-desc" rows="2" placeholder="Ex: 10 cartons Nivea, 5 pcs Samsung 32..." style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;resize:vertical;outline:none"></textarea>
+        </div>
+        <div>
+          <label>Montant Total (GNF) *</label>
+          <input type="number" id="appro-total" placeholder="0" min="0" style="font-family:'JetBrains Mono',monospace" oninput="approCalcReste()">
+        </div>
+        <div>
+          <label>Montant Payé (GNF)</label>
+          <input type="number" id="appro-paye" placeholder="0" min="0" style="font-family:'JetBrains Mono',monospace" oninput="approCalcReste()">
+        </div>
+        <div>
+          <label>Reste à Payer</label>
+          <input type="number" id="appro-reste" placeholder="0" readonly style="font-family:'JetBrains Mono',monospace;color:var(--red);background:var(--bg4)">
+        </div>
+        <div>
+          <label>Statut</label>
+          <select id="appro-statut">
+            <option value="EN STOCK">EN STOCK</option>
+            <option value="VENDU">VENDU</option>
+            <option value="PARTIEL">PARTIEL</option>
+            <option value="EN COURS">EN COURS</option>
+          </select>
+        </div>
+        <div style="grid-column:span 2">
+          <label>Famille / Catégorie</label>
+          <select id="appro-famille">
+            <option value="">— Toutes familles —</option>
+            <option>COSMETIQUE</option>
+            <option>ELECTRONIQUE</option>
+            <option>ELECTRO MENAGER</option>
+            <option>ALIMENTATION</option>
+            <option>DEVISES</option>
+            <option>NUTRITION BEBE</option>
+            <option>AUTRE</option>
+          </select>
+        </div>
+        <div style="grid-column:span 2">
+          <label>Origine / Note</label>
+          <input type="text" id="appro-note" placeholder="Ex: import Conakry, local...">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+        <button class="btn-add" onclick="approSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
+        <button onclick="approToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <button onclick="approResetForm()" style="padding:9px 14px;background:none;border:1px solid var(--brd2);border-radius:6px;color:var(--txt3);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px" title="Effacer tous les champs">🔄 Reset</button>
+        <span id="appro-form-msg" style="font-size:13px;color:var(--or)"></span>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="achat-kpis">
+      <div class="achat-kpi"><div class="kpi-label">Total Engagé</div><div class="kpi-value" id="appro-kpi-total">0</div></div>
+      <div class="achat-kpi kpi-grn"><div class="kpi-label">Total Payé</div><div class="kpi-value" id="appro-kpi-paye">0</div></div>
+      <div class="achat-kpi kpi-red"><div class="kpi-label">Reste à Payer</div><div class="kpi-value" id="appro-kpi-reste">0</div></div>
+      <div class="achat-kpi"><div class="kpi-label">Nb Appros</div><div class="kpi-value" id="appro-kpi-nb">0</div></div>
+    </div>
+
     <div class="table-wrap">
-      <div class="table-toolbar">
+      <div class="table-toolbar" style="flex-wrap:wrap;gap:8px">
         <div class="filter-btns" id="appro-filters">
           <button class="fbtn active" data-appro="ALL">Tous</button>
           <button class="fbtn" data-appro="EN STOCK">En Stock</button>
           <button class="fbtn" data-appro="VENDU">Vendu</button>
+          <button class="fbtn" data-appro="PARTIEL">Partiel</button>
+          <button class="fbtn" data-appro="EN COURS">En cours</button>
         </div>
         <div class="table-info" id="appro-info"></div>
       </div>
-      <table><thead><tr><th>N°</th><th>Date</th><th>Fournisseur</th><th>Total (GNF)</th><th>Payé (GNF)</th><th>Reste (GNF)</th><th>Type</th><th>Origine</th></tr></thead><tbody id="appro-tbody"></tbody></table>
+      <table>
+        <thead><tr>
+          <th>N° / Réf</th><th>Date</th><th>Fournisseur</th><th>Famille</th>
+          <th>Total (GNF)</th><th>Payé (GNF)</th><th>Reste (GNF)</th>
+          <th>Statut</th><th>Origine</th><th>Saisi par</th><th></th>
+        </tr></thead>
+        <tbody id="appro-tbody"></tbody>
+      </table>
       <div class="pagination"><div class="pag-info" id="appro-pag-info"></div><div class="pag-btns" id="appro-pag-btns"></div></div>
     </div>
   </div>
@@ -3900,15 +3989,185 @@ function initProduits(){
 
 // ─── APPROS ────────────────────────────────────────────────────
 let approPager;
+let APPRO_DATA_SAISIE = []; // appros saisies manuellement (localStorage)
+let approActiveFilter = 'ALL';
+
+function approLoadStorage() {
+  try { const r = localStorage.getItem('manfara_appros'); if(r) APPRO_DATA_SAISIE = JSON.parse(r); } catch(e) { APPRO_DATA_SAISIE = []; }
+}
+function approSaveStorage() {
+  try { localStorage.setItem('manfara_appros', JSON.stringify(APPRO_DATA_SAISIE)); } catch(e) {}
+}
+
+function approToggleForm(approData) {
+  const f = document.getElementById('appro-form');
+  const isOpen = f.style.display !== 'none';
+  if (isOpen && !approData) { f.style.display = 'none'; approResetForm(); return; }
+  approResetForm();
+  // Populate fournisseurs datalist
+  const dl = document.getElementById('appro-frs-list');
+  dl.innerHTML = '';
+  DB_LOCAL.fournisseurs.forEach(fn => { const opt = document.createElement('option'); opt.value = fn.n || ''; dl.appendChild(opt); });
+  if (approData) {
+    document.getElementById('appro-form-title').textContent = '✏️ Modifier l\'approvisionnement';
+    document.getElementById('appro-form').dataset.editId = approData.id;
+    document.getElementById('appro-date').value = approData.date || '';
+    document.getElementById('appro-num').value = approData.num || '';
+    document.getElementById('appro-frs').value = approData.frs || '';
+    document.getElementById('appro-desc').value = approData.desc || '';
+    document.getElementById('appro-total').value = approData.total || '';
+    document.getElementById('appro-paye').value = approData.paye || '';
+    document.getElementById('appro-reste').value = approData.reste || '';
+    document.getElementById('appro-statut').value = approData.statut || 'EN STOCK';
+    document.getElementById('appro-famille').value = approData.fam || '';
+    document.getElementById('appro-note').value = approData.note || '';
+  } else {
+    document.getElementById('appro-form-title').textContent = '➕ Enregistrer un approvisionnement';
+    delete document.getElementById('appro-form').dataset.editId;
+    document.getElementById('appro-date').value = new Date().toISOString().split('T')[0];
+  }
+  f.style.display = 'block';
+  document.getElementById('appro-frs').focus();
+}
+
+function approResetForm() {
+  ['appro-date','appro-num','appro-frs','appro-desc','appro-total','appro-paye','appro-reste','appro-note'].forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  document.getElementById('appro-statut').value = 'EN STOCK';
+  document.getElementById('appro-famille').value = '';
+  document.getElementById('appro-form-msg').textContent = '';
+  delete document.getElementById('appro-form').dataset.editId;
+}
+
+function approCalcReste() {
+  const total = parseFloat(document.getElementById('appro-total').value) || 0;
+  const paye  = parseFloat(document.getElementById('appro-paye').value)  || 0;
+  const reste = Math.max(0, total - paye);
+  document.getElementById('appro-reste').value = reste;
+  const sel = document.getElementById('appro-statut');
+  if(total > 0) {
+    if(reste === 0) sel.value = 'EN STOCK';
+    else if(paye > 0) sel.value = 'PARTIEL';
+    else sel.value = 'EN COURS';
+  }
+}
+
+async function approSauvegarder() {
+  try {
+    const editId = document.getElementById('appro-form').dataset.editId;
+    const date   = document.getElementById('appro-date').value;
+    const frs    = document.getElementById('appro-frs').value.trim();
+    const total  = parseFloat(document.getElementById('appro-total').value) || 0;
+    const paye   = parseFloat(document.getElementById('appro-paye').value)  || 0;
+    const reste  = Math.max(0, total - paye);
+    const statut = document.getElementById('appro-statut').value;
+    const desc   = document.getElementById('appro-desc').value.trim();
+    const note   = document.getElementById('appro-note').value.trim();
+    const fam    = document.getElementById('appro-famille').value;
+    const numRaw = document.getElementById('appro-num').value.trim();
+    const msg    = document.getElementById('appro-form-msg');
+
+    if(!date || !frs || total <= 0) {
+      msg.style.color = 'var(--red)';
+      msg.textContent = '⚠ Date, Fournisseur et Montant total sont obligatoires.';
+      return;
+    }
+
+    const num = numRaw || 'APP-' + Date.now();
+    if(editId) {
+      // Modification
+      const idx = APPRO_DATA_SAISIE.findIndex(a => a.id === editId);
+      if(idx !== -1) {
+        APPRO_DATA_SAISIE[idx] = { ...APPRO_DATA_SAISIE[idx], num, date, frs, total, paye, reste, statut, desc, note, fam };
+        approSaveStorage();
+        if(dataSource === 'firebase') { try { await db.collection('appros').doc(editId).update({ num, date, frs, total, paye, reste, statut, desc, note, fam }); } catch(e){} }
+      }
+      msg.style.color = 'var(--grn)'; msg.textContent = '✓ Approvisionnement modifié';
+    } else {
+      // Création
+      const appro = { id: 'app-'+Date.now(), num, date, frs, total, paye, reste, statut, desc, note, fam,
+        saisiepar: currentUser?.displayName || '—', createdAt: new Date().toISOString() };
+      APPRO_DATA_SAISIE.unshift(appro);
+      approSaveStorage();
+      if(dataSource === 'firebase') { try { await db.collection('appros').doc(appro.id).set(appro); } catch(e){} }
+      msg.style.color = 'var(--grn)'; msg.textContent = '✓ Appro enregistrée : ' + num;
+    }
+    approRenderAll();
+    setTimeout(() => { document.getElementById('appro-form').style.display='none'; approResetForm(); }, 1200);
+  } catch(e) { showToast((e.message||String(e)), 'error'); }
+}
+
+async function approSupprimer(id) {
+  if(!confirm('Supprimer cet approvisionnement ?')) return;
+  APPRO_DATA_SAISIE = APPRO_DATA_SAISIE.filter(a => a.id !== id);
+  approSaveStorage();
+  if(dataSource === 'firebase') { try { await db.collection('appros').doc(id).delete(); } catch(e){} }
+  approRenderAll();
+  showToast('Appro supprimée', 'info');
+}
+
+function approRenderAll() {
+  // Fusionner données statiques (historiques) + données saisies
+  const all = [...APPRO_DATA_SAISIE, ...DB_LOCAL.appros.map(a => ({
+    id: 'static-'+(a.i||Math.random()), num: a.i, date: a.d, frs: a.f,
+    total: parseFloat(a.to)||0, paye: parseFloat(a.pa)||0, reste: parseFloat(a.re)||0,
+    statut: a.ty, note: a.or, fam: a.fam||'', desc: '', saisiepar: 'Import', _static: true
+  }))];
+  const q = (document.getElementById('appro-search')?.value||'').trim().toLowerCase();
+  let data = [...all];
+  if(approActiveFilter !== 'ALL') data = data.filter(a => a.statut === approActiveFilter);
+  if(q) data = data.filter(a => (a.frs||'').toLowerCase().includes(q)||(a.num||'').toLowerCase().includes(q)||(a.desc||'').toLowerCase().includes(q));
+
+  // KPIs
+  document.getElementById('appro-kpi-total').textContent = fmt(data.reduce((s,a)=>s+(a.total||0),0)) + ' GNF';
+  document.getElementById('appro-kpi-paye').textContent  = fmt(data.reduce((s,a)=>s+(a.paye||0),0))  + ' GNF';
+  document.getElementById('appro-kpi-reste').textContent = fmt(data.reduce((s,a)=>s+(a.reste||0),0)) + ' GNF';
+  document.getElementById('appro-kpi-nb').textContent    = data.length;
+  document.getElementById('appro-sub-lbl').textContent   = all.length + ' approvisionnements';
+
+  if(!approPager) approPager = makePager(data, 50);
+  else approPager.setData(data);
+  approRenderTable();
+}
+
+function approRenderTable() {
+  const STAT_CLS = { 'EN STOCK':'badge-grn', 'VENDU':'badge-or', 'PARTIEL':'badge-blu', 'EN COURS':'badge-red' };
+  const rows = approPager.page();
+  document.getElementById('appro-tbody').innerHTML = rows.map(a => {
+    const resteCls = (a.reste||0) > 0 ? 'amount-neg' : 'amount-pos';
+    const cls = STAT_CLS[a.statut] || 'badge-blu';
+    const actions = a._static ? '' :
+      `<button onclick="approToggleForm(${JSON.stringify(a).replace(/"/g,'&quot;')})" style="padding:3px 7px;border:1px solid var(--brd);border-radius:4px;background:none;color:var(--txt3);cursor:pointer;font-size:11px" title="Modifier">✏️</button>
+       <button onclick="approSupprimer('${a.id}')" style="padding:3px 7px;border:1px solid var(--brd);border-radius:4px;background:none;color:var(--txt3);cursor:pointer;font-size:11px;margin-left:3px" title="Supprimer">🗑</button>`;
+    return `<tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--or)">${esc(a.num||'—')}</td>
+      <td style="font-size:12px">${fmtDate(a.date||a.d||'')}</td>
+      <td>${esc(a.frs||'—')}</td>
+      <td>${a.fam ? '<span class="badge badge-blu">'+esc(a.fam)+'</span>' : '—'}</td>
+      <td class="amount">${fmtFull(a.total)}</td>
+      <td class="amount amount-pos">${fmtFull(a.paye)}</td>
+      <td class="amount ${resteCls}">${fmtFull(a.reste)}</td>
+      <td><span class="badge ${cls}">${esc(a.statut||'—')}</span></td>
+      <td style="font-size:11px;color:var(--txt3)">${esc(a.note||'—')}</td>
+      <td style="font-size:11px;color:var(--txt3)">${esc(a.saisiepar||'—')}</td>
+      <td style="white-space:nowrap">${actions}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('appro-info').textContent = approPager.total() + ' appros';
+  renderPagination(approPager, document.getElementById('appro-pag-info'), document.getElementById('appro-pag-btns'), approRenderTable);
+}
+
 function initAppros(){
-  const appros=DB_LOCAL.appros;
-  let activeType='ALL', search='';
-  approPager=makePager(appros,50);
-  function filter(){ let d=appros; if(activeType!=='ALL') d=d.filter(a=>a.ty===activeType); if(search) d=d.filter(a=>(a.f||'').toLowerCase().includes(search)||(a.i||'').includes(search)); approPager.setData(d); renderA(); }
-  function renderA(){ const rows=approPager.page(); document.getElementById('appro-tbody').innerHTML=rows.map(a=>{ const reste=parseFloat(a.re)||0; const resteCls=reste>0?'amount-neg':'amount-pos'; const typeCls=a.ty==='EN STOCK'?'badge-grn':a.ty==='VENDU'?'badge-or':'badge-blu'; return `<tr><td class="amount" style="color:var(--txt3)">${a.i}</td><td>${fmtDate(a.d)}</td><td>${a.f||'—'}</td><td class="amount">${fmtFull(a.to)}</td><td class="amount amount-pos">${fmtFull(a.pa)}</td><td class="amount ${resteCls}">${fmtFull(a.re)}</td><td><span class="badge ${typeCls}">${a.ty||'—'}</span></td><td style="font-size:12px;color:var(--txt3)">${a.or||'—'}</td></tr>`; }).join(''); document.getElementById('appro-info').textContent=`${approPager.total().toLocaleString('fr-FR')} appros`; renderPagination(approPager,document.getElementById('appro-pag-info'),document.getElementById('appro-pag-btns'),renderA); }
-  document.getElementById('appro-filters').addEventListener('click',e=>{ if(!e.target.dataset.appro) return; document.querySelectorAll('#appro-filters .fbtn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); activeType=e.target.dataset.appro; filter(); });
-  document.getElementById('appro-search').addEventListener('input',e=>{ search=e.target.value.trim().toLowerCase(); filter(); });
-  filter();
+  approLoadStorage();
+  document.getElementById('appro-filters').addEventListener('click',e=>{
+    if(!e.target.dataset.appro) return;
+    document.querySelectorAll('#appro-filters .fbtn').forEach(b=>b.classList.remove('active'));
+    e.target.classList.add('active');
+    approActiveFilter = e.target.dataset.appro;
+    approPager = null;
+    approRenderAll();
+  });
+  document.getElementById('appro-search').addEventListener('input',()=>{ approPager=null; approRenderAll(); });
+  approRenderAll();
 }
 
 // ─── CLIENTS ───────────────────────────────────────────────────
