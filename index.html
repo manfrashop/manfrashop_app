@@ -14,9 +14,6 @@
 <meta name="apple-mobile-web-app-title" content="MANFRA-SHOP">
 <link rel="apple-touch-icon" href="icon-192.png">
 
-<!-- QR Code -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
@@ -1380,9 +1377,13 @@ textarea:focus {
 
 <!-- BARRE UTILISATEUR -->
 <div id="topbar" style="display:none">
-  <div class="sync-indicator">
+  <div class="sync-indicator" style="display:flex;align-items:center;gap:6px">
     <div class="sync-dot" id="sync-dot"></div>
     <span id="sync-label">Firebase</span>
+    <button id="sync-reconnect-btn" onclick="tryReconnect()"
+      style="display:none;padding:2px 8px;background:rgba(184,50,50,.2);border:1px solid var(--red);border-radius:4px;color:var(--red);cursor:pointer;font-size:11px;font-family:'Raleway',sans-serif;white-space:nowrap;align-items:center;gap:3px">
+      ↻ Reconnecter
+    </button>
   </div>
   <button class="topbar-cloture" onclick="clotureCaisseModal()" title="Clôturer la caisse du jour">🏦 Clôture Caisse</button>
   <button class="topbar-cloture" onclick="rptAlertesCredits()" title="Crédits en retard" style="background:rgba(192,57,43,.15);border-color:var(--red);color:var(--red)">⚠️ Crédits</button>
@@ -1491,7 +1492,7 @@ textarea:focus {
     <div id="prod-form" style="display:none;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px;margin-bottom:20px">
       <h3 style="margin:0 0 16px;color:var(--or);font-size:15px" id="prod-form-title">➕ Nouveau produit</h3>
       <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px">
-        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Code *</label><input type="text" id="prod-form-code" placeholder="Auto-généré" oninput="prodUpdateQR(this.value, document.getElementById('prod-form-lib').value)" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Code *</label><input type="text" id="prod-form-code" placeholder="Ex: 1479" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
         <div style="grid-column:span 2"><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Libellé *</label><input type="text" id="prod-form-lib" placeholder="Ex: COLGATE DENTIFRICE 100ML" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
         <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Famille</label><select id="prod-form-fam" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"><option>COSMETIQUE</option><option>ELECTRONIQUE</option><option>ALIMENTATION</option><option>ELECTRO MENAGER</option><option>NUTRITION BEBE</option><option>DEVISES</option></select></div>
         <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Prix Achat (GNF) *</label><input type="number" id="prod-form-prix" placeholder="0" min="0" oninput="prodAutoMarge()" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
@@ -1500,17 +1501,6 @@ textarea:focus {
         <div style="grid-column:span 2"><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Fournisseur</label><input type="text" id="prod-form-frns" placeholder="Ex: ETS DIALLO" list="prod-frns-list" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"><datalist id="prod-frns-list"></datalist></div>
       </div>
       <input type="hidden" id="prod-form-orig-code">
-      <!-- QR Code Preview -->
-      <div id="prod-qr-wrap" style="display:none;margin:12px 0;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;align-items:center;gap:16px">
-        <div style="display:flex;align-items:center;gap:16px">
-          <div id="prod-qr-canvas" style="background:#fff;padding:6px;border-radius:4px;line-height:0"></div>
-          <div>
-            <div style="font-size:11px;color:var(--txt3);margin-bottom:4px">QR Code du produit</div>
-            <div id="prod-qr-label" style="font-size:12px;color:var(--or);font-family:'JetBrains Mono',monospace"></div>
-            <button onclick="prodPrintQR()" style="margin-top:8px;padding:5px 12px;background:var(--bg4);border:1px solid var(--brd2);border-radius:5px;color:var(--txt2);cursor:pointer;font-size:11px">🖨️ Imprimer</button>
-          </div>
-        </div>
-      </div>
       <div style="display:flex;gap:8px;align-items:center">
         <button class="btn-add" onclick="prodSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
         <button onclick="prodToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
@@ -2668,6 +2658,12 @@ const FIREBASE_CONFIG = {
 firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth();
 const db   = firebase.firestore();
+// Améliore la compatibilité réseau (réseaux mobiles, proxies, Guinée)
+db.settings({
+  experimentalForceLongPolling: true,
+  experimentalAutoDetectLongPolling: true,
+  merge: true
+});
 
 // ─── Persistance offline Firestore ────────────────────────────
 db.enablePersistence({ synchronizeTabs: true })
@@ -2700,9 +2696,38 @@ DB_LOCAL = STATIC_DB;
 function setSyncStatus(state) {
   const dot = document.getElementById('sync-dot');
   const lbl = document.getElementById('sync-label');
+  const btn = document.getElementById('sync-reconnect-btn');
   dot.className = 'sync-dot' + (state==='syncing'?' syncing':state==='error'?' error':'');
   lbl.textContent = state==='ok' ? 'Connecté' : state==='syncing' ? 'Sync...' : state==='offline' ? 'Hors ligne' : 'Erreur';
+  if(btn) btn.style.display = (state==='offline' || state==='error') ? 'inline-flex' : 'none';
+  // Couleur du dot selon état
+  if(state==='ok') dot.style.background = 'var(--grn)';
+  else if(state==='offline' || state==='error') dot.style.background = 'var(--red)';
 }
+
+// ─── Reconnexion manuelle ──────────────────────────────────────
+function tryReconnect() {
+  const btn = document.getElementById('sync-reconnect-btn');
+  if(btn) { btn.disabled = true; btn.textContent = '↻ ...'; }
+  setSyncStatus('syncing');
+  // Forcer Firebase à reprendre le réseau
+  db.enableNetwork()
+    .then(() => loadData())
+    .catch(() => loadData());
+  setTimeout(() => {
+    if(btn) { btn.disabled = false; btn.textContent = '↻ Reconnecter'; }
+  }, 5000);
+}
+
+// ─── Reconnexion auto quand le navigateur repasse online ──────
+window.addEventListener('online', () => {
+  console.log('Réseau détecté — reconnexion automatique...');
+  setSyncStatus('syncing');
+  db.enableNetwork()
+    .then(() => loadData())
+    .catch(() => loadData());
+});
+window.addEventListener('offline', () => setSyncStatus('offline'));
 
 // ─── AUTH ──────────────────────────────────────────────────────
 auth.onAuthStateChanged(async user => {
@@ -2854,6 +2879,13 @@ function loadData() {
       setSyncStatus('offline');
       document.getElementById('loader').style.display = 'none';
       initAllModules();
+      // Retry automatique après 10 secondes
+      setTimeout(() => {
+        if(dataSource === 'local') {
+          console.log('Auto-retry connexion Firestore...');
+          db.enableNetwork().then(() => loadData()).catch(() => {});
+        }
+      }, 10000);
     });
 }
 
@@ -2937,6 +2969,15 @@ function _startRealtimeListeners() {
 function _rtError(e) {
   console.warn('Realtime listener error:', e);
   setSyncStatus('offline');
+  // Tentative de récupération automatique après 8s
+  setTimeout(() => {
+    if(navigator.onLine) {
+      db.enableNetwork().then(() => {
+        if(dataSource === 'firebase') _startRealtimeListeners();
+        else loadData();
+      }).catch(() => {});
+    }
+  }, 8000);
 }
 
 // ─── HAMBURGER / SIDEBAR MOBILE ────────────────────────────────
@@ -3206,6 +3247,7 @@ function initScanner() {
   inp.focus();
 
   inp.addEventListener('keydown', e => {
+    // Le pistolet envoie Enter à la fin
     if(e.key === 'Enter') {
       e.preventDefault();
       const code = inp.value.trim();
@@ -3214,6 +3256,14 @@ function initScanner() {
       inp.select();
       return;
     }
+  });
+
+  // Détection pistolet vs clavier : le pistolet envoie les chars très vite
+  inp.addEventListener('input', () => {
+    clearTimeout(scannerTimer);
+    scannerTimer = setTimeout(() => {
+      // Si la saisie s'arrête sans Enter (cas rare), ne rien faire
+    }, SCANNER_TIMEOUT * 10);
   });
 
   // Focus visuel
@@ -3226,58 +3276,6 @@ function initScanner() {
     document.getElementById('scanner-wrap').style.borderColor = 'var(--brd)';
     document.getElementById('scanner-status').textContent = '○ En veille';
     document.getElementById('scanner-status').style.color = 'var(--txt3)';
-  });
-
-  // ── SCANNER PISTOLET GLOBAL ──────────────────────────────────────
-  // Le pistolet envoie les caractères très rapidement (<30ms entre chars)
-  // On intercepte au niveau document pour capturer même sans focus sur l'input
-  let _globalBuf = '';
-  let _globalTimer = null;
-  const _PISTOLET_SPEED = 50; // ms max entre chars pour pistolet
-
-  document.addEventListener('keydown', function _scanGlobal(e) {
-    // Ne pas interférer si l'utilisateur tape dans un autre champ de saisie (input/textarea)
-    const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
-    const isTypingField = (tag === 'input' || tag === 'textarea') && e.target.id !== 'scanner-input';
-    // Ignorer les champs du formulaire produit et autres inputs sauf scanner-input
-    if(isTypingField) return;
-
-    // Si le focus est sur scanner-input, laisser le handler natif gérer
-    if(document.activeElement && document.activeElement.id === 'scanner-input') return;
-
-    // Section POS visible ?
-    const posSection = document.getElementById('sec-pos');
-    if(!posSection || posSection.style.display === 'none') return;
-
-    if(e.key === 'Enter') {
-      e.preventDefault();
-      clearTimeout(_globalTimer);
-      const code = _globalBuf.trim();
-      _globalBuf = '';
-      if(code.length >= 2) {
-        // Rediriger vers l'input et traiter
-        inp.value = code;
-        scannerProcess(code);
-        inp.value = '';
-        inp.focus();
-      }
-      return;
-    }
-
-    // Accumuler les caractères imprimables
-    if(e.key.length === 1) {
-      clearTimeout(_globalTimer);
-      _globalBuf += e.key;
-      _globalTimer = setTimeout(() => {
-        // Saisie lente = clavier → ignorer si < 3 chars (pas un code-barres)
-        if(_globalBuf.length >= 3) {
-          inp.value = _globalBuf;
-          inp.focus();
-        } else {
-          _globalBuf = '';
-        }
-      }, _PISTOLET_SPEED * 4);
-    }
   });
 }
 
@@ -4137,15 +4135,7 @@ function prodToggleForm(reset=true) {
   } else {
     if(reset) {
       document.getElementById('prod-form-title').textContent = '➕ Nouveau produit';
-      // Auto-générer le prochain code disponible
-      const maxCode = DB_LOCAL.produits.reduce((max, p) => {
-        const n = parseInt(p.c, 10);
-        return (!isNaN(n) && n > max) ? n : max;
-      }, 0);
-      const nextCode = String(maxCode + 1);
-      document.getElementById('prod-form-code').value = nextCode;
-      // Afficher le QR du nouveau code
-      prodUpdateQR(nextCode, '');
+      document.getElementById('prod-form-code').value = '';
       document.getElementById('prod-form-lib').value = '';
       // Peupler les familles depuis les données réelles
       const famSel = document.getElementById('prod-form-fam');
@@ -4186,8 +4176,6 @@ function prodEditer(code) {
   // Peupler la datalist
   const dl = document.getElementById('prod-frns-list');
   if(dl) { dl.innerHTML = ''; DB_LOCAL.fournisseurs.forEach(f => { const opt = document.createElement('option'); opt.value = f.n; dl.appendChild(opt); }); }
-  // Afficher le QR du produit existant
-  prodUpdateQR(p.c, p.l);
   prodToggleForm(false);
 }
 
@@ -6360,51 +6348,6 @@ function exportCSV(type) {
     filename = 'manfara_credits.csv';
   }
 }
-// ══════════════════════════════════════════
-// QR CODE PRODUIT
-// ══════════════════════════════════════════
-let _qrInstance = null;
-
-function prodUpdateQR(code, lib) {
-  const wrap = document.getElementById('prod-qr-wrap');
-  const canvas = document.getElementById('prod-qr-canvas');
-  const label = document.getElementById('prod-qr-label');
-  if(!wrap || !canvas) return;
-
-  const val = (code || '').trim();
-  if(!val) { wrap.style.display = 'none'; return; }
-
-  wrap.style.display = 'block';
-  canvas.innerHTML = '';
-  label.textContent = val + (lib ? ' — ' + lib.substring(0, 28) : '');
-
-  try {
-    _qrInstance = new QRCode(canvas, {
-      text: val,
-      width: 90,
-      height: 90,
-      colorDark: '#000',
-      colorLight: '#fff',
-      correctLevel: QRCode.CorrectLevel.M
-    });
-  } catch(e) { console.warn('QR error', e); }
-}
-
-function prodPrintQR() {
-  const canvas = document.getElementById('prod-qr-canvas');
-  const label = document.getElementById('prod-qr-label');
-  if(!canvas) return;
-  const img = canvas.querySelector('img') || canvas.querySelector('canvas');
-  if(!img) return;
-  const src = img.tagName === 'CANVAS' ? img.toDataURL() : img.src;
-  const w = window.open('', '_blank', 'width=400,height=500');
-  w.document.write('<html><body style="text-align:center;padding:30px;font-family:monospace">' +
-    '<img src="' + src + '" style="width:200px;height:200px"><br><br>' +
-    '<b style="font-size:16px">' + (label ? label.textContent : '') + '</b>' +
-    '<br><br><button onclick="window.print()">Imprimer</button></body></html>');
-  w.document.close();
-}
-
 function prodAutoMarge() {
   const pa = parseFloat(document.getElementById('prod-form-prix').value) || 0;
   const pv = parseFloat(document.getElementById('prod-form-pv').value) || 0;
