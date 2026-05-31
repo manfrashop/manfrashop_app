@@ -1895,6 +1895,7 @@ nav a.active::before {
     <div class="act-tabs" style="margin-bottom:20px">
       <button class="act-tab active" onclick="adminTab('users',this)">👥 Utilisateurs</button>
       <button class="act-tab" onclick="adminTab('sms',this)">📱 Notifications SMS</button>
+      <button class="act-tab" onclick="adminTab('maintenance',this)">🔄 Maintenance</button>
     </div>
 
     <!-- TAB: Utilisateurs -->
@@ -2035,6 +2036,74 @@ nav a.active::before {
             </table>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- TAB: MAINTENANCE / RESET -->
+    <div id="admintab-maintenance" class="act-tabcontent">
+      <div style="max-width:680px;margin:0 auto;display:grid;gap:18px">
+
+        <!-- Bloc: Reset sélectif -->
+        <div class="admin-card">
+          <div class="admin-card-title">🗑️ Réinitialisation sélective des données</div>
+          <p style="font-size:12px;color:var(--txt3);margin:10px 0 18px">Supprime définitivement les données locales sélectionnées. Les données Firebase/Firestore ne sont pas affectées.</p>
+          <div style="display:grid;gap:10px">
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--brd)">
+              <input type="checkbox" id="rst-ventes" style="width:16px;height:16px;cursor:pointer;accent-color:var(--or)">
+              <div><div style="font-size:13px;font-weight:600">🧾 Ventes & Tickets</div><div style="font-size:11px;color:var(--txt3)">Clé : manfara_ventes, manfara_ticket_nb</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--brd)">
+              <input type="checkbox" id="rst-depenses" style="width:16px;height:16px;cursor:pointer;accent-color:var(--or)">
+              <div><div style="font-size:13px;font-weight:600">💸 Dépenses</div><div style="font-size:11px;color:var(--txt3)">Clé : manfara_depenses</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--brd)">
+              <input type="checkbox" id="rst-credits" style="width:16px;height:16px;cursor:pointer;accent-color:var(--or)">
+              <div><div style="font-size:13px;font-weight:600">💳 Crédits & Versements</div><div style="font-size:11px;color:var(--txt3)">Clé : manfara_credits, manfara_credits_versements</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--brd)">
+              <input type="checkbox" id="rst-clotures" style="width:16px;height:16px;cursor:pointer;accent-color:var(--or)">
+              <div><div style="font-size:13px;font-weight:600">🏦 Clôtures de caisse</div><div style="font-size:11px;color:var(--txt3)">Clé : manfara_clotures</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--brd)">
+              <input type="checkbox" id="rst-retours" style="width:16px;height:16px;cursor:pointer;accent-color:var(--or)">
+              <div><div style="font-size:13px;font-weight:600">↩️ Retours / Avoirs</div><div style="font-size:11px;color:var(--txt3)">Clé : manfara_retours</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--brd)">
+              <input type="checkbox" id="rst-stock" style="width:16px;height:16px;cursor:pointer;accent-color:var(--or)">
+              <div><div style="font-size:13px;font-weight:600">📦 Mouvements de stock & Inventaire</div><div style="font-size:11px;color:var(--txt3)">Clé : manfara_stock_mvt, manfara_stock_inv</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--brd)">
+              <input type="checkbox" id="rst-achats" style="width:16px;height:16px;cursor:pointer;accent-color:var(--or)">
+              <div><div style="font-size:13px;font-weight:600">🛒 Achats / Appros</div><div style="font-size:11px;color:var(--txt3)">Clé : manfara_achats</div></div>
+            </label>
+            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px 12px;background:var(--bg3);border-radius:8px;border:1px solid var(--brd)">
+              <input type="checkbox" id="rst-sms" style="width:16px;height:16px;cursor:pointer;accent-color:var(--or)">
+              <div><div style="font-size:13px;font-weight:600">📱 Historique SMS</div><div style="font-size:11px;color:var(--txt3)">Clé : manfara_sms_history</div></div>
+            </label>
+          </div>
+          <div style="display:flex;gap:10px;margin-top:18px">
+            <button onclick="rstSelectAll(true)" style="padding:7px 14px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-size:12px">☑️ Tout sélectionner</button>
+            <button onclick="rstSelectAll(false)" style="padding:7px 14px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-size:12px">⬜ Tout désélectionner</button>
+            <button onclick="rstSelective()" style="padding:7px 20px;background:rgba(220,50,50,.15);border:1px solid var(--red);border-radius:6px;color:var(--red);cursor:pointer;font-size:13px;font-weight:700;margin-left:auto">🗑️ Supprimer la sélection</button>
+          </div>
+        </div>
+
+        <!-- Bloc: Reset stock à zéro -->
+        <div class="admin-card">
+          <div class="admin-card-title">📦 Remettre tous les stocks à zéro</div>
+          <p style="font-size:12px;color:var(--txt3);margin:10px 0 14px">Remet la quantité en stock (<code style="color:var(--or)">p.s</code>) à <strong>0</strong> pour tous les produits du catalogue local. N'affecte pas Firestore.</p>
+          <button onclick="rstStockZero()" style="padding:9px 22px;background:rgba(220,50,50,.15);border:1px solid var(--red);border-radius:8px;color:var(--red);cursor:pointer;font-size:13px;font-weight:700">⚠️ Remettre stock à 0</button>
+        </div>
+
+        <!-- Bloc: Reset complet -->
+        <div class="admin-card" style="border-color:rgba(220,50,50,.35)">
+          <div class="admin-card-title" style="color:var(--red)">☢️ Réinitialisation complète</div>
+          <p style="font-size:12px;color:var(--txt3);margin:10px 0 14px">Efface <strong>toutes</strong> les données locales de l'application (localStorage complet <code style="color:var(--or)">manfara_*</code>). Action irréversible.</p>
+          <button onclick="rstAll()" style="padding:9px 22px;background:rgba(220,50,50,.25);border:2px solid var(--red);border-radius:8px;color:var(--red);cursor:pointer;font-size:13px;font-weight:700">☢️ TOUT RÉINITIALISER</button>
+        </div>
+
+        <!-- Log -->
+        <div id="rst-log" style="display:none;background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--grn)"></div>
       </div>
     </div>
 
@@ -5057,6 +5126,98 @@ function adminTab(name, btn) {
   const el = document.getElementById('admintab-'+name);
   if (el) el.classList.add('active');
   if (name === 'sms') { smsLoadUI(); smsRenderHistory(); }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE MAINTENANCE / RESET
+// ═══════════════════════════════════════════════════════════════
+
+const RST_KEYS = {
+  ventes:   ['manfara_ventes','manfara_ticket_nb'],
+  depenses: ['manfara_depenses'],
+  credits:  ['manfara_credits','manfara_credits_versements'],
+  clotures: ['manfara_clotures'],
+  retours:  ['manfara_retours'],
+  stock:    ['manfara_stock_mvt','manfara_stock_inv'],
+  achats:   ['manfara_achats'],
+  sms:      ['manfara_sms_history']
+};
+
+function rstLog(msg, ok=true) {
+  const el = document.getElementById('rst-log');
+  el.style.display = 'block';
+  el.style.color = ok ? 'var(--grn)' : 'var(--red)';
+  el.textContent = msg;
+  setTimeout(() => { el.style.display='none'; }, 4000);
+}
+
+function rstSelectAll(state) {
+  ['ventes','depenses','credits','clotures','retours','stock','achats','sms']
+    .forEach(k => { const el=document.getElementById('rst-'+k); if(el) el.checked=state; });
+}
+
+function rstSelective() {
+  const selected = ['ventes','depenses','credits','clotures','retours','stock','achats','sms']
+    .filter(k => document.getElementById('rst-'+k)?.checked);
+  if (!selected.length) { showToast('Aucune catégorie sélectionnée', 'error'); return; }
+  const labels = selected.join(', ');
+  if (!confirm('⚠️ Supprimer définitivement : ' + labels + ' ?\n\nCette action est irréversible.')) return;
+  let count = 0;
+  selected.forEach(k => {
+    (RST_KEYS[k]||[]).forEach(key => { localStorage.removeItem(key); count++; });
+  });
+  // Reload in-memory vars
+  rstReloadMemory(selected);
+  rstLog('✅ ' + count + ' clé(s) supprimée(s) : ' + labels);
+  showToast('✅ Données réinitialisées', 'success');
+}
+
+function rstStockZero() {
+  if (!confirm('⚠️ Remettre TOUS les stocks à 0 ?\n\nLes quantités en stock seront effacées localement.')) return;
+  if (DB_LOCAL && DB_LOCAL.produits) {
+    DB_LOCAL.produits.forEach(p => { p.s = 0; });
+  }
+  // Also clear stock_inv
+  localStorage.removeItem('manfara_stock_inv');
+  localStorage.removeItem('manfara_stock_mvt');
+  if (typeof STOCK_INV !== 'undefined') { for(let k in STOCK_INV) delete STOCK_INV[k]; }
+  if (typeof STOCK_MVT !== 'undefined') { STOCK_MVT.length = 0; }
+  rstLog('✅ Tous les stocks remis à 0');
+  showToast('✅ Stocks remis à zéro', 'success');
+}
+
+function rstAll() {
+  if (!confirm('☢️ RÉINITIALISATION COMPLÈTE\n\nToutes les données locales manfara_* seront supprimées.\n\nCette action est IRRÉVERSIBLE.')) return;
+  if (!confirm('⚠️ Confirmer une deuxième fois : supprimer TOUTES les données ?')) return;
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('manfara_'));
+  keys.forEach(k => localStorage.removeItem(k));
+  rstReloadMemory(['ventes','depenses','credits','clotures','retours','stock','achats','sms']);
+  rstLog('✅ ' + keys.length + ' clé(s) supprimée(s). Application réinitialisée.');
+  showToast('✅ Application réinitialisée', 'success');
+}
+
+function rstReloadMemory(modules) {
+  if (modules.includes('ventes')) {
+    if (typeof POS_VENTES !== 'undefined') POS_VENTES.length = 0;
+    if (typeof TICKET_NB !== 'undefined') window.TICKET_NB = 1;
+  }
+  if (modules.includes('depenses')) {
+    if (typeof DEP_DATA !== 'undefined') DEP_DATA.length = 0;
+  }
+  if (modules.includes('credits')) {
+    if (typeof CRED_REMBOURSES !== 'undefined') { for(let k in CRED_REMBOURSES) delete CRED_REMBOURSES[k]; }
+    if (typeof CRED_VERSEMENTS !== 'undefined') { for(let k in CRED_VERSEMENTS) delete CRED_VERSEMENTS[k]; }
+  }
+  if (modules.includes('clotures')) {
+    if (typeof CLOTURES !== 'undefined') CLOTURES.length = 0;
+  }
+  if (modules.includes('retours')) {
+    if (typeof RETOURS !== 'undefined') RETOURS.length = 0;
+  }
+  if (modules.includes('stock')) {
+    if (typeof STOCK_MVT !== 'undefined') STOCK_MVT.length = 0;
+    if (typeof STOCK_INV !== 'undefined') { for(let k in STOCK_INV) delete STOCK_INV[k]; }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
