@@ -2579,11 +2579,35 @@ textarea:focus {
           </div>
         </div>
 
-        <!-- Bloc: Reset complet -->
+        <!-- Bloc: Reset complet LOCAL -->
         <div class="admin-card" style="border-color:rgba(220,50,50,.35)">
-          <div class="admin-card-title" style="color:var(--red)">☢️ Réinitialisation complète</div>
-          <p style="font-size:12px;color:var(--txt3);margin:10px 0 14px">Efface <strong>toutes</strong> les données locales de l'application (localStorage complet <code style="color:var(--or)">manfara_*</code>) ET vide le STATIC_DB en mémoire. Action irréversible.</p>
-          <button onclick="rstAll()" style="padding:9px 22px;background:rgba(220,50,50,.25);border:2px solid var(--red);border-radius:8px;color:var(--red);cursor:pointer;font-size:13px;font-weight:700">☢️ TOUT RÉINITIALISER</button>
+          <div class="admin-card-title" style="color:var(--red)">☢️ Réinitialisation locale</div>
+          <p style="font-size:12px;color:var(--txt3);margin:10px 0 14px">Efface <strong>toutes</strong> les données locales (localStorage <code style="color:var(--or)">manfara_*</code>) ET vide le STATIC_DB en mémoire. Action irréversible.</p>
+          <button onclick="rstAll()" style="padding:9px 22px;background:rgba(220,50,50,.25);border:2px solid var(--red);border-radius:8px;color:var(--red);cursor:pointer;font-size:13px;font-weight:700">☢️ TOUT RÉINITIALISER (local)</button>
+        </div>
+
+        <!-- Bloc: Reset TOTAL Firebase + Local -->
+        <div class="admin-card" style="border-color:rgba(220,0,0,.6);background:linear-gradient(145deg,#1a0808,#110808)">
+          <div class="admin-card-title" style="color:#ff4444;font-size:15px">🔥 REMISE À ZÉRO TOTALE — Firebase + Local</div>
+          <p style="font-size:12px;color:var(--txt3);margin:10px 0 6px">Supprime <strong>définitivement</strong> toutes les données :</p>
+          <ul style="font-size:12px;color:var(--txt3);margin:0 0 14px;padding-left:18px;line-height:2">
+            <li>Collections Firestore : <code style="color:var(--or)">produits, clients, fournisseurs, ventes, achats, depenses, appros, stock_mvt, stock_inv, points_de_vente, credits_remboursements, clotures, retours</code></li>
+            <li>localStorage complet <code style="color:var(--or)">manfara_*</code></li>
+            <li>Toutes les variables en mémoire</li>
+          </ul>
+          <div style="background:rgba(255,0,0,.08);border:1px solid rgba(255,0,0,.2);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:12px;color:#ff8888">
+            ⚠️ Cette action est <strong>IRRÉVERSIBLE</strong>. Les comptes utilisateurs Firebase Auth ne sont pas supprimés. Faites un backup avant de continuer.
+          </div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+            <button onclick="exportBackupComplet()" style="padding:9px 18px;background:rgba(201,162,39,.15);border:1px solid var(--or);border-radius:8px;color:var(--or);cursor:pointer;font-size:13px;font-weight:700">💾 Backup d'abord</button>
+            <button onclick="rstFirebaseTotal()" style="padding:11px 28px;background:rgba(220,0,0,.3);border:2px solid #ff3333;border-radius:8px;color:#ff4444;cursor:pointer;font-size:14px;font-weight:800;letter-spacing:.5px;box-shadow:0 0 20px rgba(255,0,0,.15)">🔥 EFFACER TOUTES LES DONNÉES</button>
+          </div>
+          <div id="rst-firebase-progress" style="display:none;margin-top:14px">
+            <div style="font-size:12px;color:var(--txt3);margin-bottom:6px" id="rst-firebase-status">En cours...</div>
+            <div style="background:var(--bg3);border-radius:4px;height:8px;overflow:hidden">
+              <div id="rst-firebase-bar" style="height:100%;background:linear-gradient(90deg,var(--red),#ff6666);width:0%;transition:width .3s;border-radius:4px"></div>
+            </div>
+          </div>
         </div>
 
         <!-- Log -->
@@ -5750,8 +5774,83 @@ function rstReloadMemory(modules) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// MODULE ACTIVITÉS COMMERCIALES
+// REMISE À ZÉRO TOTALE FIREBASE + LOCAL
 // ═══════════════════════════════════════════════════════════════
+async function rstFirebaseTotal() {
+  if (!confirm('🔥 REMISE À ZÉRO TOTALE\n\nCeci va supprimer TOUTES les données Firebase (produits, clients, fournisseurs, ventes, achats, dépenses, stock, points de vente, crédits, clôtures, retours) ET toutes les données locales.\n\nCette action est IRRÉVERSIBLE. Continuez ?')) return;
+  if (!confirm('⚠️ DERNIÈRE CONFIRMATION\n\nToutes les données seront perdues définitivement.\n\nÊtes-vous absolument certain ?')) return;
+
+  const progress = document.getElementById('rst-firebase-progress');
+  const statusEl = document.getElementById('rst-firebase-status');
+  const barEl    = document.getElementById('rst-firebase-bar');
+  progress.style.display = 'block';
+
+  const collections = [
+    'produits','clients','fournisseurs','ventes','achats',
+    'depenses','appros','stock_mvt','stock_inv',
+    'points_de_vente','credits_remboursements','clotures','retours'
+  ];
+  const total = collections.length;
+  let done = 0;
+
+  async function deleteCollection(colName) {
+    statusEl.textContent = `Suppression : ${colName}...`;
+    try {
+      let snap = await db.collection(colName).limit(200).get();
+      while (!snap.empty) {
+        const batch = db.batch();
+        snap.docs.forEach(d => batch.delete(d.ref));
+        await batch.commit();
+        snap = await db.collection(colName).limit(200).get();
+      }
+    } catch(e) {
+      rstLog(`⚠️ Erreur sur ${colName}: ${e.message}`);
+    }
+    done++;
+    barEl.style.width = Math.round((done / total) * 100) + '%';
+  }
+
+  rstLog('🔥 Début suppression Firebase...');
+  for (const col of collections) {
+    await deleteCollection(col);
+  }
+
+  // Effacer localStorage
+  statusEl.textContent = 'Nettoyage localStorage...';
+  const keys = Object.keys(localStorage).filter(k => k.startsWith('manfara_'));
+  keys.forEach(k => localStorage.removeItem(k));
+
+  // Vider mémoire
+  if (typeof STATIC_DB !== 'undefined') {
+    STATIC_DB.produits = []; STATIC_DB.clients = [];
+    STATIC_DB.fournisseurs = []; STATIC_DB.appros = []; STATIC_DB.depenses = [];
+  }
+  if (typeof DB_LOCAL !== 'undefined' && DB_LOCAL) {
+    DB_LOCAL.produits = []; DB_LOCAL.clients = [];
+    DB_LOCAL.fournisseurs = []; DB_LOCAL.appros = []; DB_LOCAL.depenses = [];
+  }
+  if (typeof POS_VENTES !== 'undefined') POS_VENTES.length = 0;
+  if (typeof ACHAT_DATA !== 'undefined') ACHAT_DATA.length = 0;
+  if (typeof DEP_DATA   !== 'undefined') DEP_DATA.length = 0;
+  if (typeof STOCK_MVT  !== 'undefined') STOCK_MVT.length = 0;
+  if (typeof STOCK_INV  !== 'undefined') { for(let k in STOCK_INV) delete STOCK_INV[k]; }
+  if (typeof CRED_REMBOURSES !== 'undefined') { for(let k in CRED_REMBOURSES) delete CRED_REMBOURSES[k]; }
+  if (typeof CRED_VERSEMENTS !== 'undefined') { for(let k in CRED_VERSEMENTS) delete CRED_VERSEMENTS[k]; }
+  if (typeof CLOTURES !== 'undefined') CLOTURES.length = 0;
+  if (typeof RETOURS   !== 'undefined') RETOURS.length  = 0;
+  if (typeof POINTS_DE_VENTE !== 'undefined') POINTS_DE_VENTE.length = 0;
+
+  barEl.style.width = '100%';
+  barEl.style.background = 'var(--grn)';
+  statusEl.textContent = '✅ Terminé — toutes les données ont été effacées.';
+  rstLog(`✅ Firebase vidé (${total} collections) + ${keys.length} clés localStorage supprimées.`);
+  showToast('✅ Remise à zéro totale effectuée', 'success');
+
+  // Rafraîchir l'interface après 2 secondes
+  setTimeout(() => { location.reload(); }, 2500);
+}
+
+
 
 let ACT_PAGE = 0;
 const ACT_PER_PAGE = 30;
