@@ -1566,99 +1566,6 @@ textarea:focus {
     <a onclick="rptAlertesCredits()" style="cursor:pointer"><span class="ico">⚠️</span> Alertes Crédits</a>
     <a data-sec="admin" class="admin-only"><span class="ico">⚙️</span> Utilisateurs</a>
   </nav>
-  <div id="theme-panel">
-    <div id="theme-panel-title">Thème</div>
-    <div class="theme-swatches">
-      <!-- Or Noir (défaut) -->
-      <div class="theme-swatch active" data-theme="" title="Or Noir — Classique Manfara" onclick="setTheme('')">
-        <div class="theme-swatch-inner">
-          <div class="theme-swatch-top" style="background:#111115"></div>
-          <div class="theme-swatch-bottom">
-            <span style="background:#08080A"></span>
-            <span style="background:#C9A227"></span>
-          </div>
-        </div>
-        <div class="theme-swatch-label">Or Noir</div>
-      </div>
-      <!-- Cobalt -->
-      <div class="theme-swatch" data-theme="cobalt" title="Cobalt Night" onclick="setTheme('cobalt')">
-        <div class="theme-swatch-inner">
-          <div class="theme-swatch-top" style="background:#080E1E"></div>
-          <div class="theme-swatch-bottom">
-            <span style="background:#03060F"></span>
-            <span style="background:#4A9EFF"></span>
-          </div>
-        </div>
-        <div class="theme-swatch-label">Cobalt</div>
-      </div>
-      <!-- Émeraude -->
-      <div class="theme-swatch" data-theme="emeraude" title="Jungle Pro" onclick="setTheme('emeraude')">
-        <div class="theme-swatch-inner">
-          <div class="theme-swatch-top" style="background:#071410"></div>
-          <div class="theme-swatch-bottom">
-            <span style="background:#030C09"></span>
-            <span style="background:#00D48A"></span>
-          </div>
-        </div>
-        <div class="theme-swatch-label">Émeraude</div>
-      </div>
-      <!-- Dusk -->
-      <div class="theme-swatch" data-theme="dusk" title="Violet Crépuscule" onclick="setTheme('dusk')">
-        <div class="theme-swatch-inner">
-          <div class="theme-swatch-top" style="background:#0F0819"></div>
-          <div class="theme-swatch-bottom">
-            <span style="background:#07030F"></span>
-            <span style="background:#B06CF5"></span>
-          </div>
-        </div>
-        <div class="theme-swatch-label">Dusk</div>
-      </div>
-      <!-- Cherry -->
-      <div class="theme-swatch" data-theme="cherry" title="Cerise Noir" onclick="setTheme('cherry')">
-        <div class="theme-swatch-inner">
-          <div class="theme-swatch-top" style="background:#150509"></div>
-          <div class="theme-swatch-bottom">
-            <span style="background:#0A0305"></span>
-            <span style="background:#FF4D6D"></span>
-          </div>
-        </div>
-        <div class="theme-swatch-label">Cherry</div>
-      </div>
-      <!-- Ivory -->
-      <div class="theme-swatch" data-theme="ivory" title="Clair Ivoire" onclick="setTheme('ivory')">
-        <div class="theme-swatch-inner">
-          <div class="theme-swatch-top" style="background:#FDFAF4"></div>
-          <div class="theme-swatch-bottom">
-            <span style="background:#EDE8DE"></span>
-            <span style="background:#B07A1A"></span>
-          </div>
-        </div>
-        <div class="theme-swatch-label" style="color:rgba(0,0,0,0.7);text-shadow:none">Ivoire</div>
-      </div>
-      <!-- Slate -->
-      <div class="theme-swatch" data-theme="slate" title="Ardoise" onclick="setTheme('slate')">
-        <div class="theme-swatch-inner">
-          <div class="theme-swatch-top" style="background:#161820"></div>
-          <div class="theme-swatch-bottom">
-            <span style="background:#0E0F12"></span>
-            <span style="background:#E0A840"></span>
-          </div>
-        </div>
-        <div class="theme-swatch-label">Ardoise</div>
-      </div>
-      <!-- Espresso -->
-      <div class="theme-swatch" data-theme="espresso" title="Espresso" onclick="setTheme('espresso')">
-        <div class="theme-swatch-inner">
-          <div class="theme-swatch-top" style="background:#18100A"></div>
-          <div class="theme-swatch-bottom">
-            <span style="background:#0C0804"></span>
-            <span style="background:#D4845A"></span>
-          </div>
-        </div>
-        <div class="theme-swatch-label">Espresso</div>
-      </div>
-    </div>
-  </div>
   <div class="sidebar-footer">
   </div>
 </div><!-- /#sidebar -->
@@ -2701,6 +2608,7 @@ textarea:focus {
       <button class="act-tab active" onclick="adminTab('users',this)">👥 Utilisateurs</button>
       <button class="act-tab" onclick="adminTab('sms',this)">📱 Notifications SMS</button>
       <button class="act-tab" onclick="adminTab('maintenance',this)">🔄 Maintenance</button>
+      <button class="act-tab" onclick="adminTab('apparence',this)">🎨 Apparence</button>
     </div>
 
     <!-- TAB: Utilisateurs -->
@@ -2946,6 +2854,104 @@ textarea:focus {
 
         <!-- Log -->
         <div id="rst-log" style="display:none;background:var(--bg2);border:1px solid var(--brd);border-radius:8px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--grn)"></div>
+      </div>
+    </div>
+
+    <!-- TAB: APPARENCE -->
+    <div id="admintab-apparence" class="act-tabcontent">
+      <div class="admin-card" style="max-width:520px">
+        <div class="admin-card-title">🎨 Thème de l'interface</div>
+        <p style="font-size:13px;color:var(--txt2);margin-bottom:18px">Choisissez l'apparence de l'application. Le thème est sauvegardé localement.</p>
+        <div class="theme-swatches" style="grid-template-columns:repeat(4,1fr);gap:10px">
+          <!-- Or Noir (défaut) -->
+          <div class="theme-swatch active" data-theme="" title="Or Noir — Classique Manfara" onclick="setTheme('')">
+            <div class="theme-swatch-inner">
+              <div class="theme-swatch-top" style="background:#111115"></div>
+              <div class="theme-swatch-bottom">
+                <span style="background:#08080A"></span>
+                <span style="background:#C9A227"></span>
+              </div>
+            </div>
+            <div class="theme-swatch-label">Or Noir</div>
+          </div>
+          <!-- Cobalt -->
+          <div class="theme-swatch" data-theme="cobalt" title="Cobalt Night" onclick="setTheme('cobalt')">
+            <div class="theme-swatch-inner">
+              <div class="theme-swatch-top" style="background:#080E1E"></div>
+              <div class="theme-swatch-bottom">
+                <span style="background:#03060F"></span>
+                <span style="background:#4A9EFF"></span>
+              </div>
+            </div>
+            <div class="theme-swatch-label">Cobalt</div>
+          </div>
+          <!-- Émeraude -->
+          <div class="theme-swatch" data-theme="emeraude" title="Jungle Pro" onclick="setTheme('emeraude')">
+            <div class="theme-swatch-inner">
+              <div class="theme-swatch-top" style="background:#071410"></div>
+              <div class="theme-swatch-bottom">
+                <span style="background:#030C09"></span>
+                <span style="background:#00D48A"></span>
+              </div>
+            </div>
+            <div class="theme-swatch-label">Émeraude</div>
+          </div>
+          <!-- Dusk -->
+          <div class="theme-swatch" data-theme="dusk" title="Violet Crépuscule" onclick="setTheme('dusk')">
+            <div class="theme-swatch-inner">
+              <div class="theme-swatch-top" style="background:#0F0819"></div>
+              <div class="theme-swatch-bottom">
+                <span style="background:#07030F"></span>
+                <span style="background:#B06CF5"></span>
+              </div>
+            </div>
+            <div class="theme-swatch-label">Dusk</div>
+          </div>
+          <!-- Cherry -->
+          <div class="theme-swatch" data-theme="cherry" title="Cerise Noir" onclick="setTheme('cherry')">
+            <div class="theme-swatch-inner">
+              <div class="theme-swatch-top" style="background:#150509"></div>
+              <div class="theme-swatch-bottom">
+                <span style="background:#0A0305"></span>
+                <span style="background:#FF4D6D"></span>
+              </div>
+            </div>
+            <div class="theme-swatch-label">Cherry</div>
+          </div>
+          <!-- Ivory -->
+          <div class="theme-swatch" data-theme="ivory" title="Clair Ivoire" onclick="setTheme('ivory')">
+            <div class="theme-swatch-inner">
+              <div class="theme-swatch-top" style="background:#FDFAF4"></div>
+              <div class="theme-swatch-bottom">
+                <span style="background:#EDE8DE"></span>
+                <span style="background:#B07A1A"></span>
+              </div>
+            </div>
+            <div class="theme-swatch-label" style="color:rgba(0,0,0,0.7);text-shadow:none">Ivoire</div>
+          </div>
+          <!-- Slate -->
+          <div class="theme-swatch" data-theme="slate" title="Ardoise" onclick="setTheme('slate')">
+            <div class="theme-swatch-inner">
+              <div class="theme-swatch-top" style="background:#161820"></div>
+              <div class="theme-swatch-bottom">
+                <span style="background:#0E0F12"></span>
+                <span style="background:#E0A840"></span>
+              </div>
+            </div>
+            <div class="theme-swatch-label">Ardoise</div>
+          </div>
+          <!-- Espresso -->
+          <div class="theme-swatch" data-theme="espresso" title="Espresso" onclick="setTheme('espresso')">
+            <div class="theme-swatch-inner">
+              <div class="theme-swatch-top" style="background:#18100A"></div>
+              <div class="theme-swatch-bottom">
+                <span style="background:#0C0804"></span>
+                <span style="background:#D4845A"></span>
+              </div>
+            </div>
+            <div class="theme-swatch-label">Espresso</div>
+          </div>
+        </div>
       </div>
     </div>
 
