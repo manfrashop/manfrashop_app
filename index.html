@@ -1033,13 +1033,13 @@ nav a.active::before {
 
 /* ── Fond global — ambient occlusion ─────────────────────────── */
 body {
-  background: radial-gradient(ellipse at 20% 10%, #0f0e14 0%, #08080A 60%, #050508 100%);
+  background: var(--bg);
 }
 
 /* ── Sidebar 3D ──────────────────────────────────────────────── */
 #sidebar {
-  background: linear-gradient(170deg, #141418 0%, #0f0f13 50%, #0b0b0f 100%);
-  border-right: 1px solid rgba(201,162,39,.12);
+  background: linear-gradient(170deg, var(--bg3) 0%, var(--bg2) 50%, var(--bg) 100%);
+  border-right: 1px solid var(--brd);
   box-shadow: 4px 0 24px rgba(0,0,0,.8), 1px 0 0 rgba(255,255,255,.03) inset;
 }
 
@@ -1085,8 +1085,8 @@ nav a.active::before {
 
 /* ── Topbar 3D ───────────────────────────────────────────────── */
 #topbar {
-  background: linear-gradient(180deg, rgba(20,20,26,.97) 0%, rgba(15,15,19,.97) 100%);
-  border-bottom: 1px solid rgba(201,162,39,.1);
+  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--brd);
   box-shadow: 0 4px 20px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.04) inset;
 }
 
@@ -1109,7 +1109,7 @@ nav a.active::before {
 
 /* ── Auth card 3D ────────────────────────────────────────────── */
 .auth-card {
-  background: linear-gradient(160deg, #161620 0%, #101016 60%, #0c0c12 100%);
+  background: linear-gradient(160deg, var(--bg3) 0%, var(--bg2) 60%, var(--bg) 100%);
   border: 1px solid rgba(201,162,39,.18);
   box-shadow: var(--depth-4), var(--bevel-light), 0 0 80px rgba(201,162,39,.06);
   transform: perspective(1200px) rotateX(1deg);
@@ -1140,7 +1140,7 @@ nav a.active::before {
 
 /* ── KPI cards 3D ────────────────────────────────────────────── */
 .kpi {
-  background: linear-gradient(145deg, #161620 0%, #111118 60%, #0d0d14 100%);
+  background: linear-gradient(145deg, var(--bg3) 0%, var(--bg2) 60%, var(--bg) 100%);
   border: 1px solid rgba(201,162,39,.1);
   box-shadow: var(--depth-2), var(--bevel-light), var(--bevel-dark);
   transition: all 0.22s cubic-bezier(.4,0,.2,1);
@@ -1168,7 +1168,7 @@ nav a.active::before {
 
 /* ── Stock KPIs 3D ───────────────────────────────────────────── */
 .stock-kpi, .achat-kpi, .act-kpi {
-  background: linear-gradient(145deg, #161620 0%, #111118 70%, #0d0d14 100%);
+  background: linear-gradient(145deg, var(--bg3) 0%, var(--bg2) 70%, var(--bg) 100%);
   box-shadow: var(--depth-2), var(--bevel-light), var(--bevel-dark);
   border: 1px solid rgba(201,162,39,.08);
   transition: all 0.22s;
@@ -1189,7 +1189,7 @@ nav a.active::before {
 
 /* ── Table 3D ────────────────────────────────────────────────── */
 .table-wrap {
-  background: linear-gradient(160deg, #141420 0%, #0f0f18 100%);
+  background: linear-gradient(160deg, var(--bg2) 0%, var(--bg) 100%);
   border: 1px solid rgba(201,162,39,.1);
   box-shadow: var(--depth-3), var(--bevel-light);
   position: relative;
@@ -1202,7 +1202,7 @@ nav a.active::before {
   z-index: 1;
 }
 thead tr {
-  background: linear-gradient(180deg, #1a1a25 0%, #141420 100%);
+  background: linear-gradient(180deg, var(--bg4) 0%, var(--bg3) 100%);
 }
 th {
   text-shadow: 0 1px 2px rgba(0,0,0,.8);
@@ -1230,7 +1230,7 @@ tbody tr:hover td {
 
 /* ── Product cards (POS) 3D ──────────────────────────────────── */
 .pos-product-card {
-  background: linear-gradient(145deg, #1a1a22 0%, #141420 100%);
+  background: linear-gradient(145deg, var(--bg3) 0%, var(--bg2) 100%);
   border: 1px solid rgba(201,162,39,.08);
   box-shadow: var(--depth-1), var(--bevel-light);
   transition: all 0.18s cubic-bezier(.4,0,.2,1);
@@ -1245,14 +1245,14 @@ tbody tr:hover td {
 
 /* ── Cart panel 3D ───────────────────────────────────────────── */
 .pos-cart, .pos-products {
-  background: linear-gradient(160deg, #141420 0%, #0f0f18 100%);
+  background: linear-gradient(160deg, var(--bg2) 0%, var(--bg) 100%);
   border: 1px solid rgba(201,162,39,.1);
   box-shadow: var(--depth-3), var(--bevel-light);
 }
 
 /* ── Admin cards 3D ──────────────────────────────────────────── */
 .admin-card {
-  background: linear-gradient(145deg, #161622 0%, #111118 100%);
+  background: linear-gradient(145deg, var(--bg3) 0%, var(--bg2) 100%);
   border: 1px solid rgba(201,162,39,.1);
   box-shadow: var(--depth-2), var(--bevel-light);
   position: relative;
@@ -1274,7 +1274,7 @@ tbody tr:hover td {
 
 /* ── Chart cards 3D ──────────────────────────────────────────── */
 .chart-card, .act-chart-card, .act-rank-card {
-  background: linear-gradient(145deg, #161622 0%, #111118 100%);
+  background: linear-gradient(145deg, var(--bg3) 0%, var(--bg2) 100%);
   border: 1px solid rgba(201,162,39,.09);
   box-shadow: var(--depth-2), var(--bevel-light);
   position: relative;
@@ -1290,7 +1290,7 @@ tbody tr:hover td {
 
 /* ── PDV cards 3D ────────────────────────────────────────────── */
 .pdv-card {
-  background: linear-gradient(145deg, #161622 0%, #111118 100%);
+  background: linear-gradient(145deg, var(--bg3) 0%, var(--bg2) 100%);
   border: 1px solid rgba(201,162,39,.1);
   box-shadow: var(--depth-2), var(--bevel-light);
   transition: all 0.22s;
@@ -1306,7 +1306,7 @@ tbody tr:hover td {
 
 /* ── Stock form / inline panels ──────────────────────────────── */
 .stock-form-inline, .pdv-add-form, .act-period-bar {
-  background: linear-gradient(145deg, #141420 0%, #0f0f18 100%);
+  background: linear-gradient(145deg, var(--bg2) 0%, var(--bg) 100%);
   border: 1px solid rgba(201,162,39,.1);
   box-shadow: var(--depth-2), var(--bevel-light);
 }
@@ -1337,8 +1337,8 @@ input:not([type=checkbox]):not([type=radio]),
 select,
 textarea {
   box-shadow: inset 0 2px 6px rgba(0,0,0,.6), inset 0 1px 2px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.04);
-  border-color: rgba(201,162,39,.08) !important;
-  background: linear-gradient(180deg, #0d0d14 0%, #111118 100%) !important;
+  border-color: var(--brd) !important;
+  background: var(--bg3) !important;
   transition: all 0.18s;
 }
 input:focus:not([type=checkbox]):not([type=radio]),
@@ -1350,7 +1350,7 @@ textarea:focus {
 
 /* ── Pagination buttons 3D ───────────────────────────────────── */
 .pbtn {
-  background: linear-gradient(145deg, #161620 0%, #111118 100%);
+  background: linear-gradient(145deg, var(--bg3) 0%, var(--bg2) 100%);
   box-shadow: var(--depth-1), var(--bevel-light);
   transition: all 0.15s;
 }
@@ -1386,7 +1386,7 @@ textarea:focus {
 
 /* ── Loader 3D ───────────────────────────────────────────────── */
 #loader {
-  background: radial-gradient(ellipse at center, #0f0e14 0%, #08080a 100%);
+  background: var(--bg);
 }
 .spinner {
   border-width: 2px;
@@ -1431,7 +1431,7 @@ textarea:focus {
 
 /* ── Scrollbar 3D ────────────────────────────────────────────── */
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #2C2C3A, #1C1C28);
+  background: linear-gradient(180deg, var(--bg4), var(--bg3));
   box-shadow: inset 0 1px 0 rgba(255,255,255,.05);
 }
 ::-webkit-scrollbar-thumb:hover {
@@ -1441,7 +1441,7 @@ textarea:focus {
 
 /* ── Qty buttons ──────────────────────────────────────────────── */
 .qty-btn {
-  background: linear-gradient(145deg, #1a1a22, #111118);
+  background: linear-gradient(145deg, var(--bg3), var(--bg2));
   box-shadow: var(--depth-1), var(--bevel-light);
   transition: all 0.14s;
 }
@@ -1452,8 +1452,8 @@ textarea:focus {
 
 /* ── Cart item ────────────────────────────────────────────────── */
 .cart-item {
-  background: linear-gradient(145deg, #1a1a22, #141420);
-  border: 1px solid rgba(201,162,39,.06);
+  background: linear-gradient(145deg, var(--bg3), var(--bg2));
+  border: 1px solid var(--brd);
   box-shadow: var(--depth-1), var(--bevel-light);
 }
 
