@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MANFRA-SHOP APP</title>
+<title>MANFRA-SHOP APP v14</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -80,6 +80,13 @@ body { font-family:'Raleway',sans-serif; background:var(--bg); color:var(--txt);
   display:flex; align-items:center; justify-content:flex-end;
   padding:0 24px; gap:12px; z-index:90;
 }
+.topbar-cloture {
+  padding:6px 14px; background:linear-gradient(135deg,rgba(212,175,55,.2),rgba(212,175,55,.05));
+  border:1px solid var(--or); border-radius:var(--radius);
+  color:var(--or); font-size:12px; font-weight:600; cursor:pointer;
+  font-family:'Raleway',sans-serif; transition:all .2s;
+}
+.topbar-cloture:hover { background:var(--or); color:var(--bg); }
 .topbar-user {
   display:flex; align-items:center; gap:10px; cursor:pointer;
   padding:6px 12px; border-radius:var(--radius);
@@ -447,6 +454,7 @@ tbody tr:last-child td { border-bottom:none; }
 #loader { position:fixed; inset:0; background:var(--bg); display:flex; align-items:center; justify-content:center; z-index:999; flex-direction:column; gap:16px; }
 .spinner { width:40px; height:40px; border:3px solid var(--brd); border-top-color:var(--or); border-radius:50%; animation:spin 1s linear infinite; }
 @keyframes spin { to { transform:rotate(360deg); } }
+@keyframes fadeInUp { from { opacity:0; transform:translateX(-50%) translateY(16px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
 .loader-txt { font-family:'Cinzel',serif; color:var(--or); font-size:13px; letter-spacing:2px; }
 #pwa-install-btn { display:none; align-items:center; gap:8px; padding:8px 16px; border-radius:20px; background:linear-gradient(135deg,var(--or),var(--or2)); color:var(--bg); border:none; cursor:pointer; font-family:'Raleway',sans-serif; font-size:12px; font-weight:700; letter-spacing:.5px; box-shadow:0 2px 12px rgba(212,175,55,.4); transition:all .2s; position:fixed; bottom:24px; right:24px; z-index:200; text-transform:uppercase; }
 #pwa-install-btn:hover { transform:translateY(-2px); box-shadow:0 4px 20px rgba(212,175,55,.6); }
@@ -758,6 +766,8 @@ tbody tr:last-child td { border-bottom:none; }
     <div class="sync-dot" id="sync-dot"></div>
     <span id="sync-label">Firebase</span>
   </div>
+  <button class="topbar-cloture" onclick="clotureCaisseModal()" title="Clôturer la caisse du jour">🏦 Clôture Caisse</button>
+  <button class="topbar-cloture" onclick="rptAlertesCredits()" title="Crédits en retard" style="background:rgba(192,57,43,.15);border-color:var(--red);color:var(--red)">⚠️ Crédits</button>
   <div class="topbar-user" title="Mon profil">
     <div class="topbar-avatar" id="topbar-avatar">?</div>
     <div>
@@ -789,6 +799,8 @@ tbody tr:last-child td { border-bottom:none; }
     <a data-sec="achats"><span class="ico">🛍️</span> Achats</a>
     <a data-sec="rapports"><span class="ico">📊</span> Rapports</a>
     <a data-sec="activites"><span class="ico">📈</span> Activités Comm.</a>
+    <a onclick="clotureCaisseModal()" style="cursor:pointer"><span class="ico">🏦</span> Clôture Caisse</a>
+    <a onclick="rptAlertesCredits()" style="cursor:pointer"><span class="ico">⚠️</span> Alertes Crédits</a>
     <a data-sec="admin" class="admin-only"><span class="ico">⚙️</span> Utilisateurs</a>
   </nav>
   <div class="sidebar-footer">
@@ -806,6 +818,9 @@ tbody tr:last-child td { border-bottom:none; }
         <div class="page-title">Tableau de Bord</div>
         <div class="page-sub">Vue d'ensemble — MANFRA-SHOP APP, Lero</div>
       </div>
+    </div>
+    <div class="kpi-grid" id="dash-ventes-kpi" style="margin-bottom:0">
+      <!-- Rempli dynamiquement par dashVentesKpi() -->
     </div>
     <div class="kpi-grid">
       <div class="kpi"><div class="kpi-label">Articles</div><div class="kpi-value" id="kpi-produits">—</div><div class="kpi-sub">en catalogue</div><div class="kpi-icon">📦</div></div>
@@ -854,7 +869,8 @@ tbody tr:last-child td { border-bottom:none; }
         <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Code *</label><input type="text" id="prod-form-code" placeholder="Ex: 1479" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
         <div style="grid-column:span 2"><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Libellé *</label><input type="text" id="prod-form-lib" placeholder="Ex: COLGATE DENTIFRICE 100ML" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
         <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Famille</label><select id="prod-form-fam" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"><option>COSMETIQUE</option><option>ELECTRONIQUE</option><option>ALIMENTATION</option><option>ELECTRO MENAGER</option><option>NUTRITION BEBE</option><option>DEVISES</option></select></div>
-        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Prix Achat (GNF) *</label><input type="number" id="prod-form-prix" placeholder="0" min="0" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Prix Achat (GNF) *</label><input type="number" id="prod-form-prix" placeholder="0" min="0" oninput="prodAutoMarge()" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Prix Vente (GNF) *</label><input type="number" id="prod-form-pv" placeholder="0" min="0" oninput="prodAutoMarge()" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"><span id="prod-marge-hint" style="font-size:10px;color:var(--grn);display:block;margin-top:2px"></span></div>
         <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Stock initial</label><input type="number" id="prod-form-stock" placeholder="0" min="0" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
         <div style="grid-column:span 2"><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Fournisseur</label><input type="text" id="prod-form-frns" placeholder="Ex: ETS DIALLO" list="prod-frns-list" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"><datalist id="prod-frns-list"></datalist></div>
       </div>
@@ -870,7 +886,7 @@ tbody tr:last-child td { border-bottom:none; }
         <div class="filter-btns" id="fam-filters"></div>
         <div class="table-info" id="prod-info"></div>
       </div>
-      <table><thead><tr><th>Code</th><th>Libellé</th><th>Famille</th><th>Prix Achat (GNF)</th><th>Stock Initial</th><th>Fournisseur</th><th></th></tr></thead><tbody id="prod-tbody"></tbody></table>
+      <table><thead><tr><th>Code</th><th>Libellé</th><th>Famille</th><th>Prix Achat</th><th>Prix Vente</th><th>Marge %</th><th>Stock</th><th>Fournisseur</th><th></th></tr></thead><tbody id="prod-tbody"></tbody></table>
       <div class="pagination"><div class="pag-info" id="prod-pag-info"></div><div class="pag-btns" id="prod-pag-btns"></div></div>
     </div>
   </div>
@@ -1360,7 +1376,18 @@ tbody tr:last-child td { border-bottom:none; }
           <button onclick="exportCSV('ventes')" style="padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--txt);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;text-align:left">🛒 Export Ventes (CSV)</button>
           <button onclick="exportCSV('depenses')" style="padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--txt);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;text-align:left">💸 Export Dépenses (CSV)</button>
           <button onclick="exportCSV('credits')" style="padding:10px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--txt);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;text-align:left">💳 Export Crédits (CSV)</button>
+          <button onclick="exportBackupComplet()" style="padding:10px;background:linear-gradient(135deg,rgba(212,175,55,.15),rgba(212,175,55,.05));border:1px solid var(--or);border-radius:6px;color:var(--or);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;text-align:left;font-weight:600">🗄️ Backup complet JSON (toutes tables)</button>
         </div>
+      </div>
+      <!-- P&L Compte de résultat -->
+      <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px;grid-column:span 2">
+        <h3 style="margin:0 0 16px;color:var(--or);font-size:15px">📊 Compte de Résultat (P&L)</h3>
+        <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-bottom:16px;align-items:end">
+          <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Du</label><input type="date" id="rpt-pl-du" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+          <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Au</label><input type="date" id="rpt-pl-au" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+          <button class="btn-add" onclick="rptGenererPL()" style="padding:10px 20px">📄 Générer P&L</button>
+        </div>
+        <div id="rpt-pl-result"></div>
       </div>
     </div>
   </div>
@@ -1494,7 +1521,7 @@ tbody tr:last-child td { border-bottom:none; }
     <div class="table-wrap">
       <div class="table-toolbar"><div></div><div class="table-info" id="ventes-info"></div></div>
       <table>
-        <thead><tr><th>N° Ticket</th><th>Date/Heure</th><th>Point de Vente</th><th>Client</th><th>Articles</th><th>Total GNF</th><th>Paiement</th><th>Vendeur</th></tr></thead>
+        <thead><tr><th>N° Ticket</th><th>Date/Heure</th><th>Point de Vente</th><th>Client</th><th>Articles</th><th>Total GNF</th><th>Paiement</th><th>Vendeur</th><th>Actions</th></tr></thead>
         <tbody id="ventes-tbody"></tbody>
       </table>
       <div class="pagination"><div class="pag-info" id="ventes-pag-info"></div><div class="pag-btns" id="ventes-pag-btns"></div></div>
@@ -2164,7 +2191,7 @@ const ROLE_COLORS = { admin:'#D4AF37', gerant:'#2980B9', vendeur:'#3DA85A' };
 
 // ─── INIT ALL ──────────────────────────────────────────────────
 function initAllModules() {
-  smsLoadConfig();
+  smsLoadConfig(); clotureCaisseLoadLocal(); retoursLoadLocal();
   initDashboard(); initProduits(); initAppros(); initClients(); initFournisseurs(); initDepenses(); initStock(); initAchats(); initCredits(); initRapports();
   initPOS(); initPointsDeVente();
 }
@@ -2491,7 +2518,7 @@ function posAddToCart(prod) {
   if(existing) {
     existing.qty++;
   } else {
-    POS_CART.push({ code:prod.c, nom:prod.l, prix:parseFloat(prod.p)||0, qty:1, stock:parseInt(prod.s)||0 });
+    POS_CART.push({ code:prod.c, nom:prod.l, prix:parseFloat(prod.pv||prod.p)||0, prixAchat:parseFloat(prod.p)||0, qty:1, stock:parseInt(prod.s)||0 });
   }
   posRenderCart();
 }
@@ -2750,7 +2777,7 @@ function ventesRender() {
   const tbody = document.getElementById('ventes-tbody');
   if(!tbody) return;
   if(slice.length===0) {
-    tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--txt3);padding:32px">Aucune vente enregistrée</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--txt3);padding:32px">Aucune vente enregistrée</td></tr>';
   } else {
     tbody.innerHTML = slice.map(v => `
       <tr>
@@ -2762,6 +2789,10 @@ function ventesRender() {
         <td style="font-family:'JetBrains Mono',monospace">${fmtFull(v.total)}</td>
         <td><span class="vente-badge ${v.paiement.toLowerCase()}">${{ESPECES:'💵 Espèces',ORANGE:'🟠 Orange Money',BANQUE:'🏦 Banque',MOBILE:'📱 Mobile',CREDIT:'🔖 Crédit'}[v.paiement]||v.paiement}</span></td>
         <td style="color:var(--txt3)">${v.vendeur}</td>
+        <td style="white-space:nowrap">
+          <button onclick="printTicketThermique(POS_VENTES.find(x=>x.id==='${v.id}'))" title="Ticket 58mm" style="padding:3px 7px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:var(--txt2);cursor:pointer;font-size:11px;margin-right:3px">🖨️</button>
+          <button onclick="retourModal('${v.id}')" title="Retour / Avoir" style="padding:3px 7px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:var(--or);cursor:pointer;font-size:11px">↩</button>
+        </td>
       </tr>`).join('');
   }
   document.getElementById('ventes-info').textContent = total > 0 ? (page*VENTES_PER_PAGE+1)+'–'+Math.min((page+1)*VENTES_PER_PAGE,total)+' / '+total : '0 vente';
@@ -2887,6 +2918,7 @@ function initDashboard(){
   const totalAppros = appros.reduce((s,a)=>s+(parseFloat(a.to)||0),0);
   document.getElementById('kpi-appros').textContent     = fmt(totalAppros);
   document.getElementById('kpi-appros-sub').textContent = fmtFull(totalAppros)+' GNF';
+  dashVentesKpi();
 
   // Donut
   const famCount={};
@@ -2960,7 +2992,7 @@ function initProduits(){
   let activeFam='ALL', search='';
   prodPager=makePager(prod,50);
   function filter(){ let d=prod; if(activeFam!=='ALL') d=d.filter(p=>p.f===activeFam); if(search) d=d.filter(p=>(p.l||'').toLowerCase().includes(search)||(p.c||'').includes(search)); prodPager.setData(d); renderP(); }
-  function renderP(){ const rows=prodPager.page(); const tbody=document.getElementById('prod-tbody'); tbody.innerHTML=rows.map(p=>{ const color=FAM_COLORS[p.f]||'#888'; return `<tr><td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${p.c||'—'}</span></td><td>${p.l||'—'}</td><td><span class="badge" style="background:${color}22;color:${color}">${p.f||'—'}</span></td><td class="amount">${fmtFull(p.p)} GNF</td><td class="amount">${p.s||'0'}</td><td style="font-size:12px;color:var(--txt3)">${p.fr||'—'}</td><td style="white-space:nowrap"><button onclick="prodEditer('${p.c}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:var(--or);cursor:pointer;font-size:11px;margin-right:4px">✏️</button><button onclick="prodSupprimer('${p.c}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:#e05;cursor:pointer;font-size:11px">🗑️</button></td></tr>`; }).join(''); document.getElementById('prod-info').textContent=`${prodPager.total().toLocaleString('fr-FR')} produits`; renderPagination(prodPager,document.getElementById('prod-pag-info'),document.getElementById('prod-pag-btns'),renderP); }
+  function renderP(){ const rows=prodPager.page(); const tbody=document.getElementById('prod-tbody'); tbody.innerHTML=rows.map(p=>{ const color=FAM_COLORS[p.f]||'#888'; const pa=parseFloat(p.p)||0; const pv=parseFloat(p.pv||p.p)||0; const marge=pa>0?((pv-pa)/pa*100).toFixed(1):0; const margeCls=pv>pa?'color:#3DA85A':pv<pa?'color:#e05':'color:var(--txt3)'; return `<tr><td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${p.c||'—'}</span></td><td>${p.l||'—'}</td><td><span class="badge" style="background:${color}22;color:${color}">${p.f||'—'}</span></td><td class="amount">${fmtFull(pa)}</td><td class="amount" style="color:var(--or)">${fmtFull(pv)}</td><td class="amount" style="${margeCls}">${marge}%</td><td class="amount">${p.s||'0'}</td><td style="font-size:12px;color:var(--txt3)">${p.fr||'—'}</td><td style="white-space:nowrap"><button onclick="prodEditer('${p.c}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:var(--or);cursor:pointer;font-size:11px;margin-right:4px">✏️</button><button onclick="prodSupprimer('${p.c}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:#e05;cursor:pointer;font-size:11px">🗑️</button></td></tr>`; }).join(''); document.getElementById('prod-info').textContent=`${prodPager.total().toLocaleString('fr-FR')} produits`; renderPagination(prodPager,document.getElementById('prod-pag-info'),document.getElementById('prod-pag-btns'),renderP); }
   filtersEl.addEventListener('click',e=>{ if(!e.target.dataset.fam) return; filtersEl.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); activeFam=e.target.dataset.fam; filter(); });
   document.getElementById('prod-search').addEventListener('input',e=>{ search=e.target.value.trim().toLowerCase(); filter(); });
   filter();
@@ -3207,6 +3239,8 @@ function prodToggleForm(reset=true) {
       famSel.innerHTML = toutesLesFams.map(f => `<option value="${f}">${f}</option>`).join('');
       famSel.value = 'COSMETIQUE';
       document.getElementById('prod-form-prix').value = '';
+      document.getElementById('prod-form-pv').value = '';
+      document.getElementById('prod-marge-hint').textContent = '';
       document.getElementById('prod-form-stock').value = '';
       document.getElementById('prod-form-frns').value = '';
       document.getElementById('prod-form-orig-code').value = '';
@@ -3228,6 +3262,7 @@ function prodEditer(code) {
   document.getElementById('prod-form-lib').value = p.l || '';
   document.getElementById('prod-form-fam').value = p.f || 'COSMETIQUE';
   document.getElementById('prod-form-prix').value = p.p || '';
+  document.getElementById('prod-form-pv').value = p.pv || p.p || '';
   document.getElementById('prod-form-stock').value = p.s || '';
   document.getElementById('prod-form-frns').value = p.fr || '';
   document.getElementById('prod-form-orig-code').value = p.c || '';
@@ -3251,6 +3286,7 @@ async function prodSauvegarder() {
     l: lib,
     f: document.getElementById('prod-form-fam').value,
     p: document.getElementById('prod-form-prix').value || '0',
+    pv: document.getElementById('prod-form-pv').value || document.getElementById('prod-form-prix').value || '0',
     s: document.getElementById('prod-form-stock').value || '0',
     fr: document.getElementById('prod-form-frns').value.trim()
   };
@@ -5153,11 +5189,460 @@ function exportCSV(type) {
     });
     filename = 'manfara_credits.csv';
   }
-  const csv = [headers, ...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+function prodAutoMarge() {
+  const pa = parseFloat(document.getElementById('prod-form-prix').value) || 0;
+  const pv = parseFloat(document.getElementById('prod-form-pv').value) || 0;
+  const hint = document.getElementById('prod-marge-hint');
+  if (!hint) return;
+  if (pa > 0 && pv > 0) {
+    const m = ((pv - pa) / pa * 100).toFixed(1);
+    hint.style.color = pv >= pa ? 'var(--grn)' : 'var(--red)';
+    hint.textContent = `Marge : ${m}% (${fmtFull(pv - pa)} GNF)`;
+  } else { hint.textContent = ''; }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE CLÔTURE CAISSE
+// ═══════════════════════════════════════════════════════════════
+let CLOTURES = [];
+function clotureCaisseLoadLocal() {
+  try { const d = localStorage.getItem('manfara_clotures'); if (d) CLOTURES = JSON.parse(d); } catch(e) {}
+}
+function clotureCaisseSaveLocal() {
+  try { localStorage.setItem('manfara_clotures', JSON.stringify(CLOTURES)); } catch(e) {}
+}
+function clotureCaisseModal() {
+  const today = new Date().toISOString().substring(0,10);
+  const ventesJour = POS_VENTES.filter(v => v.date && v.date.substring(0,10) === today);
+  const totalEsp = ventesJour.filter(v=>v.paiement==='ESPECES').reduce((s,v)=>s+v.total,0);
+  const totalMob = ventesJour.filter(v=>v.paiement==='MOBILE').reduce((s,v)=>s+v.total,0);
+  const totalBanq = ventesJour.filter(v=>v.paiement==='BANQUE').reduce((s,v)=>s+v.total,0);
+  const totalCred = ventesJour.filter(v=>v.paiement==='CREDIT').reduce((s,v)=>s+v.total,0);
+  const totalVentes = totalEsp + totalMob + totalBanq + totalCred;
+  // Dépenses du jour
+  const depJour = DEP_DATA.filter(d => (d.date||'').substring(0,10) === today);
+  const totalDep = depJour.reduce((s,d)=>s+(parseFloat(d.mnt)||0),0);
+  const netEsp = totalEsp - totalDep;
+  const modal = document.createElement('div');
+  modal.className = 'ticket-modal';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:12px;padding:28px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto">
+      <h2 style="font-family:'Cinzel',serif;color:var(--or);font-size:16px;margin-bottom:20px">🏦 Clôture Caisse — ${today}</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+        <div style="background:var(--bg3);border-radius:8px;padding:14px">
+          <div style="font-size:11px;color:var(--txt3);margin-bottom:6px">Ventes Espèces</div>
+          <div style="font-size:18px;font-weight:700;color:var(--grn)">${fmtFull(totalEsp)} GNF</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:14px">
+          <div style="font-size:11px;color:var(--txt3);margin-bottom:6px">Ventes Mobile Money</div>
+          <div style="font-size:18px;font-weight:700;color:#48CAE4">${fmtFull(totalMob)} GNF</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:14px">
+          <div style="font-size:11px;color:var(--txt3);margin-bottom:6px">Ventes Banque</div>
+          <div style="font-size:18px;font-weight:700;color:#9B59B6">${fmtFull(totalBanq)} GNF</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:14px">
+          <div style="font-size:11px;color:var(--txt3);margin-bottom:6px">Ventes Crédit</div>
+          <div style="font-size:18px;font-weight:700;color:var(--red)">${fmtFull(totalCred)} GNF</div>
+        </div>
+      </div>
+      <div style="background:var(--bg3);border-radius:8px;padding:14px;margin-bottom:16px">
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="color:var(--txt3)">Total ventes du jour</span><span style="color:var(--or);font-weight:700">${fmtFull(totalVentes)} GNF</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+          <span style="color:var(--txt3)">Dépenses du jour</span><span style="color:var(--red)">${fmtFull(totalDep)} GNF</span>
+        </div>
+        <hr style="border:none;border-top:1px solid var(--brd);margin:8px 0">
+        <div style="display:flex;justify-content:space-between">
+          <span style="color:var(--txt3)">Net espèces (ventes - dépenses)</span><span style="color:${netEsp>=0?'var(--grn)':'var(--red)'};font-weight:700">${fmtFull(netEsp)} GNF</span>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:6px">Fond de caisse ouverture (GNF)</label>
+        <input type="number" id="cloture-fond" placeholder="0" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:14px">
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:6px">Espèces comptées en caisse (GNF)</label>
+        <input type="number" id="cloture-reel" placeholder="0" oninput="clotureCalcEcart()" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:14px">
+        <div id="cloture-ecart" style="margin-top:8px;font-size:13px;font-weight:700"></div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:6px">Note / Observations</label>
+        <input type="text" id="cloture-note" placeholder="Observations..." style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px">
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-add" onclick="clotureSauvegarder(${totalEsp},${totalMob},${totalBanq},${totalCred},${totalVentes},${totalDep})" style="flex:1;padding:11px">✅ Clôturer la caisse</button>
+        <button onclick="this.closest('.ticket-modal').remove()" style="padding:11px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif">Fermer</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+function clotureCalcEcart() {
+  const fond = parseFloat(document.getElementById('cloture-fond')?.value) || 0;
+  const reel = parseFloat(document.getElementById('cloture-reel')?.value) || 0;
+  const today = new Date().toISOString().substring(0,10);
+  const ventesJour = POS_VENTES.filter(v => v.date && v.date.substring(0,10) === today);
+  const espVentes = ventesJour.filter(v=>v.paiement==='ESPECES').reduce((s,v)=>s+v.total,0);
+  const depJour = DEP_DATA.filter(d => (d.date||'').substring(0,10) === today);
+  const totalDep = depJour.reduce((s,d)=>s+(parseFloat(d.mnt)||0),0);
+  const attendu = fond + espVentes - totalDep;
+  const ecart = reel - attendu;
+  const el = document.getElementById('cloture-ecart');
+  if(el && reel > 0) {
+    el.style.color = ecart === 0 ? 'var(--grn)' : ecart > 0 ? '#48CAE4' : 'var(--red)';
+    el.textContent = ecart === 0 ? '✅ Caisse équilibrée' : ecart > 0 ? `⬆ Excédent : +${fmtFull(ecart)} GNF` : `⬇ Manquant : ${fmtFull(ecart)} GNF`;
+  }
+}
+
+async function clotureSauvegarder(esp,mob,banq,cred,total,dep) {
+  const today = new Date().toISOString().substring(0,10);
+  const fond = parseFloat(document.getElementById('cloture-fond')?.value) || 0;
+  const reel = parseFloat(document.getElementById('cloture-reel')?.value) || 0;
+  const note = document.getElementById('cloture-note')?.value.trim() || '';
+  const attendu = fond + esp - dep;
+  const ecart = reel - attendu;
+  const cloture = {
+    id: 'CLT-' + Date.now(), date: today, dateHeure: new Date().toISOString(),
+    fondOuverture: fond, especes: esp, mobile: mob, banque: banq, credit: cred,
+    totalVentes: total, totalDepenses: dep, netEspeces: esp - dep,
+    reelCaisse: reel, attendu, ecart, note,
+    saisiepar: currentUser?.displayName || currentUser?.email || '—'
+  };
+  CLOTURES.unshift(cloture);
+  clotureCaisseSaveLocal();
+  if (dataSource === 'firebase') {
+    try { await db.collection('clotures_caisse').doc(cloture.id).set(cloture); } catch(e) {}
+  }
+  document.querySelector('.ticket-modal')?.remove();
+  showToast('✅ Clôture enregistrée !', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// MODULE RETOURS / AVOIRS
+// ═══════════════════════════════════════════════════════════════
+let RETOURS = [];
+function retoursLoadLocal() {
+  try { const d = localStorage.getItem('manfara_retours'); if (d) RETOURS = JSON.parse(d); } catch(e) {}
+}
+function retoursSaveLocal() {
+  try { localStorage.setItem('manfara_retours', JSON.stringify(RETOURS)); } catch(e) {}
+}
+
+function retourModal(ticketId) {
+  const vente = POS_VENTES.find(v => v.id === ticketId);
+  if (!vente) return;
+  const modal = document.createElement('div');
+  modal.className = 'ticket-modal';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:12px;padding:28px;width:480px;max-width:95vw;max-height:90vh;overflow-y:auto">
+      <h2 style="font-family:'Cinzel',serif;color:var(--or);font-size:16px;margin-bottom:4px">↩ Retour / Avoir</h2>
+      <div style="font-size:12px;color:var(--txt3);margin-bottom:20px">Ticket ${vente.id} — ${vente.client||'Client anonyme'} — ${fmtFull(vente.total)} GNF</div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:6px">Articles retournés</label>
+        ${(vente.articles||[]).map((a,i)=>`
+          <div style="display:flex;align-items:center;gap:12px;padding:10px;background:var(--bg3);border-radius:6px;margin-bottom:8px">
+            <input type="checkbox" id="ret-art-${i}" value="${i}" style="width:16px;height:16px;cursor:pointer">
+            <div style="flex:1">
+              <div style="font-size:13px">${a.nom}</div>
+              <div style="font-size:11px;color:var(--txt3)">${a.qty} × ${fmtFull(a.prix)} = ${fmtFull(a.prix*a.qty)} GNF</div>
+            </div>
+            <input type="number" id="ret-qty-${i}" placeholder="Qté" min="1" max="${a.qty}" value="${a.qty}"
+              style="width:70px;background:var(--bg);border:1px solid var(--brd);border-radius:4px;padding:6px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:12px">
+          </div>`).join('')}
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:6px">Motif du retour *</label>
+        <select id="ret-motif" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px">
+          <option>Produit défectueux</option><option>Mauvaise commande</option><option>Client insatisfait</option>
+          <option>Erreur de facturation</option><option>Autre</option>
+        </select>
+      </div>
+      <div style="margin-bottom:20px">
+        <label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:6px">Mode avoir</label>
+        <select id="ret-mode" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px">
+          <option value="REMBOURSEMENT">Remboursement espèces</option>
+          <option value="AVOIR">Avoir client (bon à valoir)</option>
+          <option value="ECHANGE">Échange produit</option>
+        </select>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn-add" onclick="retourConfirmer('${ticketId}')" style="flex:1;padding:11px">✅ Confirmer le retour</button>
+        <button onclick="this.closest('.ticket-modal').remove()" style="padding:11px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif">Annuler</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+async function retourConfirmer(ticketId) {
+  const vente = POS_VENTES.find(v => v.id === ticketId);
+  if (!vente) return;
+  const motif = document.getElementById('ret-motif')?.value;
+  const mode = document.getElementById('ret-mode')?.value;
+  const articlesRetournes = [];
+  let montantAvoir = 0;
+  (vente.articles||[]).forEach((a,i) => {
+    const cb = document.getElementById(`ret-art-${i}`);
+    if (cb?.checked) {
+      const qty = Math.min(parseInt(document.getElementById(`ret-qty-${i}`)?.value)||1, a.qty);
+      articlesRetournes.push({...a, qtyRetour: qty});
+      montantAvoir += a.prix * qty;
+      // Réajuster le stock
+      const prod = DB_LOCAL.produits.find(p => p.c == a.code);
+      if (prod) { prod.s = String((parseInt(prod.s)||0) + qty); }
+    }
+  });
+  if (articlesRetournes.length === 0) { showToast('⚠ Sélectionnez au moins un article', 'error'); return; }
+  const retour = {
+    id: 'RET-' + Date.now(), ticketId, date: new Date().toISOString(),
+    client: vente.client||'', articles: articlesRetournes, motif, mode,
+    montantAvoir, saisiepar: currentUser?.displayName || currentUser?.email || '—'
+  };
+  RETOURS.unshift(retour);
+  retoursSaveLocal();
+  if (dataSource === 'firebase') {
+    try { await db.collection('retours').doc(retour.id).set(retour); } catch(e) {}
+  }
+  document.querySelector('.ticket-modal')?.remove();
+  showToast(`✅ Retour enregistré — Avoir : ${fmtFull(montantAvoir)} GNF`, 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// RAPPORT P&L (Compte de Résultat)
+// ═══════════════════════════════════════════════════════════════
+function rptGenererPL() {
+  const du = document.getElementById('rpt-pl-du')?.value || '';
+  const au = document.getElementById('rpt-pl-au')?.value || '';
+  if (!du || !au) { showToast('⚠ Sélectionnez une période', 'error'); return; }
+  // CA = ventes dans la période
+  const ventesP = POS_VENTES.filter(v => { const d=v.date?v.date.substring(0,10):''; return d>=du && d<=au; });
+  const ca = ventesP.reduce((s,v)=>s+v.total,0);
+  // CMVD = coût des marchandises vendues (prix achat × qté)
+  let cmvd = 0;
+  ventesP.forEach(v => {
+    (v.articles||[]).forEach(a => {
+      const prod = DB_LOCAL.produits.find(p=>p.c==a.code);
+      const pa = prod ? parseFloat(prod.p)||0 : 0;
+      cmvd += pa * (a.qty||1);
+    });
+  });
+  const margebrute = ca - cmvd;
+  const tauxMarge = ca > 0 ? (margebrute / ca * 100).toFixed(1) : 0;
+  // Dépenses
+  const allDep = [...DEP_DATA, ...(DB_LOCAL.depenses||[])];
+  const depP = allDep.filter(d => { const date=d.date||(d.d?d.d.split('/').reverse().join('-'):''); return date>=du && date<=au; });
+  const totalDep = depP.reduce((s,d)=>s+(parseFloat(d.mnt||d.m)||0),0);
+  const beneficeNet = margebrute - totalDep;
+  // Par catégorie dépenses
+  const parCat = {};
+  depP.forEach(d => { const c=d.cat||'AUTRE'; parCat[c]=(parCat[c]||0)+(parseFloat(d.mnt||d.m)||0); });
+  const catRows = Object.entries(parCat).sort((a,b)=>b[1]-a[1])
+    .map(([c,v])=>`<tr><td style="padding:6px 10px;color:var(--txt3);font-size:12px">&nbsp;&nbsp;${c}</td><td style="text-align:right;padding:6px 10px;font-size:12px;color:var(--red)">−${fmtFull(v)} GNF</td></tr>`).join('');
+  const el = document.getElementById('rpt-pl-result');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="background:var(--bg3);border-radius:10px;overflow:hidden;margin-top:4px">
+      <table style="width:100%;border-collapse:collapse">
+        <thead><tr style="background:var(--bg4)"><th style="text-align:left;padding:10px;font-size:12px;color:var(--or)">Compte de Résultat ${du} → ${au}</th><th style="text-align:right;padding:10px;font-size:12px;color:var(--or)">Montant</th></tr></thead>
+        <tbody>
+          <tr style="background:var(--bg3)"><td style="padding:8px 10px;font-weight:600">Chiffre d'Affaires</td><td style="text-align:right;padding:8px 10px;font-weight:700;color:var(--grn)">${fmtFull(ca)} GNF</td></tr>
+          <tr><td style="padding:6px 10px;color:var(--txt3);font-size:12px">&nbsp;&nbsp;Nb ventes : ${ventesP.length} tickets</td><td style="text-align:right;padding:6px 10px;font-size:12px;color:var(--txt3)">${ventesP.length}</td></tr>
+          <tr style="background:var(--bg3)"><td style="padding:8px 10px;font-weight:600">− Coût des Marchandises Vendues</td><td style="text-align:right;padding:8px 10px;font-weight:700;color:var(--red)">−${fmtFull(cmvd)} GNF</td></tr>
+          <tr style="border-top:2px solid var(--or)"><td style="padding:10px;font-weight:700;color:var(--or)">= Marge Brute</td><td style="text-align:right;padding:10px;font-weight:700;color:var(--or)">${fmtFull(margebrute)} GNF (${tauxMarge}%)</td></tr>
+          <tr style="background:var(--bg3)"><td style="padding:8px 10px;font-weight:600">− Dépenses d'exploitation</td><td style="text-align:right;padding:8px 10px;font-weight:700;color:var(--red)">−${fmtFull(totalDep)} GNF</td></tr>
+          ${catRows}
+          <tr style="border-top:2px solid ${beneficeNet>=0?'var(--grn)':'var(--red)'}">
+            <td style="padding:10px;font-weight:700;font-size:15px;color:${beneficeNet>=0?'var(--grn)':'var(--red)'}">${beneficeNet>=0?'✅ BÉNÉFICE NET':'❌ PERTE NETTE'}</td>
+            <td style="text-align:right;padding:10px;font-weight:700;font-size:15px;color:${beneficeNet>=0?'var(--grn)':'var(--red)'}">${fmtFull(Math.abs(beneficeNet))} GNF</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DASHBOARD — KPIs ventes live
+// ═══════════════════════════════════════════════════════════════
+function dashVentesKpi() {
+  const today = new Date().toISOString().substring(0,10);
+  const thisWeek = new Date(); thisWeek.setDate(thisWeek.getDate()-6);
+  const weekStr = thisWeek.toISOString().substring(0,10);
+  const thisMonth = today.substring(0,7);
+  const ventesJour = POS_VENTES.filter(v=>v.date&&v.date.substring(0,10)===today);
+  const ventesSemaine = POS_VENTES.filter(v=>v.date&&v.date.substring(0,10)>=weekStr);
+  const ventesMois = POS_VENTES.filter(v=>v.date&&v.date.substring(0,7)===thisMonth);
+  const caJour = ventesJour.reduce((s,v)=>s+v.total,0);
+  const caSemaine = ventesSemaine.reduce((s,v)=>s+v.total,0);
+  const caMois = ventesMois.reduce((s,v)=>s+v.total,0);
+  const el = document.getElementById('dash-ventes-kpi');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="kpi" onclick="clotureCaisseModal()" style="cursor:pointer" title="Clôturer la caisse">
+      <div class="kpi-label">CA Aujourd'hui</div>
+      <div class="kpi-value" style="color:var(--grn)">${fmt(caJour)}</div>
+      <div class="kpi-sub">${ventesJour.length} vente(s) — cliquer pour clôture</div>
+      <div class="kpi-icon">💰</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">CA Cette Semaine</div>
+      <div class="kpi-value">${fmt(caSemaine)}</div>
+      <div class="kpi-sub">${ventesSemaine.length} vente(s)</div>
+      <div class="kpi-icon">📈</div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">CA Ce Mois</div>
+      <div class="kpi-value">${fmt(caMois)}</div>
+      <div class="kpi-sub">${ventesMois.length} vente(s)</div>
+      <div class="kpi-icon">📅</div>
+    </div>
+    <div class="kpi" onclick="rptAlertesCredits()" style="cursor:pointer" title="Crédits en retard">
+      <div class="kpi-label">Crédits en retard</div>
+      <div class="kpi-value" style="color:var(--red)" id="dash-cred-retard">—</div>
+      <div class="kpi-sub">Cliquer pour voir</div>
+      <div class="kpi-icon">⚠️</div>
+    </div>`;
+  // Crédits en retard
+  const todayDate = new Date(); todayDate.setHours(0,0,0,0);
+  const credEnRetard = POS_VENTES.filter(v => {
+    if (v.paiement !== 'CREDIT' || !v.echeance) return false;
+    const reste = Math.max(0, v.total - (CRED_REMBOURSES[v.id]||0));
+    return reste > 0 && new Date(v.echeance) < todayDate;
+  });
+  const elRetard = document.getElementById('dash-cred-retard');
+  if (elRetard) elRetard.textContent = credEnRetard.length;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// ALERTES CRÉDITS ÉCHUS
+// ═══════════════════════════════════════════════════════════════
+function rptAlertesCredits() {
+  const todayDate = new Date(); todayDate.setHours(0,0,0,0);
+  const credEnRetard = POS_VENTES.filter(v => {
+    if (v.paiement !== 'CREDIT' || !v.echeance) return false;
+    const reste = Math.max(0, v.total - (CRED_REMBOURSES[v.id]||0));
+    return reste > 0 && new Date(v.echeance) < todayDate;
+  }).sort((a,b) => new Date(a.echeance) - new Date(b.echeance));
+  const total = credEnRetard.reduce((s,v) => s + Math.max(0, v.total - (CRED_REMBOURSES[v.id]||0)), 0);
+  const modal = document.createElement('div');
+  modal.className = 'ticket-modal';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:12px;padding:28px;width:560px;max-width:95vw;max-height:85vh;overflow-y:auto">
+      <h2 style="font-family:'Cinzel',serif;color:var(--red);font-size:16px;margin-bottom:4px">⚠️ Crédits Échus — En Retard</h2>
+      <div style="font-size:13px;color:var(--txt3);margin-bottom:20px">Total impayé : <span style="color:var(--red);font-weight:700">${fmtFull(total)} GNF</span> — ${credEnRetard.length} crédit(s)</div>
+      ${credEnRetard.length === 0 ? '<p style="color:var(--grn);font-size:14px">✅ Aucun crédit en retard !</p>' :
+        credEnRetard.map(v => {
+          const reste = Math.max(0, v.total - (CRED_REMBOURSES[v.id]||0));
+          const ech = new Date(v.echeance);
+          const joursRetard = Math.floor((todayDate - ech) / 86400000);
+          return `<div style="background:var(--bg3);border:1px solid rgba(192,57,43,.3);border-radius:8px;padding:14px;margin-bottom:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--or)">${v.id}</span>
+                <span style="font-size:13px;margin-left:10px">${v.client||'—'}</span>
+              </div>
+              <div style="text-align:right">
+                <div style="font-size:14px;font-weight:700;color:var(--red)">${fmtFull(reste)} GNF</div>
+                <div style="font-size:11px;color:var(--txt3)">${joursRetard}j de retard</div>
+              </div>
+            </div>
+            <div style="font-size:11px;color:var(--txt3)">Échéance : ${ech.toLocaleDateString('fr-FR')} | PDV : ${v.pointNom||'—'} | Vendeur : ${v.vendeur||'—'}</div>
+          </div>`;
+        }).join('')}
+      <button onclick="this.closest('.ticket-modal').remove()" style="width:100%;padding:11px;margin-top:10px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif">Fermer</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// EXPORT BACKUP COMPLET JSON
+// ═══════════════════════════════════════════════════════════════
+function exportBackupComplet() {
+  const backup = {
+    exportDate: new Date().toISOString(),
+    app: 'MANFARA-SHOP v14',
+    produits: DB_LOCAL.produits,
+    clients: DB_LOCAL.clients,
+    fournisseurs: DB_LOCAL.fournisseurs,
+    appros: DB_LOCAL.appros,
+    depenses: [...DEP_DATA, ...(DB_LOCAL.depenses||[])],
+    ventes: POS_VENTES,
+    credits_remboursements: CRED_REMBOURSES,
+    credits_versements: CRED_VERSEMENTS,
+    points_de_vente: POINTS_DE_VENTE,
+    clotures: CLOTURES,
+    retours: RETOURS,
+    sms_history: SMS_HISTORY
+  };
+  const json = JSON.stringify(backup, null, 2);
+  const blob = new Blob([json], {type:'application/json;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href=url; a.download=filename; a.click();
+  const date = new Date().toISOString().substring(0,10).replace(/-/g,'');
+  a.href = url; a.download = `manfara_backup_${date}.json`; a.click();
   URL.revokeObjectURL(url);
+  showToast('✅ Backup complet téléchargé', 'success');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// IMPRESSION TICKET THERMIQUE 58mm
+// ═══════════════════════════════════════════════════════════════
+function printTicketThermique(venteSrc) {
+  const vente = venteSrc || (POS_VENTES.length > 0 ? POS_VENTES[0] : null);
+  if (!vente) return;
+  const win = window.open('', '_blank', 'width=320,height=600');
+  if (!win) { window.print(); return; }
+  const lignes = (vente.articles||[]).map(a =>
+    `<div class="item-nom">${a.nom.substring(0,26)}</div>
+     <div class="item-dtl">${a.qty} x ${a.prix.toLocaleString('fr-FR')} = ${(a.prix*a.qty).toLocaleString('fr-FR')}</div>`
+  ).join('');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Ticket</title>
+  <style>
+    @page { margin:0; size:58mm auto; }
+    body { font-family:monospace; font-size:11px; width:56mm; margin:0 auto; color:#000; }
+    .center { text-align:center; }
+    .bold { font-weight:bold; }
+    .big { font-size:14px; }
+    .sep { border:none; border-top:1px dashed #000; margin:4px 0; }
+    .row { display:flex; justify-content:space-between; }
+    .item-nom { font-size:10px; margin-top:4px; }
+    .item-dtl { font-size:10px; color:#333; padding-left:4px; }
+    .total { font-size:13px; font-weight:bold; border-top:2px solid #000; padding-top:4px; margin-top:4px; display:flex; justify-content:space-between; }
+    .footer { text-align:center; font-size:9px; margin-top:8px; color:#555; }
+  </style></head><body>
+  <div class="center bold big">MANFARA-SHOP</div>
+  <div class="center" style="font-size:9px">Lero, Siguiri — Guinée</div>
+  <hr class="sep">
+  <div class="row"><span>${vente.id}</span><span>${vente.dateStr||''}</span></div>
+  <div class="row"><span>Client:</span><span>${vente.client||'—'}</span></div>
+  <div class="row"><span>PDV:</span><span>${vente.pointNom||'—'}</span></div>
+  <hr class="sep">
+  ${lignes}
+  <hr class="sep">
+  ${vente.remise>0?`<div class="row"><span>Remise</span><span>-${vente.remise.toLocaleString('fr-FR')}</span></div>`:''}
+  <div class="total"><span>TOTAL</span><span>${vente.total.toLocaleString('fr-FR')} GNF</span></div>
+  <div class="row" style="margin-top:4px"><span>Paiement:</span><span>${vente.paiement}</span></div>
+  ${vente.paiement==='CREDIT'&&vente.echeance?`<div class="row" style="color:#800"><span>Échéance:</span><span>${new Date(vente.echeance).toLocaleDateString('fr-FR')}</span></div>`:''}
+  <hr class="sep">
+  <div class="footer">Merci de votre confiance !<br>Vendeur: ${vente.vendeur||'—'}<br>HABATECH © MANFARA-SHOP</div>
+  </body></html>`);
+  win.document.close();
+  setTimeout(() => { win.print(); win.close(); }, 400);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// HELPER TOAST
+// ═══════════════════════════════════════════════════════════════
+function showToast(msg, type='info') {
+  const t = document.createElement('div');
+  const bg = type==='success'?'#1a5c2a':type==='error'?'#5c1a1a':'#2a3a5c';
+  t.style.cssText = `position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:${bg};color:#fff;padding:12px 24px;border-radius:8px;font-family:'Raleway',sans-serif;font-size:14px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.5);animation:fadeInUp .3s ease`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
 }
 </script>
