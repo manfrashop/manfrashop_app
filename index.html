@@ -2575,6 +2575,7 @@ textarea:focus {
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button onclick="rstStaticProduits()" style="padding:9px 18px;background:rgba(220,140,0,.15);border:1px solid #E88C20;border-radius:8px;color:#E88C20;cursor:pointer;font-size:13px;font-weight:700">🗂️ Vider produits hardcodés</button>
             <button onclick="rstStaticClients()" style="padding:9px 18px;background:rgba(220,140,0,.15);border:1px solid #E88C20;border-radius:8px;color:#E88C20;cursor:pointer;font-size:13px;font-weight:700">👥 Vider clients hardcodés</button>
+            <button onclick="rstStaticAppros()" style="padding:9px 18px;background:rgba(220,140,0,.15);border:1px solid #E88C20;border-radius:8px;color:#E88C20;cursor:pointer;font-size:13px;font-weight:700">📦 Vider appros hardcodées</button>
             <button onclick="rstStaticAll()" style="padding:9px 18px;background:rgba(220,50,50,.15);border:1px solid var(--red);border-radius:8px;color:var(--red);cursor:pointer;font-size:13px;font-weight:700">🔥 Vider tout le STATIC_DB</button>
           </div>
         </div>
@@ -5708,6 +5709,14 @@ function rstStaticClients() {
   if (DB_LOCAL) DB_LOCAL.clients = [];
   rstLog('✅ Clients hardcodés vidés en mémoire.');
   showToast('✅ Clients hardcodés supprimés', 'success');
+}
+
+function rstStaticAppros() {
+  if (!confirm('⚠️ Vider toutes les appros hardcodées (STATIC_DB.appros) ?\n\nLes appros saisies en localStorage ne sont pas affectées.')) return;
+  if (typeof STATIC_DB !== 'undefined') STATIC_DB.appros = [];
+  if (DB_LOCAL) DB_LOCAL.appros = [];
+  rstLog('✅ Appros hardcodées vidées en mémoire.');
+  showToast('✅ Appros hardcodées supprimées', 'success');
 }
 
 function rstStaticAll() {
