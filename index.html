@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Ets Manfara & Fils — Gestion Commerciale</title>
+<title>MANFRA-SHOP APP</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -11,7 +11,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Manfara">
+<meta name="apple-mobile-web-app-title" content="MANFRA-SHOP">
 <link rel="apple-touch-icon" href="icon-192.png">
 
 <!-- Firebase SDK -->
@@ -735,7 +735,7 @@ tbody tr:last-child td { border-bottom:none; }
   <div class="auth-card">
     <div class="auth-logo">
       <div class="auth-icon">🏪</div>
-      <h1>Ets Manfara<br>& Fils</h1>
+      <h1>MANFRA-SHOP<br>APP</h1>
       <p>Gestion Commerciale — Lero</p>
     </div>
     <div class="auth-field">
@@ -748,7 +748,7 @@ tbody tr:last-child td { border-bottom:none; }
     </div>
     <button class="auth-btn" id="auth-login-btn" onclick="doLogin()">Se connecter</button>
     <div class="auth-error" id="auth-error"></div>
-    <div class="auth-footer">Ets Manfara & Fils · Lero, Siguiri</div>
+    <div class="auth-footer">MANFRA-SHOP APP · Lero, Siguiri</div>
   </div>
 </div>
 
@@ -771,7 +771,7 @@ tbody tr:last-child td { border-bottom:none; }
 <!-- SIDEBAR -->
 <div id="sidebar" style="display:none">
   <div class="brand">
-    <h1>Ets Manfara<br>& Fils</h1>
+    <h1>MANFRA-SHOP<br>APP</h1>
     <p>Gestion Commerciale</p>
   </div>
   <nav>
@@ -804,7 +804,7 @@ tbody tr:last-child td { border-bottom:none; }
     <div class="page-header">
       <div>
         <div class="page-title">Tableau de Bord</div>
-        <div class="page-sub">Vue d'ensemble — Ets Manfara & Fils, Lero</div>
+        <div class="page-sub">Vue d'ensemble — MANFRA-SHOP APP, Lero</div>
       </div>
     </div>
     <div class="kpi-grid">
@@ -842,14 +842,35 @@ tbody tr:last-child td { border-bottom:none; }
   <div id="sec-produits" class="section">
     <div class="page-header">
       <div><div class="page-title">Produits</div><div class="page-sub" id="prod-count-lbl">Chargement...</div></div>
-      <div class="search-bar"><input type="text" id="prod-search" placeholder="Rechercher un produit..."></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="search-bar"><input type="text" id="prod-search" placeholder="Rechercher un produit..."></div>
+        <button class="btn-add" onclick="prodToggleForm()">+ Nouveau produit</button>
+      </div>
+    </div>
+    <!-- Formulaire ajout/modification produit -->
+    <div id="prod-form" style="display:none;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px;margin-bottom:20px">
+      <h3 style="margin:0 0 16px;color:var(--or);font-size:15px" id="prod-form-title">➕ Nouveau produit</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Code *</label><input type="text" id="prod-form-code" placeholder="Ex: 1479" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
+        <div style="grid-column:span 2"><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Libellé *</label><input type="text" id="prod-form-lib" placeholder="Ex: COLGATE DENTIFRICE 100ML" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Famille</label><select id="prod-form-fam" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"><option>COSMETIQUE</option><option>ELECTRONIQUE</option><option>ALIMENTATION</option><option>ELECTRO MENAGER</option><option>NUTRITION BEBE</option><option>DEVISES</option></select></div>
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Prix Achat (GNF) *</label><input type="number" id="prod-form-prix" placeholder="0" min="0" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Stock initial</label><input type="number" id="prod-form-stock" placeholder="0" min="0" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
+        <div style="grid-column:span 2"><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Fournisseur</label><input type="text" id="prod-form-frns" placeholder="Ex: ETS DIALLO" list="prod-frns-list" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"><datalist id="prod-frns-list"></datalist></div>
+      </div>
+      <input type="hidden" id="prod-form-orig-code">
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-add" onclick="prodSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
+        <button onclick="prodToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <span id="prod-form-msg" style="font-size:13px;color:var(--or)"></span>
+      </div>
     </div>
     <div class="table-wrap">
       <div class="table-toolbar">
         <div class="filter-btns" id="fam-filters"></div>
         <div class="table-info" id="prod-info"></div>
       </div>
-      <table><thead><tr><th>Code</th><th>Libellé</th><th>Famille</th><th>Prix Achat (GNF)</th><th>Stock Initial</th><th>Fournisseur</th></tr></thead><tbody id="prod-tbody"></tbody></table>
+      <table><thead><tr><th>Code</th><th>Libellé</th><th>Famille</th><th>Prix Achat (GNF)</th><th>Stock Initial</th><th>Fournisseur</th><th></th></tr></thead><tbody id="prod-tbody"></tbody></table>
       <div class="pagination"><div class="pag-info" id="prod-pag-info"></div><div class="pag-btns" id="prod-pag-btns"></div></div>
     </div>
   </div>
@@ -878,11 +899,39 @@ tbody tr:last-child td { border-bottom:none; }
   <div id="sec-clients" class="section">
     <div class="page-header">
       <div><div class="page-title">Clients</div><div class="page-sub" id="cli-count-lbl">Chargement...</div></div>
-      <div class="search-bar"><input type="text" id="cli-search" placeholder="Rechercher un client..."></div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="search-bar"><input type="text" id="cli-search" placeholder="Rechercher un client..."></div>
+        <button class="btn-add" onclick="cliToggleForm()">+ Nouveau client</button>
+      </div>
     </div>
+
+    <!-- Formulaire ajout / édition client -->
+    <div id="cli-form" style="display:none;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px;margin-bottom:20px">
+      <h3 id="cli-form-title" style="margin:0 0 16px;color:var(--or);font-size:15px">➕ Nouveau client</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+        <div style="grid-column:span 1">
+          <label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Nom / Société *</label>
+          <input type="text" id="cli-form-nom" placeholder="Ex: AMADOU CAMARA" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px">
+        </div>
+        <div style="grid-column:span 1">
+          <label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Téléphone</label>
+          <input type="text" id="cli-form-tel" placeholder="Ex: 622080823" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px">
+        </div>
+        <div style="grid-column:span 1">
+          <label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Adresse / Quartier</label>
+          <input type="text" id="cli-form-adr" placeholder="Ex: LERO CENTRE EMPLOYE A LA SMD" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px">
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-add" onclick="cliSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
+        <button onclick="cliToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <span id="cli-form-msg" style="font-size:13px;color:var(--or)"></span>
+      </div>
+    </div>
+
     <div class="table-wrap">
       <div class="table-toolbar"><div></div><div class="table-info" id="cli-info"></div></div>
-      <table><thead><tr><th>#</th><th>Nom / Société</th><th>Adresse</th><th>Téléphone</th></tr></thead><tbody id="cli-tbody"></tbody></table>
+      <table><thead><tr><th>#</th><th>Nom / Société</th><th>Adresse</th><th>Téléphone</th><th></th></tr></thead><tbody id="cli-tbody"></tbody></table>
       <div class="pagination"><div class="pag-info" id="cli-pag-info"></div><div class="pag-btns" id="cli-pag-btns"></div></div>
     </div>
   </div>
@@ -891,11 +940,30 @@ tbody tr:last-child td { border-bottom:none; }
   <div id="sec-fournisseurs" class="section">
     <div class="page-header">
       <div><div class="page-title">Fournisseurs</div><div class="page-sub">Partenaires commerciaux</div></div>
-      <div class="search-bar"><input type="text" id="frns-search" placeholder="Rechercher..."></div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div class="search-bar"><input type="text" id="frns-search" placeholder="Rechercher..."></div>
+        <button class="btn-add" onclick="frnsToggleForm()">+ Nouveau fournisseur</button>
+      </div>
+    </div>
+    <!-- Formulaire ajout/modification fournisseur -->
+    <div id="frns-form" style="display:none;background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:20px;margin-bottom:20px">
+      <h3 style="margin:0 0 16px;color:var(--or);font-size:15px" id="frns-form-title">➕ Nouveau fournisseur</h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:12px">
+        <div style="grid-column:span 2"><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Nom / Société *</label><input type="text" id="frns-form-nom" placeholder="Ex: ETS DIALLO &amp; FRÈRES" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Téléphone</label><input type="text" id="frns-form-tel" placeholder="+224..." style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px"></div>
+        <div><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Ville</label><input type="text" id="frns-form-ville" placeholder="Ex: CONAKRY" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+        <div style="grid-column:span 4"><label style="font-size:11px;color:var(--txt3);display:block;margin-bottom:4px">Adresse</label><input type="text" id="frns-form-adresse" placeholder="Ex: MADINA ENIPRA BOUTIQUE N°170" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:8px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px"></div>
+      </div>
+      <input type="hidden" id="frns-form-id">
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn-add" onclick="frnsSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
+        <button onclick="frnsToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <span id="frns-form-msg" style="font-size:13px;color:var(--or)"></span>
+      </div>
     </div>
     <div class="table-wrap">
       <div class="table-toolbar"><div></div><div class="table-info" id="frns-info"></div></div>
-      <table><thead><tr><th>#</th><th>Nom / Société</th><th>Adresse</th><th>Ville</th><th>Téléphone</th></tr></thead><tbody id="frns-tbody"></tbody></table>
+      <table><thead><tr><th>#</th><th>Nom / Société</th><th>Adresse</th><th>Ville</th><th>Téléphone</th><th></th></tr></thead><tbody id="frns-tbody"></tbody></table>
       <div class="pagination"><div class="pag-info" id="frns-pag-info"></div><div class="pag-btns" id="frns-pag-btns"></div></div>
     </div>
   </div>
@@ -1225,12 +1293,23 @@ tbody tr:last-child td { border-bottom:none; }
       <div class="kpi-card"><div class="kpi-value" id="cred-kpi-reste">0</div><div class="kpi-label">Reste à payer</div></div>
     </div>
     <div class="table-wrap">
-      <div class="table-toolbar">
+      <div class="table-toolbar" style="flex-wrap:wrap;gap:10px">
         <div class="search-bar" style="margin:0"><input type="text" id="cred-search" placeholder="Rechercher un client..." oninput="credFilter()"></div>
+        <!-- Filtres statut -->
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="cred-stat-btn" data-statut="retard" onclick="credSetStatut('retard')"
+            style="padding:5px 12px;border:1px solid var(--brd);border-radius:20px;background:transparent;color:var(--txt3);font-size:11px;cursor:pointer;font-family:'Raleway',sans-serif;transition:all .15s">⚠️ En retard</button>
+          <button class="cred-stat-btn" data-statut="attente" onclick="credSetStatut('attente')"
+            style="padding:5px 12px;border:1px solid var(--brd);border-radius:20px;background:transparent;color:var(--txt3);font-size:11px;cursor:pointer;font-family:'Raleway',sans-serif;transition:all .15s">🔴 En attente</button>
+          <button class="cred-stat-btn" data-statut="partiel" onclick="credSetStatut('partiel')"
+            style="padding:5px 12px;border:1px solid var(--brd);border-radius:20px;background:transparent;color:var(--txt3);font-size:11px;cursor:pointer;font-family:'Raleway',sans-serif;transition:all .15s">🟡 Partiel</button>
+          <button class="cred-stat-btn" data-statut="solde" onclick="credSetStatut('solde')"
+            style="padding:5px 12px;border:1px solid var(--brd);border-radius:20px;background:transparent;color:var(--txt3);font-size:11px;cursor:pointer;font-family:'Raleway',sans-serif;transition:all .15s">✅ Soldé</button>
+        </div>
         <div class="table-info" id="cred-info"></div>
       </div>
       <table>
-        <thead><tr><th>Ticket</th><th>Date</th><th>Client</th><th>Point de Vente</th><th>Total GNF</th><th>Remboursé</th><th>Reste</th><th>Statut</th><th></th></tr></thead>
+        <thead><tr><th>Ticket</th><th>Date</th><th>Client</th><th>Point de Vente</th><th>Échéance</th><th>Total GNF</th><th>Remboursé</th><th>Reste</th><th>Statut</th><th></th></tr></thead>
         <tbody id="cred-tbody"></tbody>
       </table>
       <div class="pagination"><div class="pag-info" id="cred-pag-info"></div><div class="pag-btns" id="cred-pag-btns"></div></div>
@@ -1304,9 +1383,32 @@ tbody tr:last-child td { border-bottom:none; }
     <div class="pos-grid">
       <!-- Catalogue produits -->
       <div class="pos-products">
+        <!-- ─── MODULE SCANNER PISTOLET ─── -->
+        <div id="scanner-bar" style="padding:10px 16px 0;border-bottom:1px solid var(--brd)">
+          <div style="display:flex;gap:8px;align-items:center;background:var(--bg3);border:2px solid var(--brd);border-radius:8px;padding:6px 10px;transition:border-color .2s" id="scanner-wrap">
+            <span style="font-size:18px">🔫</span>
+            <input type="text" id="scanner-input"
+              placeholder="Scanner un code-barres ou saisir un code produit..."
+              style="flex:1;background:none;border:none;outline:none;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px;"
+              autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            <span id="scanner-status" style="font-size:12px;color:var(--txt3);white-space:nowrap"></span>
+          </div>
+          <div style="display:flex;gap:12px;align-items:center;padding:6px 2px 8px">
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--txt3);cursor:pointer">
+              <input type="checkbox" id="scanner-autofocus" checked onchange="scannerToggleAuto(this.checked)" style="accent-color:var(--or)">
+              Refocus auto après ajout
+            </label>
+            <label style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--txt3);cursor:pointer">
+              <input type="checkbox" id="scanner-beep" checked style="accent-color:var(--or)">
+              Bip sonore
+            </label>
+            <span id="scanner-last" style="font-size:11px;color:var(--txt3);font-family:'JetBrains Mono',monospace"></span>
+          </div>
+        </div>
         <div class="pos-search">
           <input type="text" id="pos-prod-search" placeholder="🔍 Rechercher un produit..." oninput="posFilterProducts()">
           <span id="pos-prod-count" style="font-size:12px;color:var(--txt3);white-space:nowrap"></span>
+          <button onclick="scannerFocus()" title="Cliquez ici pour activer le scanner pistolet" style="padding:6px 10px;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;color:var(--or);cursor:pointer;font-size:12px;white-space:nowrap">🔫 Scanner</button>
         </div>
         <div class="pos-fam-tabs" id="pos-fam-tabs">
           <button class="fam-tab active" onclick="posSelectFam(this,'')">Tous</button>
@@ -1337,14 +1439,15 @@ tbody tr:last-child td { border-bottom:none; }
           </div>
           <div class="cart-client-row">
             <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px">Client</label>
-            <select id="cart-client">
+            <select id="cart-client" onchange="posUpdateEncours()">
               <option value="">Client de passage</option>
             </select>
+            <div id="cart-encours-info" style="display:none;margin-top:6px;padding:7px 10px;background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.25);border-radius:6px;font-size:12px;color:var(--red)"></div>
           </div>
           <div class="cart-pay-row">
             <div>
               <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Mode</label>
-              <select id="cart-paiement">
+              <select id="cart-paiement" onchange="posToggleEcheance()">
                 <option value="ESPECES">💵 Espèces</option>
                 <option value="ORANGE">🟠 Orange Money</option>
                 <option value="BANQUE">🏦 Virement Banque</option>
@@ -1356,6 +1459,11 @@ tbody tr:last-child td { border-bottom:none; }
               <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">Remise (GNF)</label>
               <input type="number" id="cart-remise" placeholder="0" min="0" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:7px 10px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:13px;" oninput="posUpdateTotal()">
             </div>
+          </div>
+          <!-- Champ échéance — visible uniquement en mode CREDIT -->
+          <div id="cart-echeance-row" style="display:none;margin-bottom:10px">
+            <label style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:4px">📅 Date d'échéance</label>
+            <input type="date" id="cart-echeance" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:6px;padding:7px 10px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;">
           </div>
           <button class="btn-vendre" id="btn-vendre" onclick="posValiderVente()">✓ Valider la vente</button>
         </div>
@@ -1423,7 +1531,7 @@ tbody tr:last-child td { border-bottom:none; }
     <div class="page-header">
       <div>
         <div class="page-title">📈 Activités Commerciales</div>
-        <div class="page-sub" id="act-sub">Analyse des performances — Ets Manfara & Fils</div>
+        <div class="page-sub" id="act-sub">Analyse des performances — MANFRA-SHOP APP</div>
       </div>
       <button class="btn-add" onclick="actExportCSV()" style="padding:8px 16px;font-size:12px">📥 Export CSV</button>
     </div>
@@ -1677,7 +1785,7 @@ tbody tr:last-child td { border-bottom:none; }
                 <div style="flex:1"><label style="font-size:11px;color:var(--txt3)">API Key</label><input type="password" id="sms-infobip-key" placeholder="Votre clé API" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
                 <div style="flex:1"><label style="font-size:11px;color:var(--txt3)">Base URL</label><input type="text" id="sms-infobip-base" placeholder="xxxxx.api.infobip.com" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
               </div>
-              <div><label style="font-size:11px;color:var(--txt3)">Nom expéditeur (From)</label><input type="text" id="sms-infobip-from" placeholder="Manfara" maxlength="11" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+              <div><label style="font-size:11px;color:var(--txt3)">Nom expéditeur (From)</label><input type="text" id="sms-infobip-from" placeholder="MANFRA-SHOP" maxlength="11" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
             </div>
 
             <!-- Orange fields -->
@@ -1686,7 +1794,7 @@ tbody tr:last-child td { border-bottom:none; }
                 ℹ️ Orange SMS API : contactez Orange Guinée Business pour obtenir votre Bearer Token et enregistrer votre nom d'expéditeur.
               </div>
               <div><label style="font-size:11px;color:var(--txt3)">Bearer Token</label><input type="password" id="sms-orange-token" placeholder="Bearer Token Orange" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
-              <div><label style="font-size:11px;color:var(--txt3)">Nom expéditeur (From)</label><input type="text" id="sms-orange-from" placeholder="Manfara" maxlength="11" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
+              <div><label style="font-size:11px;color:var(--txt3)">Nom expéditeur (From)</label><input type="text" id="sms-orange-from" placeholder="MANFRA-SHOP" maxlength="11" style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:9px;color:var(--txt);font-family:'Raleway',sans-serif;font-size:13px;box-sizing:border-box"></div>
             </div>
 
             <!-- Webhook fields -->
@@ -1934,12 +2042,13 @@ async function loadData() {
 
 async function loadFromFirestore() {
   // Charger toutes les collections en parallèle
-  const [prod, appros, clients, frns, dep] = await Promise.all([
+  const [prod, appros, clients, frns, dep, credRemb] = await Promise.all([
     db.collection('produits').get(),
     db.collection('appros').get(),
     db.collection('clients').get(),
     db.collection('fournisseurs').get(),
     db.collection('depenses').get(),
+    db.collection('credits_remboursements').get(),
   ]);
   DB_LOCAL = {
     produits:      prod.docs.map(d=>d.data()),
@@ -1948,6 +2057,15 @@ async function loadFromFirestore() {
     fournisseurs:  frns.docs.map(d=>d.data()),
     depenses:      dep.docs.map(d=>d.data()),
   };
+  // Reconstituer CRED_REMBOURSES depuis Firestore (priorité sur localStorage)
+  if (!credRemb.empty) {
+    credRemb.docs.forEach(d => {
+      const data = d.data();
+      CRED_REMBOURSES[d.id] = data.rembourse || 0;
+      if (data.versements) CRED_VERSEMENTS[d.id] = data.versements;
+    });
+    try { localStorage.setItem('manfara_credits', JSON.stringify(CRED_REMBOURSES)); } catch(e) {}
+  }
 }
 
 // ─── HAMBURGER / SIDEBAR MOBILE ────────────────────────────────
@@ -2118,16 +2236,26 @@ async function posSaveToFirestore() {
       batch1.set(ref, p);
     });
     await batch1.commit();
-    // Sauvegarder la dernière vente (la première du tableau)
+    // CORRECTION BUG : sauvegarder TOUTES les ventes (pas seulement POS_VENTES[0])
+    // On envoie par lots de 500 (limite Firestore batch)
     if(POS_VENTES.length > 0) {
-      const v = POS_VENTES[0];
-      await db.collection('ventes').doc(v.id).set(v);
+      const BATCH_SIZE = 500;
+      for(let i = 0; i < POS_VENTES.length; i += BATCH_SIZE) {
+        const batchV = db.batch();
+        POS_VENTES.slice(i, i + BATCH_SIZE).forEach(v => {
+          const ref = db.collection('ventes').doc(v.id);
+          batchV.set(ref, v);
+        });
+        await batchV.commit();
+      }
     }
   } catch(e) { /* offline */ }
 }
 
 function initPOS() {
   posLoadStorage();
+  // Initialiser le module scanner pistolet
+  setTimeout(initScanner, 200);
   // Default PDV if none
   if(POINTS_DE_VENTE.length === 0) {
     POINTS_DE_VENTE = [{id:'pdv1', nom:'Boutique Principale', loc:'Lero, Siguiri', resp:'Admin', tel:'', createdAt: new Date().toISOString()}];
@@ -2140,10 +2268,14 @@ function initPOS() {
   // Populate client select in cart
   const sel = document.getElementById('cart-client');
   if(sel) {
+    // Vider avant de repeupler (évite les doublons si initPOS() est rappelé)
+    while(sel.options.length > 1) sel.remove(1);
     DB_LOCAL.clients.forEach(c => {
+      const nom = c.n || c[Object.keys(c)[0]] || '';
+      if(!nom) return;
       const opt = document.createElement('option');
-      opt.value = c.n || c[Object.keys(c)[0]];
-      opt.textContent = c.n || c[Object.keys(c)[0]];
+      opt.value = nom;
+      opt.textContent = nom + (c.t ? ' (' + c.t + ')' : '');
       sel.appendChild(opt);
     });
   }
@@ -2186,6 +2318,132 @@ function posPopulateFamTabs() {
     btn.onclick = () => posSelectFam(btn, f);
     tabs.appendChild(btn);
   });
+}
+
+// ─── MODULE SCANNER PISTOLET ───────────────────────────────────
+let scannerAutoFocus = true;
+let scannerBuffer = '';
+let scannerTimer = null;
+const SCANNER_TIMEOUT = 80; // ms entre chars — pistolet < 30ms, clavier > 100ms
+
+function initScanner() {
+  const inp = document.getElementById('scanner-input');
+  if(!inp) return;
+
+  // Focus auto sur le champ scanner quand on entre dans le POS
+  inp.focus();
+
+  inp.addEventListener('keydown', e => {
+    // Le pistolet envoie Enter à la fin
+    if(e.key === 'Enter') {
+      e.preventDefault();
+      const code = inp.value.trim();
+      if(code) scannerProcess(code);
+      inp.value = '';
+      inp.select();
+      return;
+    }
+  });
+
+  // Détection pistolet vs clavier : le pistolet envoie les chars très vite
+  inp.addEventListener('input', () => {
+    clearTimeout(scannerTimer);
+    scannerTimer = setTimeout(() => {
+      // Si la saisie s'arrête sans Enter (cas rare), ne rien faire
+    }, SCANNER_TIMEOUT * 10);
+  });
+
+  // Focus visuel
+  inp.addEventListener('focus', () => {
+    document.getElementById('scanner-wrap').style.borderColor = 'var(--or)';
+    document.getElementById('scanner-status').textContent = '● Prêt';
+    document.getElementById('scanner-status').style.color = '#4c8';
+  });
+  inp.addEventListener('blur', () => {
+    document.getElementById('scanner-wrap').style.borderColor = 'var(--brd)';
+    document.getElementById('scanner-status').textContent = '○ En veille';
+    document.getElementById('scanner-status').style.color = 'var(--txt3)';
+  });
+}
+
+function scannerToggleAuto(checked) {
+  scannerAutoFocus = checked;
+}
+
+function scannerProcess(rawCode) {
+  const inp = document.getElementById('scanner-input');
+  const lastEl = document.getElementById('scanner-last');
+
+  // Chercher le produit par code exact, puis par inclusion
+  let prod = DB_LOCAL.produits.find(p => p.c === rawCode)
+          || DB_LOCAL.produits.find(p => (p.c||'').toLowerCase() === rawCode.toLowerCase())
+          || DB_LOCAL.produits.find(p => (p.l||'').toLowerCase() === rawCode.toLowerCase());
+
+  if(prod) {
+    // ✅ Produit trouvé → ajouter au panier
+    posAddToCart(prod);
+    scannerFeedback(true, prod.l, rawCode, lastEl);
+    // Vider le filtre texte si actif pour montrer la grille complète
+    if(POS_SEARCH_FILTER) {
+      POS_SEARCH_FILTER = '';
+      document.getElementById('pos-prod-search').value = '';
+      posRenderProductGrid();
+    }
+  } else {
+    // ❌ Code inconnu
+    scannerFeedback(false, null, rawCode, lastEl);
+  }
+
+  if(scannerAutoFocus && inp) {
+    setTimeout(() => { inp.focus(); inp.select(); }, 50);
+  }
+}
+
+function scannerFeedback(found, nomProd, code, lastEl) {
+  const wrap = document.getElementById('scanner-wrap');
+  const beep = document.getElementById('scanner-beep');
+
+  if(found) {
+    wrap.style.borderColor = '#4c8';
+    wrap.style.background = '#4c811a';
+    if(lastEl) lastEl.textContent = '✅ ' + (nomProd ? nomProd.substring(0,30) : code);
+    if(lastEl) lastEl.style.color = '#4c8';
+    scannerBeep(true);
+  } else {
+    wrap.style.borderColor = '#e05';
+    wrap.style.background = '#5a0a1a';
+    if(lastEl) lastEl.textContent = '❌ Code inconnu : ' + code;
+    if(lastEl) lastEl.style.color = '#e05';
+    scannerBeep(false);
+  }
+
+  setTimeout(() => {
+    wrap.style.borderColor = 'var(--or)';
+    wrap.style.background = 'var(--bg3)';
+  }, 600);
+}
+
+function scannerBeep(success) {
+  const beepEl = document.getElementById('scanner-beep');
+  if(!beepEl || !beepEl.checked) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = success ? 1200 : 300;
+    osc.type = success ? 'sine' : 'square';
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + (success ? 0.12 : 0.25));
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + (success ? 0.12 : 0.25));
+  } catch(e) {}
+}
+
+function scannerFocus() {
+  const inp = document.getElementById('scanner-input');
+  if(inp) { inp.focus(); inp.select(); }
 }
 
 function posSelectFam(btn, fam) {
@@ -2331,6 +2589,41 @@ function posUpdateTotal() {
   if(countEl) countEl.textContent = POS_CART.reduce((s,i)=>s+i.qty,0);
 }
 
+function posToggleEcheance() {
+  const mode = document.getElementById('cart-paiement')?.value;
+  const row = document.getElementById('cart-echeance-row');
+  if (!row) return;
+  if (mode === 'CREDIT') {
+    row.style.display = 'block';
+    // Proposer une échéance par défaut à 30 jours
+    const inp = document.getElementById('cart-echeance');
+    if (inp && !inp.value) {
+      const d = new Date(); d.setDate(d.getDate()+30);
+      inp.value = d.toISOString().split('T')[0];
+    }
+  } else {
+    row.style.display = 'none';
+  }
+  posUpdateEncours();
+}
+
+function posUpdateEncours() {
+  const client = document.getElementById('cart-client')?.value;
+  const mode = document.getElementById('cart-paiement')?.value;
+  const infoEl = document.getElementById('cart-encours-info');
+  if (!infoEl) return;
+  if (!client || mode !== 'CREDIT') { infoEl.style.display='none'; return; }
+
+  const ventesClient = POS_VENTES.filter(v=>v.paiement==='CREDIT'&&(v.client===client||v.client===client));
+  const encours = ventesClient.reduce((s,v)=>s+Math.max(0,v.total-(CRED_REMBOURSES[v.id]||0)),0);
+  if (encours > 0) {
+    infoEl.style.display = 'block';
+    infoEl.innerHTML = `⚠️ Encours crédit actuel : <strong style="font-family:'JetBrains Mono',monospace">${fmtFull(encours)} GNF</strong>`;
+  } else {
+    infoEl.style.display = 'none';
+  }
+}
+
 function posValiderVente() {
   if(!POS_CURRENT_POINT) { alert('Sélectionnez un point de vente.'); return; }
   if(POS_CART.length === 0) return;
@@ -2339,6 +2632,7 @@ function posValiderVente() {
   const total = Math.max(0, subtotal - remise);
   const client = document.getElementById('cart-client')?.value || 'Client de passage';
   const paiement = document.getElementById('cart-paiement')?.value || 'ESPECES';
+  const echeance = paiement === 'CREDIT' ? (document.getElementById('cart-echeance')?.value || '') : '';
   const now = new Date();
   const ticketId = 'T-' + String(POS_TICKET_NB).padStart(5,'0');
   POS_TICKET_NB++;
@@ -2350,6 +2644,7 @@ function posValiderVente() {
     pointNom: POS_CURRENT_POINT.nom,
     client,
     paiement,
+    echeance,
     articles: [...POS_CART],
     subtotal,
     remise,
@@ -2366,16 +2661,20 @@ function posValiderVente() {
   if (clientTel) {
     if (SMS_CONFIG.trigVente) {
       const items = vente.articles.map(a=>`${a.nom} ×${a.qty}`).join(', ');
-      const msg = `Manfara & Fils - Ticket ${vente.id}: ${fmtFull(vente.total)} GNF (${vente.paiement}). Articles: ${items.substring(0,60)}. Merci!`;
+      const msg = `MANFRA-SHOP - Ticket ${vente.id}: ${fmtFull(vente.total)} GNF (${vente.paiement}). Articles: ${items.substring(0,60)}. Merci!`;
       smsEnvoyer(clientTel, msg, 'vente');
     }
     if (SMS_CONFIG.trigCredit && vente.paiement === 'CREDIT') {
-      const msg = `Manfara & Fils - Crédit accordé: ${fmtFull(vente.total)} GNF (Réf. ${vente.id}). Merci de régulariser dès que possible.`;
+      const echeanceLabel = echeance ? ` Échéance: ${new Date(echeance).toLocaleDateString('fr-FR')}.` : '';
+      const msg = `MANFRA-SHOP - Crédit accordé: ${fmtFull(vente.total)} GNF (Réf. ${vente.id}).${echeanceLabel} Merci de régulariser.`;
       smsEnvoyer(clientTel, msg, 'credit');
     }
   }
   posClearCart();
   document.getElementById('cart-remise').value = '';
+  document.getElementById('cart-echeance-row').style.display = 'none';
+  document.getElementById('cart-echeance').value = '';
+  document.getElementById('cart-encours-info').style.display = 'none';
   ventesRender();
 }
 
@@ -2384,7 +2683,7 @@ function posShowTicket(vente) {
   modal.className = 'ticket-modal';
   modal.innerHTML = `
     <div class="ticket-paper">
-      <h2>Ets Manfara & Fils</h2>
+      <h2>MANFRA-SHOP APP</h2>
       <div class="ticket-sub">Lero, Siguiri, Guinée<br>${vente.pointNom}</div>
       <hr class="ticket-sep">
       <div class="ticket-row"><span>Ticket:</span><span>${vente.id}</span></div>
@@ -2399,6 +2698,7 @@ function posShowTicket(vente) {
       ${vente.remise>0?`<div class="ticket-row"><span>Remise</span><span>-${fmtFull(vente.remise)}</span></div>`:''}
       <div class="ticket-row ticket-total"><span>TOTAL</span><span>${fmtFull(vente.total)} GNF</span></div>
       <div class="ticket-row" style="margin-top:6px"><span>Mode:</span><span>${vente.paiement}</span></div>
+      ${vente.paiement==='CREDIT'&&vente.echeance?`<div class="ticket-row" style="color:var(--red)"><span>Échéance:</span><span>${new Date(vente.echeance).toLocaleDateString('fr-FR')}</span></div>`:''}
       <div class="ticket-footer">Merci de votre confiance !<br>Vendeur: ${vente.vendeur}</div>
       <div class="ticket-actions">
         <button class="btn-print" onclick="window.print()">🖨 Imprimer</button>
@@ -2660,7 +2960,7 @@ function initProduits(){
   let activeFam='ALL', search='';
   prodPager=makePager(prod,50);
   function filter(){ let d=prod; if(activeFam!=='ALL') d=d.filter(p=>p.f===activeFam); if(search) d=d.filter(p=>(p.l||'').toLowerCase().includes(search)||(p.c||'').includes(search)); prodPager.setData(d); renderP(); }
-  function renderP(){ const rows=prodPager.page(); const tbody=document.getElementById('prod-tbody'); tbody.innerHTML=rows.map(p=>{ const color=FAM_COLORS[p.f]||'#888'; return `<tr><td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${p.c||'—'}</span></td><td>${p.l||'—'}</td><td><span class="badge" style="background:${color}22;color:${color}">${p.f||'—'}</span></td><td class="amount">${fmtFull(p.p)} GNF</td><td class="amount">${p.s||'0'}</td><td style="font-size:12px;color:var(--txt3)">${p.fr||'—'}</td></tr>`; }).join(''); document.getElementById('prod-info').textContent=`${prodPager.total().toLocaleString('fr-FR')} produits`; renderPagination(prodPager,document.getElementById('prod-pag-info'),document.getElementById('prod-pag-btns'),renderP); }
+  function renderP(){ const rows=prodPager.page(); const tbody=document.getElementById('prod-tbody'); tbody.innerHTML=rows.map(p=>{ const color=FAM_COLORS[p.f]||'#888'; return `<tr><td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${p.c||'—'}</span></td><td>${p.l||'—'}</td><td><span class="badge" style="background:${color}22;color:${color}">${p.f||'—'}</span></td><td class="amount">${fmtFull(p.p)} GNF</td><td class="amount">${p.s||'0'}</td><td style="font-size:12px;color:var(--txt3)">${p.fr||'—'}</td><td style="white-space:nowrap"><button onclick="prodEditer('${p.c}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:var(--or);cursor:pointer;font-size:11px;margin-right:4px">✏️</button><button onclick="prodSupprimer('${p.c}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:#e05;cursor:pointer;font-size:11px">🗑️</button></td></tr>`; }).join(''); document.getElementById('prod-info').textContent=`${prodPager.total().toLocaleString('fr-FR')} produits`; renderPagination(prodPager,document.getElementById('prod-pag-info'),document.getElementById('prod-pag-btns'),renderP); }
   filtersEl.addEventListener('click',e=>{ if(!e.target.dataset.fam) return; filtersEl.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); activeFam=e.target.dataset.fam; filter(); });
   document.getElementById('prod-search').addEventListener('input',e=>{ search=e.target.value.trim().toLowerCase(); filter(); });
   filter();
@@ -2681,15 +2981,118 @@ function initAppros(){
 
 // ─── CLIENTS ───────────────────────────────────────────────────
 let cliPager;
-function initClients(){
-  const clients=DB_LOCAL.clients;
-  document.getElementById('cli-count-lbl').textContent=`${clients.length.toLocaleString('fr-FR')} clients enregistrés`;
-  let search='';
-  cliPager=makePager(clients,50);
-  function filter(){ let d=clients; if(search) d=d.filter(c=>(c.n||'').toLowerCase().includes(search)||(c.t||'').includes(search)); cliPager.setData(d); renderC(); }
-  function renderC(){ const rows=cliPager.page(); document.getElementById('cli-tbody').innerHTML=rows.map(c=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${c.i}</td><td>${c.n||'—'}</td><td style="font-size:12px;color:var(--txt3)">${c.a||'—'}</td><td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--or)">${c.t||'—'}</span></td></tr>`).join(''); document.getElementById('cli-info').textContent=`${cliPager.total().toLocaleString('fr-FR')} clients`; renderPagination(cliPager,document.getElementById('cli-pag-info'),document.getElementById('cli-pag-btns'),renderC); }
-  document.getElementById('cli-search').addEventListener('input',e=>{ search=e.target.value.trim().toLowerCase(); filter(); });
-  filter();
+// ── État édition client ──
+let CLI_EDIT_ID = null; // null = création, sinon ID du client en cours d'édition
+
+function cliToggleForm(clientData) {
+  const form = document.getElementById('cli-form');
+  const isOpen = form.style.display !== 'none';
+  if (isOpen && !clientData) { form.style.display = 'none'; cliResetForm(); return; }
+  // Pré-remplissage si édition
+  if (clientData) {
+    CLI_EDIT_ID = clientData.i;
+    document.getElementById('cli-form-title').textContent = '✏️ Modifier le client';
+    document.getElementById('cli-form-nom').value = clientData.n || '';
+    document.getElementById('cli-form-tel').value = clientData.t || '';
+    document.getElementById('cli-form-adr').value = clientData.a || '';
+  } else {
+    CLI_EDIT_ID = null;
+    document.getElementById('cli-form-title').textContent = '➕ Nouveau client';
+    cliResetForm();
+  }
+  form.style.display = 'block';
+  document.getElementById('cli-form-nom').focus();
+}
+
+function cliResetForm() {
+  CLI_EDIT_ID = null;
+  ['cli-form-nom','cli-form-tel','cli-form-adr'].forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('cli-form-msg').textContent = '';
+}
+
+async function cliSauvegarder() {
+  const nom = document.getElementById('cli-form-nom').value.trim().toUpperCase();
+  const tel  = document.getElementById('cli-form-tel').value.trim();
+  const adr  = document.getElementById('cli-form-adr').value.trim().toUpperCase();
+  const msg  = document.getElementById('cli-form-msg');
+  if (!nom) { msg.style.color='var(--red)'; msg.textContent='⚠ Le nom est obligatoire.'; return; }
+
+  if (CLI_EDIT_ID) {
+    // ── Modification ──
+    const idx = DB_LOCAL.clients.findIndex(c => c.i === CLI_EDIT_ID);
+    if (idx === -1) { msg.style.color='var(--red)'; msg.textContent='Client introuvable.'; return; }
+    DB_LOCAL.clients[idx] = { ...DB_LOCAL.clients[idx], n: nom, t: tel, a: adr };
+    if (dataSource === 'firebase') {
+      try { await db.collection('clients').doc(String(CLI_EDIT_ID)).update({ n: nom, t: tel, a: adr }); } catch(e) {}
+    }
+    msg.style.color='var(--or)'; msg.textContent='✅ Client modifié !';
+  } else {
+    // ── Création ──
+    const newId = 'CLI-' + Date.now();
+    const nouveau = { i: newId, n: nom, t: tel, a: adr, createdAt: new Date().toISOString(), saisiepar: currentUser?.displayName || currentUser?.email || '—' };
+    DB_LOCAL.clients.unshift(nouveau);
+    if (dataSource === 'firebase') {
+      try { await db.collection('clients').doc(newId).set(nouveau); } catch(e) {}
+    }
+    // Mise à jour du select POS
+    const sel = document.getElementById('cart-client');
+    if (sel) {
+      const opt = document.createElement('option');
+      opt.value = nouveau.n; opt.textContent = nouveau.n + (nouveau.t ? ` (${nouveau.t})` : '');
+      sel.insertBefore(opt, sel.children[1]);
+    }
+    msg.style.color='var(--or)'; msg.textContent='✅ Client enregistré !';
+    cliResetForm();
+    document.getElementById('cli-form-nom').focus();
+  }
+  cliRenderAll();
+  setTimeout(() => { msg.textContent = ''; }, 3000);
+}
+
+async function cliSupprimer(id) {
+  if (!confirm('Supprimer ce client ? Cette action est irréversible.')) return;
+  DB_LOCAL.clients = DB_LOCAL.clients.filter(c => c.i !== id);
+  if (dataSource === 'firebase') {
+    try { await db.collection('clients').doc(String(id)).delete(); } catch(e) {}
+  }
+  cliRenderAll();
+}
+
+let cliSearchVal = '';
+function cliRenderAll() {
+  const clients = DB_LOCAL.clients;
+  document.getElementById('cli-count-lbl').textContent = `${clients.length.toLocaleString('fr-FR')} clients enregistrés`;
+  let d = clients;
+  if (cliSearchVal) d = d.filter(c => (c.n||'').toLowerCase().includes(cliSearchVal) || (c.t||'').includes(cliSearchVal));
+  cliPager.setData(d);
+  renderCliPage();
+}
+
+function renderCliPage() {
+  const canEdit = currentUser && (currentUser.role === 'admin' || currentUser.role === 'gerant');
+  const rows = cliPager.page();
+  document.getElementById('cli-tbody').innerHTML = rows.map(c => `
+    <tr>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${c.i}</td>
+      <td>${c.n||'—'}</td>
+      <td style="font-size:12px;color:var(--txt3)">${c.a||'—'}</td>
+      <td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--or)">${c.t||'—'}</span></td>
+      <td style="text-align:right;white-space:nowrap">
+        ${canEdit ? `<button onclick='cliToggleForm(${JSON.stringify(c)})' style="background:none;border:1px solid var(--brd);border-radius:5px;color:var(--txt2);font-size:11px;padding:3px 8px;cursor:pointer;margin-right:4px">✏️</button>` : ''}
+        ${currentUser?.role === 'admin' ? `<button onclick="cliSupprimer('${c.i}')" style="background:none;border:1px solid var(--red);border-radius:5px;color:var(--red);font-size:11px;padding:3px 8px;cursor:pointer">🗑</button>` : ''}
+      </td>
+    </tr>`).join('');
+  document.getElementById('cli-info').textContent = `${cliPager.total().toLocaleString('fr-FR')} clients`;
+  renderPagination(cliPager, document.getElementById('cli-pag-info'), document.getElementById('cli-pag-btns'), renderCliPage);
+}
+
+function initClients() {
+  cliPager = makePager(DB_LOCAL.clients, 50);
+  document.getElementById('cli-search').addEventListener('input', e => {
+    cliSearchVal = e.target.value.trim().toLowerCase();
+    cliRenderAll();
+  });
+  cliRenderAll();
 }
 
 // ─── FOURNISSEURS ──────────────────────────────────────────────
@@ -2699,9 +3102,195 @@ function initFournisseurs(){
   let search='';
   frnsPager=makePager(frns,50);
   function filter(){ let d=frns; if(search) d=d.filter(f=>(f.n||'').toLowerCase().includes(search)||(f.v||'').toLowerCase().includes(search)); frnsPager.setData(d); renderF(); }
-  function renderF(){ const rows=frnsPager.page(); document.getElementById('frns-tbody').innerHTML=rows.map(f=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${f.i}</td><td>${f.n||'—'}</td><td style="font-size:12px;color:var(--txt3)">${f.a||'—'}</td><td><span class="badge badge-blu">${f.v||'—'}</span></td><td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--or)">${f.t||'—'}</span></td></tr>`).join(''); document.getElementById('frns-info').textContent=`${frnsPager.total().toLocaleString('fr-FR')} fournisseurs`; renderPagination(frnsPager,document.getElementById('frns-pag-info'),document.getElementById('frns-pag-btns'),renderF); }
+  function renderF(){ const rows=frnsPager.page(); document.getElementById('frns-tbody').innerHTML=rows.map(f=>`<tr><td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${f.i}</td><td>${f.n||'—'}</td><td style="font-size:12px;color:var(--txt3)">${f.a||'—'}</td><td><span class="badge badge-blu">${f.v||'—'}</span></td><td><span style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--or)">${f.t||'—'}</span></td><td style="white-space:nowrap"><button onclick="frnsEditer('${f.i}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:var(--or);cursor:pointer;font-size:11px;margin-right:4px">✏️</button><button onclick="frnsSupprimer('${f.i}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:#e05;cursor:pointer;font-size:11px">🗑️</button></td></tr>`).join(''); document.getElementById('frns-info').textContent=`${frnsPager.total().toLocaleString('fr-FR')} fournisseurs`; renderPagination(frnsPager,document.getElementById('frns-pag-info'),document.getElementById('frns-pag-btns'),renderF); }
   document.getElementById('frns-search').addEventListener('input',e=>{ search=e.target.value.trim().toLowerCase(); filter(); });
   filter();
+}
+
+
+// ─── CRUD FOURNISSEURS ─────────────────────────────────────────
+function frnsToggleForm(reset=true) {
+  const form = document.getElementById('frns-form');
+  const shown = form.style.display !== 'none';
+  if(shown) {
+    form.style.display = 'none';
+  } else {
+    if(reset) {
+      document.getElementById('frns-form-title').textContent = '➕ Nouveau fournisseur';
+      document.getElementById('frns-form-nom').value = '';
+      document.getElementById('frns-form-tel').value = '';
+      document.getElementById('frns-form-ville').value = '';
+      document.getElementById('frns-form-adresse').value = '';
+      document.getElementById('frns-form-id').value = '';
+      document.getElementById('frns-form-msg').textContent = '';
+    }
+    form.style.display = 'block';
+    form.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+
+function frnsEditer(id) {
+  const f = DB_LOCAL.fournisseurs.find(x => x.i == id);
+  if(!f) return;
+  document.getElementById('frns-form-title').textContent = '✏️ Modifier fournisseur';
+  document.getElementById('frns-form-nom').value = f.n || '';
+  document.getElementById('frns-form-tel').value = f.t || '';
+  document.getElementById('frns-form-ville').value = f.v || '';
+  document.getElementById('frns-form-adresse').value = f.a || '';
+  document.getElementById('frns-form-id').value = f.i;
+  document.getElementById('frns-form-msg').textContent = '';
+  frnsToggleForm(false);
+}
+
+async function frnsSauvegarder() {
+  const nom = document.getElementById('frns-form-nom').value.trim();
+  if(!nom) { document.getElementById('frns-form-msg').textContent = '⚠️ Le nom est obligatoire.'; return; }
+  const id = document.getElementById('frns-form-id').value.trim();
+  const msgEl = document.getElementById('frns-form-msg');
+  msgEl.textContent = '⏳ Enregistrement...';
+
+  // Générer un ID si nouveau
+  const finalId = id || String(Math.max(0, ...DB_LOCAL.fournisseurs.map(f=>parseInt(f.i)||0)) + 1);
+  const record = {
+    i: finalId,
+    n: nom,
+    t: document.getElementById('frns-form-tel').value.trim(),
+    v: document.getElementById('frns-form-ville').value.trim(),
+    a: document.getElementById('frns-form-adresse').value.trim()
+  };
+
+  // Mettre à jour en mémoire
+  const idx = DB_LOCAL.fournisseurs.findIndex(f => f.i == finalId);
+  if(idx >= 0) DB_LOCAL.fournisseurs[idx] = record;
+  else DB_LOCAL.fournisseurs.push(record);
+
+  // Sauvegarder dans Firestore
+  try {
+    await db.collection('fournisseurs').doc('frn_' + finalId).set(record);
+    msgEl.style.color = 'var(--or)';
+    msgEl.textContent = '✅ Fournisseur enregistré avec succès !';
+  } catch(e) {
+    msgEl.style.color = '#e05';
+    msgEl.textContent = '⚠️ Hors ligne — sauvegardé localement.';
+  }
+
+  // Rafraîchir la liste
+  initFournisseurs();
+  setTimeout(() => frnsToggleForm(), 1500);
+}
+
+async function frnsSupprimer(id) {
+  const f = DB_LOCAL.fournisseurs.find(x => x.i == id);
+  if(!f) return;
+  if(!confirm('Supprimer le fournisseur "' + f.n + '" ?')) return;
+  DB_LOCAL.fournisseurs = DB_LOCAL.fournisseurs.filter(x => x.i != id);
+  try { await db.collection('fournisseurs').doc('frn_' + id).delete(); } catch(e) { /* offline */ }
+  initFournisseurs();
+}
+
+// ─── CRUD PRODUITS ─────────────────────────────────────────────
+function prodToggleForm(reset=true) {
+  const form = document.getElementById('prod-form');
+  const shown = form.style.display !== 'none';
+  if(shown) {
+    form.style.display = 'none';
+  } else {
+    if(reset) {
+      document.getElementById('prod-form-title').textContent = '➕ Nouveau produit';
+      document.getElementById('prod-form-code').value = '';
+      document.getElementById('prod-form-lib').value = '';
+      // Peupler les familles depuis les données réelles
+      const famSel = document.getElementById('prod-form-fam');
+      const famsExistantes = [...new Set(DB_LOCAL.produits.map(p=>p.f).filter(Boolean))].sort();
+      const FAMS_BASE = ['COSMETIQUE','ELECTRONIQUE','ELECTRO MENAGER','ALIMENTATION','DEVISES','NUTRITION BEBE'];
+      const toutesLesFams = [...new Set([...FAMS_BASE, ...famsExistantes])].sort();
+      famSel.innerHTML = toutesLesFams.map(f => `<option value="${f}">${f}</option>`).join('');
+      famSel.value = 'COSMETIQUE';
+      document.getElementById('prod-form-prix').value = '';
+      document.getElementById('prod-form-stock').value = '';
+      document.getElementById('prod-form-frns').value = '';
+      document.getElementById('prod-form-orig-code').value = '';
+      document.getElementById('prod-form-msg').textContent = '';
+      // Peupler la datalist des fournisseurs
+      const dl = document.getElementById('prod-frns-list');
+      if(dl) { dl.innerHTML = ''; DB_LOCAL.fournisseurs.forEach(f => { const opt = document.createElement('option'); opt.value = f.n; dl.appendChild(opt); }); }
+    }
+    form.style.display = 'block';
+    form.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+}
+
+function prodEditer(code) {
+  const p = DB_LOCAL.produits.find(x => x.c == code);
+  if(!p) return;
+  document.getElementById('prod-form-title').textContent = '✏️ Modifier produit';
+  document.getElementById('prod-form-code').value = p.c || '';
+  document.getElementById('prod-form-lib').value = p.l || '';
+  document.getElementById('prod-form-fam').value = p.f || 'COSMETIQUE';
+  document.getElementById('prod-form-prix').value = p.p || '';
+  document.getElementById('prod-form-stock').value = p.s || '';
+  document.getElementById('prod-form-frns').value = p.fr || '';
+  document.getElementById('prod-form-orig-code').value = p.c || '';
+  document.getElementById('prod-form-msg').textContent = '';
+  // Peupler la datalist
+  const dl = document.getElementById('prod-frns-list');
+  if(dl) { dl.innerHTML = ''; DB_LOCAL.fournisseurs.forEach(f => { const opt = document.createElement('option'); opt.value = f.n; dl.appendChild(opt); }); }
+  prodToggleForm(false);
+}
+
+async function prodSauvegarder() {
+  const code = document.getElementById('prod-form-code').value.trim();
+  const lib = document.getElementById('prod-form-lib').value.trim();
+  if(!code || !lib) { document.getElementById('prod-form-msg').textContent = '⚠️ Code et libellé obligatoires.'; return; }
+  const msgEl = document.getElementById('prod-form-msg');
+  msgEl.textContent = '⏳ Enregistrement...';
+  const origCode = document.getElementById('prod-form-orig-code').value.trim();
+
+  const record = {
+    c: code,
+    l: lib,
+    f: document.getElementById('prod-form-fam').value,
+    p: document.getElementById('prod-form-prix').value || '0',
+    s: document.getElementById('prod-form-stock').value || '0',
+    fr: document.getElementById('prod-form-frns').value.trim()
+  };
+
+  // Si le code a changé (modification), supprimer l'ancien
+  if(origCode && origCode !== code) {
+    DB_LOCAL.produits = DB_LOCAL.produits.filter(p => p.c != origCode);
+    try { await db.collection('produits').doc('prd_' + origCode).delete(); } catch(e) {}
+  }
+
+  // Mettre à jour en mémoire
+  const idx = DB_LOCAL.produits.findIndex(p => p.c == code);
+  if(idx >= 0) DB_LOCAL.produits[idx] = record;
+  else DB_LOCAL.produits.push(record);
+
+  // Sauvegarder dans Firestore
+  try {
+    await db.collection('produits').doc('prd_' + code).set(record);
+    msgEl.style.color = 'var(--or)';
+    msgEl.textContent = '✅ Produit enregistré avec succès !';
+  } catch(e) {
+    msgEl.style.color = '#e05';
+    msgEl.textContent = '⚠️ Hors ligne — sauvegardé localement.';
+  }
+
+  // Rafraîchir la liste
+  initProduits();
+  // Mettre à jour le KPI
+  document.getElementById('kpi-produits').textContent = DB_LOCAL.produits.length.toLocaleString('fr-FR');
+  setTimeout(() => prodToggleForm(), 1500);
+}
+
+async function prodSupprimer(code) {
+  const p = DB_LOCAL.produits.find(x => x.c == code);
+  if(!p) return;
+  if(!confirm('Supprimer le produit "' + p.l + '" (code ' + code + ') ?')) return;
+  DB_LOCAL.produits = DB_LOCAL.produits.filter(x => x.c != code);
+  try { await db.collection('produits').doc('prd_' + code).delete(); } catch(e) { /* offline */ }
+  initProduits();
+  document.getElementById('kpi-produits').textContent = DB_LOCAL.produits.length.toLocaleString('fr-FR');
 }
 
 // ─── DEPENSES ──────────────────────────────────────────────────
@@ -3605,28 +4194,129 @@ async function initDepenses() {
 // MODULE CRÉDITS CLIENTS
 // ══════════════════════════════════════════════════════
 let CRED_REMBOURSES = {};
+let CRED_VERSEMENTS = {}; // historique : { ticketId: [{montant, date, operateur}] }
 let credPager;
+let credStatutFilter = ''; // 'retard' | 'partiel' | 'solde' | ''
 
 function credLoadLocal() {
   try {
     const d = localStorage.getItem('manfara_credits');
     if (d) CRED_REMBOURSES = JSON.parse(d);
+    const dv = localStorage.getItem('manfara_credits_versements');
+    if (dv) CRED_VERSEMENTS = JSON.parse(dv);
   } catch(e) {}
 }
 
 function credSaveLocal() {
-  try { localStorage.setItem('manfara_credits', JSON.stringify(CRED_REMBOURSES)); } catch(e) {}
+  try {
+    localStorage.setItem('manfara_credits', JSON.stringify(CRED_REMBOURSES));
+    localStorage.setItem('manfara_credits_versements', JSON.stringify(CRED_VERSEMENTS));
+  } catch(e) {}
 }
 
-async function credRembourser(ticketId, total) {
-  const montant = parseFloat(prompt(`Montant remboursé pour le ticket ${ticketId} (GNF) :`) || '0');
-  if (isNaN(montant) || montant <= 0) return;
+function credRembourserModal(ticketId, total) {
+  // Supprimer modal existant éventuel
+  document.getElementById('cred-remb-modal')?.remove();
+  const vente = POS_VENTES.find(v=>v.id===ticketId);
+  const rembActuel = CRED_REMBOURSES[ticketId] || 0;
+  const resteActuel = total - rembActuel;
+  const versements = CRED_VERSEMENTS[ticketId] || [];
+
+  const modal = document.createElement('div');
+  modal.id = 'cred-remb-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:12px;padding:28px 28px 24px;width:420px;max-width:95vw;box-shadow:0 8px 40px rgba(0,0,0,.7);">
+      <div style="font-family:'Cinzel',serif;font-size:15px;color:var(--or);margin-bottom:4px">Enregistrer un remboursement</div>
+      <div style="font-size:11px;color:var(--txt3);margin-bottom:18px">Ticket <span style="color:var(--txt);font-family:'JetBrains Mono',monospace">${ticketId}</span> — Client : <strong style="color:var(--txt)">${vente?.client||'—'}</strong></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px">
+        <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:11px;color:var(--txt3);margin-bottom:4px">Total crédit</div>
+          <div style="font-family:'JetBrains Mono',monospace;color:var(--txt);font-size:13px">${fmtFull(total)} GNF</div>
+        </div>
+        <div style="background:var(--bg3);border-radius:8px;padding:12px;text-align:center">
+          <div style="font-size:11px;color:var(--txt3);margin-bottom:4px">Reste à payer</div>
+          <div style="font-family:'JetBrains Mono',monospace;color:var(--red);font-size:13px">${fmtFull(resteActuel)} GNF</div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px">
+        <label style="font-size:11px;color:var(--txt3);letter-spacing:.5px;text-transform:uppercase;display:block;margin-bottom:6px">Montant reçu (GNF)</label>
+        <input id="cred-remb-input" type="number" min="1" max="${resteActuel}" placeholder="Ex : 50 000"
+          style="width:100%;background:var(--bg3);border:1px solid var(--brd);border-radius:var(--radius);padding:10px 14px;color:var(--txt);font-family:'JetBrains Mono',monospace;font-size:15px;outline:none;transition:border .2s"
+          onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--brd)'">
+      </div>
+
+      ${versements.length > 0 ? `
+      <div style="margin-bottom:16px">
+        <div style="font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px">Historique des versements</div>
+        <div style="background:var(--bg3);border-radius:6px;padding:8px 10px;max-height:100px;overflow-y:auto">
+          ${versements.map(v=>`
+            <div style="display:flex;justify-content:space-between;font-size:11px;padding:3px 0;border-bottom:1px solid var(--brd)">
+              <span style="color:var(--txt2)">${v.date}</span>
+              <span style="color:var(--grn);font-family:'JetBrains Mono',monospace">+${fmtFull(v.montant)} GNF</span>
+              <span style="color:var(--txt3)">${v.operateur||''}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>` : ''}
+
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="document.getElementById('cred-remb-modal').remove()"
+          style="padding:9px 18px;background:transparent;border:1px solid var(--brd);border-radius:var(--radius);color:var(--txt3);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">
+          Annuler
+        </button>
+        <button onclick="credConfirmerRemboursement('${ticketId}',${total})"
+          style="padding:9px 20px;background:linear-gradient(135deg,var(--or),var(--or2));border:none;border-radius:var(--radius);color:var(--bg);font-family:'Cinzel',serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px">
+          ✓ Confirmer
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.onclick = e => { if(e.target===modal) modal.remove(); };
+  setTimeout(() => document.getElementById('cred-remb-input')?.focus(), 50);
+}
+
+async function credConfirmerRemboursement(ticketId, total) {
+  const input = document.getElementById('cred-remb-input');
+  const montant = parseFloat(input?.value || '0');
+  if (isNaN(montant) || montant <= 0) {
+    input?.focus();
+    return;
+  }
+  const resteAvant = total - (CRED_REMBOURSES[ticketId] || 0);
+  if (montant > resteAvant) {
+    input.style.borderColor = 'var(--red)';
+    input.placeholder = `Max : ${fmtFull(resteAvant)} GNF`;
+    input.value = '';
+    input.focus();
+    return;
+  }
+
   if (!CRED_REMBOURSES[ticketId]) CRED_REMBOURSES[ticketId] = 0;
   CRED_REMBOURSES[ticketId] = Math.min(CRED_REMBOURSES[ticketId] + montant, total);
+
+  // Enregistrer dans l'historique des versements
+  if (!CRED_VERSEMENTS[ticketId]) CRED_VERSEMENTS[ticketId] = [];
+  CRED_VERSEMENTS[ticketId].push({
+    montant,
+    date: new Date().toLocaleDateString('fr-FR'),
+    operateur: currentUser?.displayName || currentUser?.email || 'Opérateur'
+  });
+
   credSaveLocal();
+
   if (dataSource === 'firebase') {
-    try { await db.collection('credits_remboursements').doc(ticketId).set({ rembourse: CRED_REMBOURSES[ticketId], updatedAt: new Date().toISOString() }); } catch(e) {}
+    try {
+      await db.collection('credits_remboursements').doc(ticketId).set({
+        rembourse: CRED_REMBOURSES[ticketId],
+        versements: CRED_VERSEMENTS[ticketId],
+        updatedAt: new Date().toISOString()
+      });
+    } catch(e) {}
   }
+
   // SMS notification remboursement
   if (SMS_CONFIG.trigRemb) {
     const vente = POS_VENTES.find(v=>v.id===ticketId);
@@ -3636,12 +4326,14 @@ async function credRembourser(ticketId, total) {
       if (clientTel) {
         const reste = Math.max(0, vente.total - (CRED_REMBOURSES[ticketId]||0));
         const msg = reste <= 0
-          ? `Manfara & Fils - Merci! Votre crédit (${vente.id}) est entièrement remboursé.`
-          : `Manfara & Fils - Remboursement reçu: ${fmtFull(montant)} GNF. Reste dû: ${fmtFull(reste)} GNF (Réf. ${vente.id}).`;
+          ? `MANFRA-SHOP - Merci! Votre crédit (${vente.id}) est entièrement remboursé.`
+          : `MANFRA-SHOP - Remboursement reçu: ${fmtFull(montant)} GNF. Reste dû: ${fmtFull(reste)} GNF (Réf. ${vente.id}).`;
         smsEnvoyer(clientTel, msg, 'remb');
       }
     }
   }
+
+  document.getElementById('cred-remb-modal')?.remove();
   credRenderAll();
 }
 
@@ -3651,19 +4343,57 @@ function credFilter() {
   credRenderAll();
 }
 
+function credSetStatut(statut) {
+  credStatutFilter = credStatutFilter === statut ? '' : statut;
+  document.querySelectorAll('.cred-stat-btn').forEach(b => {
+    b.style.background = b.dataset.statut === credStatutFilter ? 'rgba(212,175,55,.15)' : 'transparent';
+    b.style.borderColor = b.dataset.statut === credStatutFilter ? 'var(--or)' : 'var(--brd)';
+    b.style.color = b.dataset.statut === credStatutFilter ? 'var(--or)' : 'var(--txt3)';
+  });
+  credPager = null;
+  credRenderAll();
+}
+
 function credRenderAll() {
+  const today = new Date(); today.setHours(0,0,0,0);
   const credits = POS_VENTES.filter(v=>v.paiement==='CREDIT');
   let filtered = credits;
+
   if (credSearchStr) filtered = filtered.filter(v=>(v.client||'').toLowerCase().includes(credSearchStr)||(v.id||'').toLowerCase().includes(credSearchStr));
+
+  if (credStatutFilter === 'retard') {
+    filtered = filtered.filter(v => {
+      const reste = v.total - (CRED_REMBOURSES[v.id]||0);
+      if (reste <= 0) return false;
+      if (!v.echeance) return false;
+      return new Date(v.echeance) < today;
+    });
+  } else if (credStatutFilter === 'partiel') {
+    filtered = filtered.filter(v => {
+      const r = CRED_REMBOURSES[v.id]||0;
+      return r > 0 && r < v.total;
+    });
+  } else if (credStatutFilter === 'attente') {
+    filtered = filtered.filter(v => !(CRED_REMBOURSES[v.id]||0) && v.total > 0);
+  } else if (credStatutFilter === 'solde') {
+    filtered = filtered.filter(v => (CRED_REMBOURSES[v.id]||0) >= v.total);
+  }
+
   const totalCredit = credits.reduce((s,v)=>s+v.total,0);
   const totalRembourse = credits.reduce((s,v)=>s+(CRED_REMBOURSES[v.id]||0),0);
   const totalReste = totalCredit - totalRembourse;
   const nbClients = [...new Set(credits.map(v=>v.client||'—'))].length;
+  const nbRetard = credits.filter(v => {
+    const reste = v.total - (CRED_REMBOURSES[v.id]||0);
+    return reste > 0 && v.echeance && new Date(v.echeance) < today;
+  }).length;
+
   document.getElementById('cred-kpi-total').textContent = fmt(totalCredit);
   document.getElementById('cred-kpi-nb').textContent = nbClients;
   document.getElementById('cred-kpi-rembourse').textContent = fmt(totalRembourse);
   document.getElementById('cred-kpi-reste').textContent = fmt(totalReste);
-  document.getElementById('cred-sub').textContent = `${credits.length} ventes à crédit — Reste: ${fmtFull(totalReste)} GNF`;
+  document.getElementById('cred-sub').textContent = `${credits.length} ventes à crédit — Reste: ${fmtFull(totalReste)} GNF${nbRetard > 0 ? ` — ⚠️ ${nbRetard} en retard` : ''}`;
+
   if (!credPager) credPager = makePager(filtered, 30);
   else credPager.setData(filtered);
   const rows = credPager.page();
@@ -3673,21 +4403,26 @@ function credRenderAll() {
     const rembourse = CRED_REMBOURSES[v.id] || 0;
     const reste = v.total - rembourse;
     const pct = v.total > 0 ? Math.round((rembourse/v.total)*100) : 0;
+    const estRetard = reste > 0 && v.echeance && new Date(v.echeance) < today;
+    const echeanceStr = v.echeance ? `<span style="font-size:11px;color:${estRetard?'var(--red)':'var(--txt3)'}">${estRetard?'⚠️ ':''} ${new Date(v.echeance).toLocaleDateString('fr-FR')}</span>` : '<span style="color:var(--txt3);font-size:11px">—</span>';
     const statut = reste <= 0 ? '<span class="badge badge-grn">✓ Soldé</span>' :
+                   estRetard ? '<span class="badge" style="background:rgba(192,57,43,.18);color:var(--red);border:1px solid rgba(192,57,43,.3)">⚠️ Retard</span>' :
                    rembourse > 0 ? `<span class="badge badge-or">Partiel ${pct}%</span>` :
-                   '<span class="badge" style="background:#ff000022;color:#ff4444">En attente</span>';
-    return `<tr>
+                   '<span class="badge" style="background:#ff000022;color:#ff6666">En attente</span>';
+    const progBar = v.total > 0 ? `<div style="height:3px;background:var(--bg4);border-radius:2px;margin-top:3px"><div style="height:3px;background:var(--grn);border-radius:2px;width:${pct}%"></div></div>` : '';
+    return `<tr style="${estRetard?'background:rgba(192,57,43,.04)':''}">
       <td><span style="font-family:'JetBrains Mono',monospace;color:var(--or)">${v.id}</span></td>
       <td>${v.dateStr||'—'}</td>
       <td><strong>${v.client||'—'}</strong></td>
       <td>${v.pointNom||'—'}</td>
+      <td>${echeanceStr}</td>
       <td class="amount">${fmtFull(v.total)}</td>
-      <td class="amount amount-pos">${fmtFull(rembourse)}</td>
+      <td class="amount amount-pos">${fmtFull(rembourse)}${progBar}</td>
       <td class="amount ${reste>0?'amount-neg':'amount-pos'}">${fmtFull(Math.max(0,reste))}</td>
       <td>${statut}</td>
-      <td>${reste>0 ? `<button onclick="credRembourser('${v.id}',${v.total})" class="btn-add" style="padding:4px 10px;font-size:11px">Rembourser</button>` : ''}</td>
+      <td>${reste>0 ? `<button onclick="credRembourserModal('${v.id}',${v.total})" class="btn-add" style="padding:4px 10px;font-size:11px">Rembourser</button>` : ''}</td>
     </tr>`;
-  }).join('') || '<tr><td colspan="9" style="text-align:center;color:var(--txt3);padding:32px">Aucune vente à crédit</td></tr>';
+  }).join('') || '<tr><td colspan="10" style="text-align:center;color:var(--txt3);padding:32px">Aucune vente à crédit</td></tr>';
   document.getElementById('cred-info').textContent = `${filtered.length} crédits`;
   renderPagination(credPager, document.getElementById('cred-pag-info'), document.getElementById('cred-pag-btns'), credRenderAll);
 }
@@ -3695,6 +4430,7 @@ function credRenderAll() {
 function initCredits() {
   credLoadLocal();
   credPager = null;
+  credStatutFilter = '';
   credRenderAll();
 }
 
@@ -3844,10 +4580,10 @@ function smsLoadUI() {
   } else if (p === 'infobip' && SMS_CONFIG.infobip) {
     el('sms-infobip-key') && (el('sms-infobip-key').value = SMS_CONFIG.infobip.key||'');
     el('sms-infobip-base') && (el('sms-infobip-base').value = SMS_CONFIG.infobip.base||'');
-    el('sms-infobip-from') && (el('sms-infobip-from').value = SMS_CONFIG.infobip.from||'Manfara');
+    el('sms-infobip-from') && (el('sms-infobip-from').value = SMS_CONFIG.infobip.from||'MANFRA-SHOP');
   } else if (p === 'orange' && SMS_CONFIG.orange) {
     el('sms-orange-token') && (el('sms-orange-token').value = SMS_CONFIG.orange.token||'');
-    el('sms-orange-from') && (el('sms-orange-from').value = SMS_CONFIG.orange.from||'Manfara');
+    el('sms-orange-from') && (el('sms-orange-from').value = SMS_CONFIG.orange.from||'MANFRA-SHOP');
   } else if (p === 'webhook' && SMS_CONFIG.webhook) {
     el('sms-webhook-url') && (el('sms-webhook-url').value = SMS_CONFIG.webhook.url||'');
     el('sms-webhook-auth') && (el('sms-webhook-auth').value = SMS_CONFIG.webhook.auth||'');
@@ -3925,7 +4661,7 @@ async function smsEnvoyer(to, message, type) {
       const r = await fetch(`https://${base}/sms/2/text/advanced`, {
         method: 'POST',
         headers: { Authorization: 'App ' + key, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: [{ from: from||'Manfara', destinations: [{ to: phone }], text: message }] }),
+        body: JSON.stringify({ messages: [{ from: from||'MANFRA-SHOP', destinations: [{ to: phone }], text: message }] }),
       });
       const json = await r.json();
       if (!r.ok) throw new Error(JSON.stringify(json));
@@ -3961,7 +4697,7 @@ async function smsTest() {
   if (!testNum) return;
   const msg = document.getElementById('sms-msg');
   if (msg) { msg.style.color='var(--txt3)'; msg.textContent='📤 Envoi en cours...'; }
-  await smsEnvoyer(testNum, 'Test SMS depuis Manfara & Fils. Bonne journée !', 'test');
+  await smsEnvoyer(testNum, 'Test SMS depuis MANFRA-SHOP APP. Bonne journée !', 'test');
   const last = SMS_HISTORY[0];
   if (msg) {
     if (last?.ok) { msg.style.color='#3DA85A'; msg.textContent='✅ SMS envoyé avec succès !'; }
@@ -3998,7 +4734,7 @@ function initActivites() {
   // Remplir le filtre PDV
   const sel = document.getElementById('act-pdv-filter');
   sel.innerHTML = '<option value="">Tous</option>';
-  (POS_POINTS || []).forEach(p => {
+  (POINTS_DE_VENTE || []).forEach(p => {
     const o = document.createElement('option');
     o.value = p.id; o.textContent = p.nom || p.id;
     sel.appendChild(o);
@@ -4387,7 +5123,7 @@ function actExportCSV() {
   const csv = rows.map(r=>r.map(c=>'"'+String(c).replace(/"/g,'""')+'"').join(',')).join('\n');
   const blob = new Blob(['\ufeff'+csv], {type:'text/csv;charset=utf-8;'});
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a'); a.href=url; a.download='activites-manfara.csv'; a.click();
+  const a = document.createElement('a'); a.href=url; a.download='activites-manfra-shop.csv'; a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -4406,10 +5142,14 @@ function exportCSV(type) {
     rows = [...DEP_DATA,...(DB_LOCAL.depenses||[])].map(d=>[d.id||d.i,d.date||d.d,d.lib||d.l,d.cat||'',d.mnt||d.m,d.saisiepar||'']);
     filename = 'manfara_depenses.csv';
   } else if (type === 'credits') {
-    headers = ['Ticket','Date','Client','Point de Vente','Total GNF','Remboursé','Reste'];
+    headers = ['Ticket','Date','Client','Point de Vente','Échéance','Total GNF','Remboursé','Reste','Versements','Statut'];
     rows = POS_VENTES.filter(v=>v.paiement==='CREDIT').map(v=>{
       const r=CRED_REMBOURSES[v.id]||0;
-      return [v.id,v.dateStr,v.client,v.pointNom,v.total,r,Math.max(0,v.total-r)];
+      const reste=Math.max(0,v.total-r);
+      const vers=(CRED_VERSEMENTS[v.id]||[]).map(vv=>`${vv.date}:${vv.montant}`).join(' | ');
+      const statut=reste<=0?'Soldé':r>0?'Partiel':'En attente';
+      const echeance=v.echeance?new Date(v.echeance).toLocaleDateString('fr-FR'):'';
+      return [v.id,v.dateStr,v.client,v.pointNom,echeance,v.total,r,reste,vers,statut];
     });
     filename = 'manfara_credits.csv';
   }

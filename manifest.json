@@ -1,6 +1,6 @@
 {
-  "name": "Ets Manfara & Fils — Gestion Commerciale",
-  "short_name": "Manfara",
+  "name": "MANFRA-SHOP APP",
+  "short_name": "MANFRA-SHOP",
   "description": "Gestion commerciale — Lero, Siguiri",
   "start_url": "./index.html",
   "display": "standalone",
