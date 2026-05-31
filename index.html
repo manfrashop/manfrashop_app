@@ -1500,6 +1500,7 @@ textarea:focus {
       <div style="display:flex;gap:8px;align-items:center">
         <button class="btn-add" onclick="prodSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
         <button onclick="prodToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <button onclick="resetForm('prod-form')" style="padding:9px 14px;background:none;border:1px solid var(--brd2);border-radius:6px;color:var(--txt3);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;display:flex;align-items:center;gap:5px" title="Effacer tous les champs">🔄 Reset</button>
         <span id="prod-form-msg" style="font-size:13px;color:var(--or)"></span>
       </div>
     </div>
@@ -1563,6 +1564,7 @@ textarea:focus {
       <div style="display:flex;gap:8px;align-items:center">
         <button class="btn-add" onclick="cliSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
         <button onclick="cliToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <button onclick="resetForm('cli-form')" style="padding:9px 14px;background:none;border:1px solid var(--brd2);border-radius:6px;color:var(--txt3);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;display:flex;align-items:center;gap:5px" title="Effacer tous les champs">🔄 Reset</button>
         <span id="cli-form-msg" style="font-size:13px;color:var(--or)"></span>
       </div>
     </div>
@@ -1596,6 +1598,7 @@ textarea:focus {
       <div style="display:flex;gap:8px;align-items:center">
         <button class="btn-add" onclick="frnsSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
         <button onclick="frnsToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <button onclick="resetForm('frns-form')" style="padding:9px 14px;background:none;border:1px solid var(--brd2);border-radius:6px;color:var(--txt3);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;display:flex;align-items:center;gap:5px" title="Effacer tous les champs">🔄 Reset</button>
         <span id="frns-form-msg" style="font-size:13px;color:var(--or)"></span>
       </div>
     </div>
@@ -1626,6 +1629,7 @@ textarea:focus {
       <div style="display:flex;gap:8px;align-items:center">
         <button class="btn-add" onclick="depSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
         <button onclick="depToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <button onclick="resetForm('dep-form')" style="padding:9px 14px;background:none;border:1px solid var(--brd2);border-radius:6px;color:var(--txt3);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;display:flex;align-items:center;gap:5px" title="Effacer tous les champs">🔄 Reset</button>
         <span id="dep-form-msg" style="font-size:13px;color:var(--or)"></span>
       </div>
     </div>
@@ -1719,6 +1723,7 @@ textarea:focus {
       <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
         <button class="btn-add" onclick="achatSauvegarder()" style="padding:9px 20px">✓ Enregistrer</button>
         <button onclick="achatToggleForm()" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <button onclick="resetForm('achat-form')" style="padding:9px 14px;background:none;border:1px solid var(--brd2);border-radius:6px;color:var(--txt3);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;display:flex;align-items:center;gap:5px" title="Effacer tous les champs">🔄 Reset</button>
         <span id="achat-form-msg" style="font-size:13px;color:var(--or)"></span>
       </div>
     </div>
@@ -1832,6 +1837,7 @@ textarea:focus {
           <div style="display:flex;gap:6px;padding-bottom:1px">
             <button class="btn-add" onclick="stockAjustSauver()" style="padding:8px 14px;white-space:nowrap">✓ OK</button>
             <button onclick="stockToggleForm()" style="padding:8px 10px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-size:13px">✕</button>
+            <button onclick="resetForm('stock-form')" style="padding:8px 10px;background:none;border:1px solid var(--brd2);border-radius:6px;color:var(--txt3);cursor:pointer;font-size:13px" title="Effacer les champs">🔄</button>
           </div>
         </div>
         <div id="stock-adj-msg" style="margin-top:8px;font-size:13px;color:var(--or)"></div>
@@ -2168,6 +2174,7 @@ textarea:focus {
       <div style="display:flex;gap:8px">
         <button class="btn-add" onclick="pdvAjouter()" style="padding:9px 20px">Créer</button>
         <button onclick="document.getElementById('pdv-add-form').style.display='none'" style="padding:9px 16px;background:none;border:1px solid var(--brd);border-radius:6px;color:var(--txt2);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px">Annuler</button>
+        <button onclick="resetForm('pdv-add-form')" style="padding:9px 14px;background:none;border:1px solid var(--brd2);border-radius:6px;color:var(--txt3);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;display:flex;align-items:center;gap:5px" title="Effacer tous les champs">🔄 Reset</button>
       </div>
       <div id="pdv-msg" style="margin-top:10px;font-size:13px;color:var(--or)"></div>
     </div>
@@ -2381,6 +2388,7 @@ textarea:focus {
               <option value="admin">🔑 Administrateur</option>
             </select>
             <button class="btn-add" id="btn-create-user" onclick="createUser()">Créer le compte</button>
+            <button onclick="resetForm('admintab-users')" style="padding:9px 14px;background:none;border:1px solid var(--brd2);border-radius:6px;color:var(--txt3);cursor:pointer;font-family:'Raleway',sans-serif;font-size:13px;display:flex;align-items:center;gap:5px;width:fit-content" title="Effacer tous les champs">🔄 Effacer le formulaire</button>
             <div class="admin-msg" id="admin-msg"></div>
           </div>
         </div>
@@ -6633,8 +6641,28 @@ function printTicketThermique(venteSrc) {
 }
 
 // ═══════════════════════════════════════════════════════════════
-// HELPER TOAST
+// RESET FORMULAIRE UNIVERSEL
 // ═══════════════════════════════════════════════════════════════
+function resetForm(formId) {
+  const container = document.getElementById(formId);
+  if (!container) return;
+  // Réinitialise tous les inputs (sauf hidden)
+  container.querySelectorAll('input:not([type=hidden])').forEach(el => {
+    if (el.type === 'checkbox' || el.type === 'radio') el.checked = false;
+    else el.value = '';
+  });
+  // Réinitialise les selects à leur première option
+  container.querySelectorAll('select').forEach(el => { el.selectedIndex = 0; });
+  // Vide les textareas
+  container.querySelectorAll('textarea').forEach(el => { el.value = ''; });
+  // Efface les messages de feedback
+  container.querySelectorAll('[id$="-msg"]').forEach(el => { el.textContent = ''; });
+  // Efface les hints (ex: marge produit)
+  const margeHint = document.getElementById('prod-marge-hint');
+  if (margeHint && container.contains(margeHint)) margeHint.textContent = '';
+  showToast('🔄 Formulaire réinitialisé', 'info');
+}
+
 function showToast(msg, type='info') {
   const t = document.createElement('div');
   const bg = type==='success'?'#1a5c2a':type==='error'?'#5c1a1a':'#2a3a5c';
