@@ -2333,7 +2333,10 @@ function _startRealtimeListeners() {
         CRED_REMBOURSES[d.id] = data.rembourse || 0;
         if (data.versements) CRED_VERSEMENTS[d.id] = data.versements;
       });
-      try { localStorage.setItem('manfara_credits', JSON.stringify(CRED_REMBOURSES)); } catch(e) {}
+      try {
+        localStorage.setItem('manfara_credits', JSON.stringify(CRED_REMBOURSES));
+        localStorage.setItem('manfara_credits_versements', JSON.stringify(CRED_VERSEMENTS));
+      } catch(e) {}
       _rtReady['credits_remboursements'] = true;
       _checkAllReady();
       if (_appInitialized) { try { initCredits(); } catch(e){} }
@@ -2503,7 +2506,7 @@ function posLoadFromFirestore() {
   );
 }
 
-function posSaveStorage() {
+function posSaveStorage(nouvelleVente) {
   try {
     localStorage.setItem('manfara_pdv', JSON.stringify(POINTS_DE_VENTE));
     localStorage.setItem('manfara_ventes', JSON.stringify(POS_VENTES));
@@ -2511,11 +2514,11 @@ function posSaveStorage() {
   } catch(e) {}
   // Sync vers Firestore si connecté
   if(dataSource === 'firebase') {
-    posSaveToFirestore();
+    posSaveToFirestore(nouvelleVente);
   }
 }
 
-async function posSaveToFirestore() {
+async function posSaveToFirestore(nouvelleVente) {
   try {
     // Sauvegarder les PDV
     const batch1 = db.batch();
@@ -2524,18 +2527,9 @@ async function posSaveToFirestore() {
       batch1.set(ref, p);
     });
     await batch1.commit();
-    // CORRECTION BUG : sauvegarder TOUTES les ventes (pas seulement POS_VENTES[0])
-    // On envoie par lots de 500 (limite Firestore batch)
-    if(POS_VENTES.length > 0) {
-      const BATCH_SIZE = 500;
-      for(let i = 0; i < POS_VENTES.length; i += BATCH_SIZE) {
-        const batchV = db.batch();
-        POS_VENTES.slice(i, i + BATCH_SIZE).forEach(v => {
-          const ref = db.collection('ventes').doc(v.id);
-          batchV.set(ref, v);
-        });
-        await batchV.commit();
-      }
+    // N'écrire QUE la nouvelle vente (pas tout le tableau)
+    if(nouvelleVente) {
+      await db.collection('ventes').doc(nouvelleVente.id).set(nouvelleVente);
     }
   } catch(e) { /* offline */ }
 }
@@ -2953,7 +2947,7 @@ function posValiderVente() {
       }
     }
   });
-  posSaveStorage();
+  posSaveStorage(vente);
   posShowTicket(vente);
   // SMS notifications
   const clientObj = (DB_LOCAL.clients||[]).find(c=>c.n===vente.client||c.i===vente.client);
@@ -3840,15 +3834,18 @@ function achatLoadStorage() {
   } catch(e) { ACHAT_DATA = []; }
 }
 
-async function achatLoadFirestore() {
+let _achatListener = null;
+function achatLoadFirestore() {
   if(dataSource !== 'firebase') return;
-  try {
-    const snap = await db.collection('achats').orderBy('createdAt','desc').get();
-    if(!snap.empty) {
-      ACHAT_DATA = snap.docs.map(d => d.data());
-      achatSaveStorage();
-    }
-  } catch(e) { console.warn('Achats Firestore:', e); }
+  if(_achatListener) { _achatListener(); _achatListener = null; }
+  _achatListener = db.collection('achats').orderBy('createdAt','desc')
+    .onSnapshot({ includeMetadataChanges: false }, snap => {
+      if(!snap.empty) {
+        ACHAT_DATA = snap.docs.map(d => d.data());
+        achatSaveStorage();
+        achatRenderAll();
+      }
+    }, e => console.warn('Achats listener:', e));
 }
 
 function achatFilter() {
@@ -4009,22 +4006,36 @@ function stockLoadStorage() {
   } catch(e) { STOCK_MVT = []; STOCK_INV = {}; }
 }
 
-async function stockLoadFirestore() {
+let _stockListeners = [];
+function stockLoadFirestore() {
   if(dataSource !== 'firebase') return;
-  try {
-    const [mvtSnap, invSnap] = await Promise.all([
-      db.collection('stock_mvt').orderBy('date','desc').limit(2000).get(),
-      db.collection('stock_inv').get()
-    ]);
-    if(!mvtSnap.empty) STOCK_MVT = mvtSnap.docs.map(d=>d.data());
-    if(!invSnap.empty) {
-      STOCK_INV = {};
-      invSnap.docs.forEach(d => { STOCK_INV[d.id] = d.data(); });
-    }
-    stockSaveStorage();
-    stockBuildInventaire();
-    stockRenderAll();
-  } catch(e) { console.warn('Stock Firestore:', e); }
+  _stockListeners.forEach(u => u());
+  _stockListeners = [];
+
+  // ── mouvements ──
+  _stockListeners.push(
+    db.collection('stock_mvt').orderBy('date','desc').limit(2000)
+      .onSnapshot({ includeMetadataChanges: false }, snap => {
+        if(!snap.empty) STOCK_MVT = snap.docs.map(d => d.data());
+        stockSaveStorage();
+        stockBuildInventaire();
+        stockRenderAll();
+      }, e => console.warn('stock_mvt listener:', e))
+  );
+
+  // ── inventaire ──
+  _stockListeners.push(
+    db.collection('stock_inv')
+      .onSnapshot({ includeMetadataChanges: false }, snap => {
+        if(!snap.empty) {
+          STOCK_INV = {};
+          snap.docs.forEach(d => { STOCK_INV[d.id] = d.data(); });
+        }
+        stockSaveStorage();
+        stockBuildInventaire();
+        stockRenderAll();
+      }, e => console.warn('stock_inv listener:', e))
+  );
 }
 
 async function stockSaveFirestore(mvt) {
