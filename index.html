@@ -150,7 +150,6 @@ body {
 }
 .achat-form-grid input:focus, .achat-form-grid select:focus { border-color:var(--or); }
 .achat-form-grid select option { background:var(--bg3); }
-select option { background:var(--bg2); color:var(--txt); }
 .achat-kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:20px; }
 .achat-kpi { background:var(--bg2); border:1px solid var(--brd); border-radius:var(--radius); padding:18px; position:relative; overflow:hidden; }
 .achat-kpi::before { content:''; position:absolute; top:0;left:0;right:0;height:2px; background:linear-gradient(90deg,var(--or),transparent); }
@@ -495,7 +494,7 @@ tbody tr:last-child td { border-bottom:none; }
 .ticket-actions { display:flex; gap:8px; margin-top:16px; justify-content:center; }
 .ticket-actions button { padding:8px 16px; border-radius:6px; border:none; cursor:pointer; font-family:'Raleway',sans-serif; font-size:12px; font-weight:600; }
 .btn-print { background:#111; color:#fff; }
-.btn-close-ticket { background:var(--bg3); color:var(--txt); border:1px solid var(--brd2); }
+.btn-close-ticket { background:#eee; color:#333; }
 .top-list { list-style:none; }
 .top-item { display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid rgba(42,42,54,.5); }
 .top-item:last-child { border:none; }
@@ -1382,7 +1381,7 @@ textarea:focus {
     <div class="sync-dot" id="sync-dot"></div>
     <span id="sync-label">Firebase</span>
     <button id="sync-reconnect-btn" onclick="tryReconnect()"
-      style="display:none;padding:2px 8px;background:rgba(184,50,50,.2);border:1px solid var(--red);border-radius:4px;color:var(--red);cursor:pointer;font-size:11px;font-family:'Raleway',sans-serif;white-space:nowrap">
+      style="display:none;padding:2px 8px;background:rgba(184,50,50,.2);border:1px solid var(--red);border-radius:4px;color:var(--red);cursor:pointer;font-size:11px;font-family:'Raleway',sans-serif;white-space:nowrap;align-items:center;gap:3px">
       ↻ Reconnecter
     </button>
   </div>
@@ -2659,16 +2658,12 @@ const FIREBASE_CONFIG = {
 firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth();
 const db   = firebase.firestore();
-
-// ─── Réseau : long-polling pour compatibilité réseaux mobiles (Guinée) ────
-// DOIT être appelé avant tout accès Firestore
-try {
-  db.settings({
-    experimentalForceLongPolling: true,
-    experimentalAutoDetectLongPolling: true,
-    merge: true
-  });
-} catch(e) { console.warn('db.settings:', e); }
+// Améliore la compatibilité réseau (réseaux mobiles, proxies, Guinée)
+db.settings({
+  experimentalForceLongPolling: true,
+  experimentalAutoDetectLongPolling: true,
+  merge: true
+});
 
 // ─── Persistance offline Firestore ────────────────────────────
 db.enablePersistence({ synchronizeTabs: true })
@@ -2705,39 +2700,37 @@ function setSyncStatus(state) {
   dot.className = 'sync-dot' + (state==='syncing'?' syncing':state==='error'?' error':'');
   lbl.textContent = state==='ok' ? 'Connecté' : state==='syncing' ? 'Sync...' : state==='offline' ? 'Hors ligne' : 'Erreur';
   if(btn) btn.style.display = (state==='offline' || state==='error') ? 'inline-flex' : 'none';
+  // Couleur du dot selon état
+  if(state==='ok') dot.style.background = 'var(--grn)';
+  else if(state==='offline' || state==='error') dot.style.background = 'var(--red)';
 }
 
+// ─── Reconnexion manuelle ──────────────────────────────────────
 function tryReconnect() {
   const btn = document.getElementById('sync-reconnect-btn');
   if(btn) { btn.disabled = true; btn.textContent = '↻ ...'; }
   setSyncStatus('syncing');
+  // Forcer Firebase à reprendre le réseau
   db.enableNetwork()
     .then(() => loadData())
     .catch(() => loadData());
   setTimeout(() => {
     if(btn) { btn.disabled = false; btn.textContent = '↻ Reconnecter'; }
-  }, 8000);
+  }, 5000);
 }
 
+// ─── Reconnexion auto quand le navigateur repasse online ──────
 window.addEventListener('online', () => {
-  db.enableNetwork().then(() => loadData()).catch(() => loadData());
+  console.log('Réseau détecté — reconnexion automatique...');
+  setSyncStatus('syncing');
+  db.enableNetwork()
+    .then(() => loadData())
+    .catch(() => loadData());
 });
 window.addEventListener('offline', () => setSyncStatus('offline'));
 
 // ─── AUTH ──────────────────────────────────────────────────────
-// ─── Timeout de sécurité : si Auth ne répond pas en 15s → écran de connexion
-let _authResolved = false;
-const _authTimeout = setTimeout(() => {
-  if (!_authResolved) {
-    console.warn('Firebase Auth timeout — affichage écran connexion');
-    document.getElementById('loader').style.display = 'none';
-    showAuthScreen('Connexion lente. Vérifiez votre réseau et réessayez.');
-  }
-}, 15000);
-
 auth.onAuthStateChanged(async user => {
-  _authResolved = true;
-  clearTimeout(_authTimeout);
   document.getElementById('loader').style.display = 'none';
   if (!user) {
     showAuthScreen();
@@ -2749,26 +2742,18 @@ auth.onAuthStateChanged(async user => {
     try {
       snap = await db.collection('users').doc(user.uid).get({ source: 'cache' });
     } catch(_) {
-      try {
-        snap = await db.collection('users').doc(user.uid).get({ source: 'server' });
-      } catch(e2) {
-        // Ni cache ni réseau → mode dégradé offline
-        currentUser = { uid: user.uid, email: user.email, displayName: user.email, role: 'vendeur' };
-        setSyncStatus('offline');
-        showApp();
-        return;
-      }
+      snap = await db.collection('users').doc(user.uid).get({ source: 'server' });
     }
     if (!snap || !snap.exists || snap.data().disabled === true) {
       await auth.signOut();
-      showAuthScreen('Compte desactivé ou introuvable.');
+      showAuthScreen('Compte desactive ou introuvable.');
       return;
     }
     const profile = snap.data();
     currentUser = { uid: user.uid, email: user.email, displayName: profile.displayName || user.email, role: profile.role || 'vendeur' };
     showApp();
   } catch(e) {
-    // Toujours pas de données → mode offline dégradé
+    // Toujours pas de donnees -> mode offline degrade
     currentUser = { uid: user.uid, email: user.email, displayName: user.email, role: 'vendeur' };
     setSyncStatus('offline');
     showApp();
@@ -2870,47 +2855,34 @@ function loadData() {
   setSyncStatus('syncing');
   document.getElementById('loader').style.display = 'flex';
   document.getElementById('loader-txt').textContent = 'Chargement des données...';
-  // Mettre à jour le message après 5s si toujours en cours
-  setTimeout(() => {
-    const l = document.getElementById('loader');
-    const t = document.getElementById('loader-txt');
-    if(l && l.style.display !== 'none' && t) t.textContent = 'Connexion lente, patientez...';
-  }, 5000);
-  setTimeout(() => {
-    const l = document.getElementById('loader');
-    const t = document.getElementById('loader-txt');
-    if(l && l.style.display !== 'none' && t) t.textContent = 'Toujours en attente... vérifiez le réseau';
-  }, 10000);
 
-  // Vérifier si Firestore est disponible avec timeout de 12s
-  const _loadTimeout = setTimeout(() => {
-    if(dataSource !== 'firebase') {
-      dataSource = 'local';
-      DB_LOCAL = STATIC_DB;
-      setSyncStatus('offline');
-      document.getElementById('loader').style.display = 'none';
-      if(!_appInitialized) initAllModules();
-    }
-  }, 12000);
-
+  // Vérifier si Firestore est disponible (une collection test)
   db.collection('produits').limit(1).get()
     .then(snap => {
-      clearTimeout(_loadTimeout);
-      // Firestore disponible (même si vide) → activer les listeners temps réel
-      dataSource = 'firebase';
-      _startRealtimeListeners();
+      if (!snap.empty) {
+        // Firestore disponible → activer les listeners temps réel
+        dataSource = 'firebase';
+        _startRealtimeListeners();
+      } else {
+        // Firestore vide → données statiques locales
+        dataSource = 'local';
+        DB_LOCAL = STATIC_DB;
+        document.getElementById('loader').style.display = 'none';
+        setSyncStatus('ok');
+        initAllModules();
+      }
     })
     .catch(() => {
-      clearTimeout(_loadTimeout);
-      // Pas de réseau → fallback local
+      // Pas de réseau → fallback local (cache Firestore pris en charge par onSnapshot)
       dataSource = 'local';
       DB_LOCAL = STATIC_DB;
       setSyncStatus('offline');
       document.getElementById('loader').style.display = 'none';
-      if(!_appInitialized) initAllModules();
-      // Retry auto dans 10s
+      initAllModules();
+      // Retry automatique après 10 secondes
       setTimeout(() => {
         if(dataSource === 'local') {
+          console.log('Auto-retry connexion Firestore...');
           db.enableNetwork().then(() => loadData()).catch(() => {});
         }
       }, 10000);
@@ -2997,6 +2969,15 @@ function _startRealtimeListeners() {
 function _rtError(e) {
   console.warn('Realtime listener error:', e);
   setSyncStatus('offline');
+  // Tentative de récupération automatique après 8s
+  setTimeout(() => {
+    if(navigator.onLine) {
+      db.enableNetwork().then(() => {
+        if(dataSource === 'firebase') _startRealtimeListeners();
+        else loadData();
+      }).catch(() => {});
+    }
+  }, 8000);
 }
 
 // ─── HAMBURGER / SIDEBAR MOBILE ────────────────────────────────
@@ -3909,7 +3890,7 @@ function initProduits(){
   let activeFam='ALL', search='';
   prodPager=makePager(prod,50);
   function filter(){ let d=prod; if(activeFam!=='ALL') d=d.filter(p=>p.f===activeFam); if(search) d=d.filter(p=>(p.l||'').toLowerCase().includes(search)||(p.c||'').includes(search)); prodPager.setData(d); renderP(); }
-  function renderP(){ const rows=prodPager.page(); const tbody=document.getElementById('prod-tbody'); tbody.innerHTML=rows.map(p=>{ const color=FAM_COLORS[p.f]||'var(--txt2)'; const pa=parseFloat(p.p)||0; const pv=parseFloat(p.pv||p.p)||0; const marge=pa>0?((pv-pa)/pa*100).toFixed(1):0; const margeCls=pv>pa?'color:#3DA85A':pv<pa?'color:#e05':'color:var(--txt3)'; return `<tr><td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${p.c||'—'}</span></td><td>${esc(p.l)||'—'}</td><td><span class="badge" style="background:${color}22;color:${color}">${p.f||'—'}</span></td><td class="amount">${fmtFull(pa)}</td><td class="amount" style="color:var(--or)">${fmtFull(pv)}</td><td class="amount" style="${margeCls}">${marge}%</td><td class="amount"><span style="font-weight:700;color:${(parseInt(p.s)||0)>0?'#3DA85A':'#e05'}">${p.s||'0'}</span></td><td style="font-size:12px;color:var(--txt3)">${p.fr||'—'}</td><td style="white-space:nowrap"><button onclick="prodEditer('${p.c}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:var(--or);cursor:pointer;font-size:11px;margin-right:4px">✏️</button><button onclick="prodSupprimer('${p.c}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:#e05;cursor:pointer;font-size:11px">🗑️</button></td></tr>`; }).join(''); document.getElementById('prod-info').textContent=`${prodPager.total().toLocaleString('fr-FR')} produits`; renderPagination(prodPager,document.getElementById('prod-pag-info'),document.getElementById('prod-pag-btns'),renderP); }
+  function renderP(){ const rows=prodPager.page(); const tbody=document.getElementById('prod-tbody'); tbody.innerHTML=rows.map(p=>{ const color=FAM_COLORS[p.f]||'#888'; const pa=parseFloat(p.p)||0; const pv=parseFloat(p.pv||p.p)||0; const marge=pa>0?((pv-pa)/pa*100).toFixed(1):0; const margeCls=pv>pa?'color:#3DA85A':pv<pa?'color:#e05':'color:var(--txt3)'; return `<tr><td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--txt3)">${p.c||'—'}</span></td><td>${esc(p.l)||'—'}</td><td><span class="badge" style="background:${color}22;color:${color}">${p.f||'—'}</span></td><td class="amount">${fmtFull(pa)}</td><td class="amount" style="color:var(--or)">${fmtFull(pv)}</td><td class="amount" style="${margeCls}">${marge}%</td><td class="amount"><span style="font-weight:700;color:${(parseInt(p.s)||0)>0?'#3DA85A':'#e05'}">${p.s||'0'}</span></td><td style="font-size:12px;color:var(--txt3)">${p.fr||'—'}</td><td style="white-space:nowrap"><button onclick="prodEditer('${p.c}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:var(--or);cursor:pointer;font-size:11px;margin-right:4px">✏️</button><button onclick="prodSupprimer('${p.c}')" style="padding:4px 8px;background:var(--bg3);border:1px solid var(--brd);border-radius:4px;color:#e05;cursor:pointer;font-size:11px">🗑️</button></td></tr>`; }).join(''); document.getElementById('prod-info').textContent=`${prodPager.total().toLocaleString('fr-FR')} produits`; renderPagination(prodPager,document.getElementById('prod-pag-info'),document.getElementById('prod-pag-btns'),renderP); }
   filtersEl.addEventListener('click',e=>{ if(!e.target.dataset.fam) return; filtersEl.querySelectorAll('.fbtn').forEach(b=>b.classList.remove('active')); e.target.classList.add('active'); activeFam=e.target.dataset.fam; filter(); });
   document.getElementById('prod-search').addEventListener('input',e=>{ search=e.target.value.trim().toLowerCase(); filter(); });
   filter();
@@ -4271,7 +4252,7 @@ async function loadUsersList() {
     snap.docs.forEach(doc => {
       const u = doc.data();
       const uid = doc.id;
-      const color = ROLE_COLORS[u.role] || 'var(--txt2)';
+      const color = ROLE_COLORS[u.role] || '#888';
       const initials = (u.displayName||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
       const isMe = uid === currentUser.uid;
       const li = document.createElement('li');
@@ -4936,7 +4917,7 @@ function stockRenderInv() {
   document.getElementById('stock-inv-tbody').innerHTML = rows.map(inv => {
     const actuel = stockGetActuel(inv.code);
     const s = inv.seuil_min || seuil;
-    const color = FAM_COLORS_LOCAL[inv.famille] || 'var(--txt2)';
+    const color = FAM_COLORS_LOCAL[inv.famille] || '#888';
     let etatCls, etatLbl;
     if(actuel <= 0)  { etatCls='sab-rupture'; etatLbl='RUPTURE'; }
     else if(actuel<=s){ etatCls='sab-bas';     etatLbl='BAS'; }
@@ -5011,7 +4992,7 @@ function stockRenderAlertes() {
     : alertes.map(inv => {
         const actuel = stockGetActuel(inv.code);
         const s = inv.seuil_min || seuil;
-        const color = FAM_COLORS_LOCAL[inv.famille]||'var(--txt2)';
+        const color = FAM_COLORS_LOCAL[inv.famille]||'#888';
         let etatCls, etatLbl;
         if(actuel<=0){ etatCls='sab-rupture'; etatLbl='🔴 RUPTURE'; }
         else          { etatCls='sab-bas';     etatLbl='🟠 STOCK BAS'; }
