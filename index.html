@@ -25,21 +25,46 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* ═══════════════════════════════════════════════════════
-   THÈME PAR DÉFAUT : OR NOIR (Manfara Classic)
+   THÈME PAR DÉFAUT : LUMIÈRE MARINE (Manfara Light)
 ═══════════════════════════════════════════════════════ */
 :root {
-  --or: #C9A227; --or2: #E8C547; --or3: rgba(201,162,39,0.12);
-  --bg: #08080A; --bg2: #111115; --bg3: #18181F; --bg4: #1F1F28;
-  --txt: #FFFFFF; --txt2: #D8D4CC; --txt3: #A09890;
-  --brd: #222230; --brd2: #2C2C3A;
-  --grn: #2EA34D; --red: #B83232; --blu: #2472A8;
-  --grn2: rgba(46,163,77,0.12); --red2: rgba(184,50,50,0.12); --blu2: rgba(36,114,168,0.12);
+  /* Accents dorés / orange */
+  --or: #C9A227; --or2: #D4880A; --or3: rgba(201,162,39,0.13);
+
+  /* Fonds — blanc et gris très clair */
+  --bg: #F4F5F7; --bg2: #FFFFFF; --bg3: #ECEEF2; --bg4: #E2E5EB;
+
+  /* Textes — bleu marine + gris */
+  --txt: #1A1F5E; --txt2: #3A4278; --txt3: #6B7280;
+
+  /* Bordures */
+  --brd: #DDE1EA; --brd2: #C8CEDB;
+
+  /* Statuts */
+  --grn: #16A34A; --red: #DC2626; --blu: #4A4FA8;
+  --grn2: rgba(22,163,74,0.10); --red2: rgba(220,38,38,0.10); --blu2: rgba(74,79,168,0.10);
+
+  /* Ombres légères */
+  --shadow: 0 4px 20px rgba(26,31,94,0.10);
+  --shadow-sm: 0 2px 8px rgba(26,31,94,0.07);
+
+  /* Layout */
   --radius: 10px; --radius-sm: 6px; --radius-lg: 14px;
-  --shadow: 0 8px 32px rgba(0,0,0,0.6);
-  --shadow-sm: 0 2px 10px rgba(0,0,0,0.4);
   --sidebar-w: 230px;
   --topbar-h: 52px;
   --transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── THÈME : LUMIÈRE MARINE (alias explicite) ── */
+html[data-theme="light"] {
+  --or: #C9A227; --or2: #D4880A; --or3: rgba(201,162,39,0.13);
+  --bg: #F4F5F7; --bg2: #FFFFFF; --bg3: #ECEEF2; --bg4: #E2E5EB;
+  --txt: #1A1F5E; --txt2: #3A4278; --txt3: #6B7280;
+  --brd: #DDE1EA; --brd2: #C8CEDB;
+  --grn: #16A34A; --red: #DC2626; --blu: #4A4FA8;
+  --grn2: rgba(22,163,74,0.10); --red2: rgba(220,38,38,0.10); --blu2: rgba(74,79,168,0.10);
+  --shadow: 0 4px 20px rgba(26,31,94,0.10);
+  --shadow-sm: 0 2px 8px rgba(26,31,94,0.07);
 }
 
 /* ── THÈME : MINUIT BLEU (Cobalt Night) ── */
@@ -239,7 +264,7 @@ body {
   display:flex; align-items:center; justify-content:flex-end;
   padding:0 24px; gap:10px; z-index:90;
   backdrop-filter:blur(8px);
-  background:rgba(17,17,21,0.92);
+  background:rgba(26,31,94,0.96);
 }
 .topbar-cloture {
   padding:6px 14px; background:var(--or3);
@@ -1019,10 +1044,10 @@ nav a.active::before {
 /* ── Variables 3D ────────────────────────────────────────────── */
 :root {
   --light-angle: 145deg;
-  --depth-1: 0 1px 3px rgba(0,0,0,.6), 0 4px 12px rgba(0,0,0,.4);
-  --depth-2: 0 2px 8px rgba(0,0,0,.7), 0 8px 24px rgba(0,0,0,.5), 0 1px 0 rgba(255,255,255,.04) inset;
-  --depth-3: 0 4px 16px rgba(0,0,0,.8), 0 16px 40px rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.06) inset, 0 -1px 0 rgba(0,0,0,.4) inset;
-  --depth-4: 0 8px 32px rgba(0,0,0,.9), 0 24px 60px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.08) inset;
+  --depth-1: 0 1px 3px rgba(26,31,94,.10), 0 4px 12px rgba(26,31,94,.07);
+  --depth-2: 0 2px 8px rgba(26,31,94,.12), 0 8px 24px rgba(26,31,94,.08), 0 1px 0 rgba(255,255,255,.6) inset;
+  --depth-3: 0 4px 16px rgba(26,31,94,.14), 0 16px 40px rgba(26,31,94,.10), 0 1px 0 rgba(255,255,255,.7) inset, 0 -1px 0 rgba(26,31,94,.08) inset;
+  --depth-4: 0 8px 32px rgba(26,31,94,.16), 0 24px 60px rgba(26,31,94,.12), 0 1px 0 rgba(255,255,255,.8) inset;
   --bevel-light: inset 0 1px 0 rgba(255,255,255,.08), inset 1px 0 0 rgba(255,255,255,.04);
   --bevel-dark:  inset 0 -1px 0 rgba(0,0,0,.5), inset -1px 0 0 rgba(0,0,0,.3);
   --glow-or: 0 0 20px rgba(201,162,39,.25), 0 0 60px rgba(201,162,39,.08);
@@ -1040,7 +1065,7 @@ body {
 #sidebar {
   background: linear-gradient(170deg, var(--bg3) 0%, var(--bg2) 50%, var(--bg) 100%);
   border-right: 1px solid var(--brd);
-  box-shadow: 4px 0 24px rgba(0,0,0,.8), 1px 0 0 rgba(255,255,255,.03) inset;
+  box-shadow: 4px 0 24px rgba(26,31,94,.12), 1px 0 0 rgba(255,255,255,.5) inset;
 }
 
 .brand {
@@ -1085,9 +1110,9 @@ nav a.active::before {
 
 /* ── Topbar 3D ───────────────────────────────────────────────── */
 #topbar {
-  background: linear-gradient(180deg, var(--bg2) 0%, var(--bg) 100%);
-  border-bottom: 1px solid var(--brd);
-  box-shadow: 0 4px 20px rgba(0,0,0,.7), 0 1px 0 rgba(255,255,255,.04) inset;
+  background: linear-gradient(180deg, #1E2468 0%, #1A1F5E 100%);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 4px 20px rgba(26,31,94,.3), 0 1px 0 rgba(255,255,255,.06) inset;
 }
 
 .topbar-avatar {
@@ -2881,7 +2906,7 @@ textarea:focus {
         <p style="font-size:17px;color:var(--txt2);margin-bottom:18px">Choisissez l'apparence de l'application. Le thème est sauvegardé localement.</p>
         <div class="theme-swatches" style="grid-template-columns:repeat(4,1fr);gap:10px">
           <!-- Or Noir (défaut) -->
-          <div class="theme-swatch active" data-theme="" title="Or Noir — Classique Manfara" onclick="setTheme('')">
+          <div class="theme-swatch active" data-theme="light" title="Lumière Marine — Défaut" onclick="setTheme('light')">
             <div class="theme-swatch-inner">
               <div class="theme-swatch-top" style="background:#111115"></div>
               <div class="theme-swatch-bottom">
@@ -7508,9 +7533,9 @@ function resetForm(formId) {
 }
 
 // ─── SYSTÈME DE THÈMES ─────────────────────────────────────────
-const THEMES = ['', 'cobalt', 'emeraude', 'dusk', 'cherry', 'ivory', 'slate', 'espresso'];
+const THEMES = ['light', 'cobalt', 'emeraude', 'dusk', 'cherry', 'ivory', 'slate', 'espresso'];
 const THEME_NAMES = {
-  '': 'Or Noir', 'cobalt': 'Cobalt', 'emeraude': 'Émeraude',
+  'light': 'Lumière Marine', 'cobalt': 'Cobalt', 'emeraude': 'Émeraude',
   'dusk': 'Dusk', 'cherry': 'Cherry', 'ivory': 'Ivoire',
   'slate': 'Ardoise', 'espresso': 'Espresso'
 };
@@ -7529,12 +7554,12 @@ function setTheme(theme) {
   // Sauvegarder
   try { localStorage.setItem('manfara_theme', theme); } catch(e) {}
   // Toast discret
-  showToast('Thème : ' + (THEME_NAMES[theme] || 'Or Noir'), 'info');
+  showToast('Thème : ' + (THEME_NAMES[theme] || 'Lumière Marine'), 'info');
 }
 
 function initTheme() {
   try {
-    const saved = localStorage.getItem('manfara_theme') || '';
+    const saved = localStorage.getItem('manfara_theme') || 'light';
     if (THEMES.includes(saved)) setTheme(saved);
   } catch(e) {}
 }
