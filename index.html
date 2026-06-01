@@ -3399,10 +3399,16 @@ document.querySelectorAll('nav a').forEach(a => {
     a.classList.add('active');
     document.getElementById('sec-' + a.dataset.sec).classList.add('active');
     if (a.dataset.sec === 'admin') loadUsersList();
+    if (a.dataset.sec === 'dashboard') initDashboard();
+    if (a.dataset.sec === 'produits') initProduits();
     if (a.dataset.sec === 'ventes') { ventesPage=0; initVentes(); }
     if (a.dataset.sec === 'stock') { initStock(); }
+    if (a.dataset.sec === 'appros') { initAppros(); }
     if (a.dataset.sec === 'achats') { initAchats(); }
+    if (a.dataset.sec === 'clients') { initClients(); }
     if (a.dataset.sec === 'credits') { initCredits(); }
+    if (a.dataset.sec === 'fournisseurs') { initFournisseurs(); }
+    if (a.dataset.sec === 'depenses') { initDepenses(); }
     if (a.dataset.sec === 'rapports') { initRapports(); }
     if (a.dataset.sec === 'activites') { initActivites(); }
     if (a.dataset.sec === 'points') { initPointsDeVente(); }
