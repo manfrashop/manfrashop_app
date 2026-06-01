@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MANFRA-SHOP APP v14</title>
+<title>MANFRA-SHOP APP v15</title>
 
 <!-- PWA -->
 <link rel="manifest" href="manifest.json">
@@ -2399,6 +2399,16 @@ textarea:focus {
         <tbody id="ventes-tbody"></tbody>
       </table>
       <div class="pagination"><div class="pag-info" id="ventes-pag-info"></div><div class="pag-btns" id="ventes-pag-btns"></div></div>
+      <!-- Chargement historique étendu (>500 ventes Firestore) -->
+      <div id="ventes-load-more-wrap" style="display:none;padding:12px 18px;border-top:1px solid var(--brd);text-align:center">
+        <button onclick="posLoadOlderVentes()" id="ventes-load-more-btn"
+          style="padding:8px 22px;background:none;border:1px solid var(--brd2);border-radius:20px;color:var(--txt3);font-size:12px;cursor:pointer;font-family:'Raleway',sans-serif;transition:var(--transition)"
+          onmouseover="this.style.borderColor='var(--or)';this.style.color='var(--or)'"
+          onmouseout="this.style.borderColor='var(--brd2)';this.style.color='var(--txt3)'">
+          ⬇ Charger l'historique complet
+        </button>
+        <span id="ventes-load-more-info" style="margin-left:12px;font-size:11px;color:var(--txt3)"></span>
+      </div>
     </div>
   </div>
 
@@ -2822,6 +2832,7 @@ textarea:focus {
           <div style="display:flex;gap:10px;flex-wrap:wrap">
             <button onclick="rstStaticProduits()" style="padding:9px 18px;background:rgba(220,140,0,.15);border:1px solid #E88C20;border-radius:8px;color:#E88C20;cursor:pointer;font-size:13px;font-weight:700">🗂️ Vider produits hardcodés</button>
             <button onclick="rstStaticClients()" style="padding:9px 18px;background:rgba(220,140,0,.15);border:1px solid #E88C20;border-radius:8px;color:#E88C20;cursor:pointer;font-size:13px;font-weight:700">👥 Vider clients hardcodés</button>
+            <button onclick="rstStaticFournisseurs()" style="padding:9px 18px;background:rgba(220,140,0,.15);border:1px solid #E88C20;border-radius:8px;color:#E88C20;cursor:pointer;font-size:13px;font-weight:700">🏭 Vider fournisseurs hardcodés</button>
             <button onclick="rstStaticAppros()" style="padding:9px 18px;background:rgba(220,140,0,.15);border:1px solid #E88C20;border-radius:8px;color:#E88C20;cursor:pointer;font-size:13px;font-weight:700">📦 Vider appros hardcodées</button>
             <button onclick="rstStaticAll()" style="padding:9px 18px;background:rgba(220,50,50,.15);border:1px solid var(--red);border-radius:8px;color:var(--red);cursor:pointer;font-size:13px;font-weight:700">🔥 Vider tout le STATIC_DB</button>
           </div>
@@ -2986,6 +2997,13 @@ textarea:focus {
                { displayName:"Admin", role:"admin", disabled:false }
 ═══════════════════════════════════════════════════════════════ */
 const FIREBASE_CONFIG = {
+  // ⚠️  SÉCURITÉ — Ces clés sont visibles dans le source HTML.
+  // Protection obligatoire :
+  //   1. Restreindre cette clé API aux domaines autorisés dans Google Cloud Console
+  //      (APIs & Services → Credentials → Application Restrictions → HTTP Referrers)
+  //   2. Les Firestore Security Rules DOIVENT bloquer les accès non authentifiés
+  //      et contrôler les droits en écriture selon le rôle (admin/gerant/vendeur)
+  //   3. Activer Firebase App Check pour bloquer les appels hors de votre app
   apiKey:            "AIzaSyA0Yq_S2WNuhVpY2AR70EYAWEPvSqjyCXU",
   authDomain:        "manfrashop-b865f.firebaseapp.com",
   projectId:         "manfrashop-b865f",
@@ -3021,8 +3039,8 @@ let dataSource    = 'local'; // 'firebase' | 'local'
 // Pour réimporter, utiliser l'outil de migration (voir README).
 const STATIC_DB = {
   produits: [],
-  fournisseurs: [{"i":"1","n":"ETS DIALLO DJINDJI & FRERES","a":"MADINA ENIPRA BOUTIQUE N°170","t":"+224664208811","v":"CONAKRY"},{"i":"2","n":"PETIT PARIS COSMETIQUE","a":"CONAKRY DIXIN","t":"+224622329533","v":"CONAKRY"},{"i":"3","n":"BARRY ABDOURAHAMANE","a":"CONAKRY MADINA ENIPRA BOUTIQUE N°171","t":"+224628612804","v":"CONAKRY"},{"i":"4","n":"ETS LALYA & FRERE","a":" MADINA ENIPRA BOUTIQUE N°B46","t":"+224622020667","v":"CONAKRY"},{"i":"5","n":"AREE DHUWODHEN","a":" MADINA ENIPRA","t":"+224622209143","v":"CONAKRY"},{"i":"6","n":"ETS IBRAHIMA SOW &FRERE","a":"BEST BABY BOUTIQUE N°B39","t":"+224664352434","v":"CONAKRY"},{"i":"7","n":"BOUBACAR SOW","a":"MADINA ENIPRA CENTRE MAYI","t":"+224664522158","v":"CONAKRY"},{"i":"8","n":"EL HADJ SOULEYMANE","a":"MADINA","t":"+224628175935","v":"CONAKRY"},{"i":"9","n":"DTA DIALLO THIERNO HAMIDOU","a":"MADINA ENIPRA BOUTIQUE N°01","t":"+224622526149","v":"CONAKRY"},{"i":"10","n":"BARRY & FRERES","a":"MADINA ENIPRA BOUTIQUE N°139","t":"+224664381787","v":"CONAKRY"},{"i":"11","n":"DIVERS FOURNISSEURS","a":"MADINA MARCHE ET BAMAKO","t":"622530425","v":"CONAKRY"},{"i":"12","n":"AMC2 TELECOM CHEZ KALLE","a":"RUE FAMOLO KOULIBALY Imm, MAMADOU BAIDY BAMAKO Rep, DU MALI","t":"+22376677573","v":"BAMAKO"},{"i":"13","n":"ETS MOHAMED FOFANA & FRERES SOMOFF","a":"BAMAKO DABANANI-Imm. SIMPARA CENTER BOUTIQUE N°42- NIF 08332380J","t":"+22376076050","v":"BAMAKO"},{"i":"14","n":"ELECTRONIQUE 2000 CHEZ YAYA SACKO","a":"IM. CATHEDRALE BOUTIQUE N°12-13 GRAND MARCHE BAMAKO MALI","t":"+22376552828","v":"BAMAKO"},{"i":"15","n":"KOUMA ELECTRONIQUE","a":"FACE CATHEDRALE BOUTIQUE N°5","t":"+22476089090","v":"BAMAKO"},{"i":"16","n":"SIDIBE BOUREMA","a":"A COTE DE CATHEDRALE GRAND MARCHE DE BAMAKO MALI","t":"+22376167090","v":"BAMAKO"},{"i":"17","n":"CHIC BEAUTE","a":"RUE MOHAMED V Imm. BABOU YAYA BP: 151- BAMAKO MALI","t":"+22376464428","v":"BAMAKO"},{"i":"19","n":"DIVERS FOURNISEUR DEVIS","a":"LERO CENTRE","t":"","v":"LOCAL"},{"i":"20","n":"ABDOUL WAHAB","a":"GRAND MARCHE DE BAMAKO","t":"","v":"BAMAKO"},{"i":"21","n":"BENTHE AIRSTAR","a":"VENDEUR DE PRODUIT ELECTRONIQUE A MADINA MARCHE","t":"622331198","v":"CONAKRY"},{"i":"22","n":"COREA AMICO","a":"COLEYA MATAM (MAXIME ZOUMANIGUI)","t":"628746002","v":"CONAKRY"},{"i":"23","n":"FOUGOUN COSMETIQUE","a":"CHEZ TELLY BAH MADINA BOUTIQUE N°147","t":"620242540","v":"CONAKRY"},{"i":"24","n":"ETS MHD DIALLO & FRERES","a":"MADINAL ECOLE BOTIQUE N°103","t":"622669271","v":"CONAKRY"},{"i":"25","n":"WAGUE BEAUTE N°1","a":"GRAND MARCHE DE BAMAKO","t":"+22375448411","v":"BAMAKO"},{"i":"26","n":"AMC TECHNOLOGY","a":"GRAND MARCHE PRES DE L'ECOBANK","t":"+22376847476","v":"BAMAKO"},{"i":"27","n":"ETS ALPHA BAH TRES PTRES","a":"MADINA ECOLE","t":"625303333","v":"CONAKRY"},{"i":"28","n":"YOUSSOUF GJIGUIBA","a":"FACE DE TRIBUNAL DE BAMAKO","t":"+22376080009","v":"BAMAKO"},{"i":"29","n":"PETELPLUS","a":"SIEGE SOCIAL: MATAM GARE KANKAN","t":"+224628411011","v":"CONAKRY"},{"i":"30","n":"O.B.B. COMMERCE GENERAL","a":"COMMUNE DE MATAM B.P989","t":"+224628150877","v":"CONAKRY"},{"i":"31","n":"ETS DIALLO & BAH","a":"MADINA GARE ROUTIERE DABOLA","t":"+224622680618","v":"CONAKRY"},{"i":"32","n":"ELECTRONIQUE DIA","a":"BAMAKO-COURA RUE 355 BOUTIQUE AS1 N066","t":"+22376336504","v":"BAMAKO"},{"i":"33","n":"TELE SERVICE KALLO & FRERES","a":"CONAKRY BOUTIQE N°911","t":"+224622291474","v":"CONAKRY"},{"i":"34","n":"BARRY & FRERES ENIPRA","a":"VENDEUR DES ACCESSOIRES","t":"+224622084035","v":"CONAKRY"},{"i":"35","n":"SATELCOM S,A","a":"DIRECTION GENERAL DE SATELCOM","t":"+224620382635","v":"CONAKRY"},{"i":"36","n":"GUINEE COSMETIQUE SARL","a":"MADINA ENIPRA","t":"+224621834232","v":"CONAKRY"},{"i":"37","n":"DAOUDA BERETE","a":"ALGERIE","t":"","v":""},{"i":"38","n":"ETS YARRAPHONE","a":"CHEZ OUSMANE YARRA AU GRAND MARCHE","t":"+22376433032","v":"BAMAKO"},{"i":"39","n":"ETS BAH ET FRERE","a":"MADINA ENIPRA BOUTIQUE N°127","t":"+224628581774","v":"CONAKRY"},{"i":"40","n":"DIABY COSMETIQUE","a":"MADINA ENIPRA","t":"622063232","v":"CONAKRY"},{"i":"41","n":"ETS D.A COMMERCE GENERAL","a":"MADINA MARCHE EX ENIPRA BOUTIQUE N235","t":"621999970","v":"CONAKRY"},{"i":"42","n":"OUSMANE DIALLLO & FRERES","a":"MADINA ENNIPRA GARE ROUTIERE BOUTIQUE N'13","t":"622727666","v":"CONAKRY"},{"i":"43","n":"M.B DIALLO","a":"MADINA EX-ENIRA","t":"628578131","v":"CONAKRY"},{"i":"44","n":"BOUTIQUE NA-025 FAIR & WHITE PARIS","a":"MADINA CENTRE COMMERCIAL DIALLO SADAKADJI","t":"623870392/627357552","v":"CONAKRY"},{"i":"45","n":"DIALLO BOUBACAR SOUADOU","a":"LABANYIN","t":"621636555","v":"CONAKRY"},{"i":"46","n":"BOUBA & FRERE","a":"HAMDALAYE","t":"621636555","v":"CONAKRY"},{"i":"47","n":"MAMADY CAMARA","a":"LERO","t":"622926581","v":"LOCAL"},{"i":"48","n":"SOULEYMANE BALDE","a":"FAYALALA CAMP","t":"622671644","v":"LOCAL"},{"i":"49","n":"BOUTIQUE ELECTRONIQUE","a":"BAMAKO GRAND MARCHE","t":"+22363830401","v":"BAMAKO"}],
-  depenses: [{"i":"183","d":"02/01/15 00:00:00","l":"LE FRAIS COURANT JOURNALIERE ET EAU","m":"25000"},{"i":"206","d":"02/02/15 00:00:00","l":"FACTURE DE COURANT JOURNALIERE","m":"20000"},{"i":"256","d":"02/03/15 00:00:00","l":"FACTURE D'EAU JOURNALIERE ET COURANT","m":"10000"},{"i":"351","d":"02/04/15 00:00:00","l":"FACTURE COURANT","m":"17000"},{"i":"653","d":"02/05/15 00:00:00","l":"frais de facture courant","m":"17000"},{"i":"812","d":"02/06/15 00:00:00","l":"FACTURE COURANT ET EAU","m":"28000"},{"i":"862","d":"02/07/15 00:00:00","l":"FACTURE COURANT","m":"17000"},{"i":"970","d":"02/09/15 00:00:00","l":"FACTURE COURANT","m":"17000"},{"i":"971","d":"02/09/15 00:00:00","l":"ACHAT DE NOUVEAUS STOCK A CONAKRY","m":"5110000"},{"i":"972","d":"02/09/15 00:00:00","l":"ACHAT DE NOUVEAUS STOCK A BAMAKO","m":"6420000"},{"i":"1131","d":"02/11/15 00:00:00","l":"FACTURE COURANT","m":"25000"},{"i":"1283","d":"02/13/15 00:00:00","l":"FACTURE DE CA C1000 SANDOZ","m":"25000"},{"i":"1373","d":"02/13/15 00:00:00","l":"FACTURE COURANT","m":""},{"i":"1392","d":"02/13/15 00:00:00","l":"ACHAT DE DOLLARS US$","m":"1010000"},{"i":"1414","d":"02/13/15 00:00:00","l":"FACTURE COURANT","m":"30000"},{"i":"1467","d":"02/14/15 00:00:00","l":"L'ACHAT DE CACHET DE LIVRE NON PAYEE","m":"25000"},{"i":"1543","d":"02/14/15 00:00:00","l":"facture courant","m":"22000"},{"i":"1579","d":"02/15/15 00:00:00","l":"L'ACHAT UNU CLE INTERNET ORANGE","m":"150000"},{"i":"1593","d":"02/15/15 00:00:00","l":"L'ACHAT DE BIJOUT POUR MA FEMME","m":"150000"},{"i":"1699","d":"02/16/15 00:00:00","l":"FACTURE COURANT","m":"25000"},{"i":"1765","d":"02/17/15 00:00:00","l":"FACTURE COURANT","m":"20000"},{"i":"1796","d":"02/17/15 00:00:00","l":"L'ACHAT DE CENT  VINGT 120 DOLLARS","m":"825000"},{"i":"1998","d":"02/18/15 00:00:00","l":"L'ACHAT DE DEVIS","m":"1100000"},{"i":"2004","d":"02/18/15 00:00:00","l":"L'ACHAT DE DEVIS","m":"3550000"},{"i":"2065","d":"02/18/15 00:00:00","l":"L'ACHAT DE CENT CINQUANTE DOLLARS USD","m":"1060000"},{"i":"2089","d":"02/19/15 00:00:00","l":"L'ACHAT DES DEVIS","m":"1150000"},{"i":"2171","d":"02/20/15 00:00:00","l":"cmplement de l'argent de bouba","m":"150000"},{"i":"2189","d":"02/20/15 00:00:00","l":"factue courant","m":"17000"},{"i":"2217","d":"02/21/15 00:00:00","l":"L'ACHAT DES DEVIS","m":"495000"},{"i":"2225","d":"02/22/15 00:00:00","l":"achat des devis","m":"650000"},{"i":"2232","d":"02/22/15 00:00:00","l":"L'ACHAT DES DEVIS","m":"1330000"},{"i":"2281","d":"02/23/15 00:00:00","l":"FACTURE COURANT ET ACHAT DE DIX DOLLARS USD","m":"75000"},{"i":"2350","d":"02/25/15 00:00:00","l":"FACTURE courant","m":"20000"},{"i":"2400","d":"02/26/15 00:00:00","l":"ACHAT DES DEVIS","m":"700000"},{"i":"2510","d":"02/27/15 00:00:00","l":" FACTURE COURANT","m":"27000"},{"i":"2516","d":"02/27/15 00:00:00","l":"L'ACHAT DE BALLAI","m":"20000"},{"i":"2601","d":"02/28/15 00:00:00","l":"FACTURE COURANT ET L'EAU","m":"25000"},{"i":"2773","d":"03/01/15 00:00:00","l":"L'ACHAT DES DEVIS","m":"1300000"},{"i":"2789","d":"03/01/15 00:00:00","l":"ACHAT DE FRANC CFA 12 BILLET","m":"730000"},{"i":"2990","d":"03/02/15 00:00:00","l":"FACTURE COURANT ET EAU","m":"30000"},{"i":"3025","d":"03/02/15 00:00:00","l":"ACHAT DES DEVIS","m":"475000"},{"i":"3146","d":"03/03/15 00:00:00","l":"POUR LA FAMILLE","m":"55000"},{"i":"3475","d":"03/05/15 00:00:00","l":"TRANSFERT DE FOND PAR IBRAHIMA SORY YANSANE","m":"380000"},{"i":"3539","d":"03/06/15 00:00:00","l":"ACHAT DES DEVIS","m":"600000"},{"i":"4160","d":"03/10/15 00:00:00","l":"LE RESTANT DE LA FACTURE DE ABOU SANOH","m":"10000"},{"i":"4194","d":"03/10/15 00:00:00","l":"FACTURE COURANT","m":"10000"},{"i":"4267","d":"03/12/15 00:00:00","l":"facture courant","m":"25000"},{"i":"4336","d":"03/13/15 00:00:00","l":"GAIN SUR LE SAC DE RIZ","m":"15000"},{"i":"4458","d":"03/14/15 00:00:00","l":"FACTURE COURANT","m":"25000"},{"i":"4635","d":"03/15/15 00:00:00","l":"FACTURE COURANT","m":"25000"},{"i":"4788","d":"03/16/15 00:00:00","l":"FACTURE COURANT","m":"15000"},{"i":"4789","d":"03/16/15 00:00:00","l":"ACHAT DE 70 DOLLARS","m":"825000"},{"i":"4880","d":"03/18/15 00:00:00","l":"facture","m":"25000"},{"i":"4932","d":"03/24/15 00:00:00","l":"ACHAT DES MARCHANDISE","m":"47145250"},{"i":"4933","d":"03/24/15 00:00:00","l":"","m":""},{"i":"4945","d":"03/24/15 00:00:00","l":"ACHAT DES DEVIS","m":"1334000"},{"i":"4946","d":"03/24/15 00:00:00","l":"FACTURE DE SARBON","m":"150000"},{"i":"5098","d":"03/25/15 00:00:00","l":"VENTE DE CLE INTERNET ORANGE QUE DAOUDA M'A OFFERTE","m":"180000"},{"i":"5102","d":"03/25/15 00:00:00","l":"VENTE DE CHARGEUR BANK A MORY TRAORE","m":"140000"},{"i":"5118","d":"03/25/15 00:00:00","l":"FACTURE COURANT","m":"20000"},{"i":"5210","d":"03/26/15 00:00:00","l":"facture courant","m":"30000"},{"i":"5261","d":"03/27/15 00:00:00","l":"facture courant","m":"30000"},{"i":"5270","d":"03/28/15 00:00:00","l":"QUATRE CD DVD","m":"20000"},{"i":"5274","d":"03/28/15 00:00:00","l":"ACHAT DE CENT DOLLARS 100 USD","m":"1420000"},{"i":"5505","d":"03/30/15 00:00:00","l":"ACHAT DE COLGATE BAIN DE BOUCHE","m":"70000"},{"i":"5550","d":"03/30/15 00:00:00","l":"facture courant et eau","m":"26000"},{"i":"5608","d":"03/31/15 00:00:00","l":"FACTURE COURANT ET EAU","m":"42000"},{"i":"5682","d":"04/01/15 00:00:00","l":"SIM COUPE","m":"5000"},{"i":"5713","d":"04/01/15 00:00:00","l":"FACTURE COURANT ET EAU","m":"35000"},{"i":"5771","d":"04/02/15 00:00:00","l":"frais divers","m":"500000"},{"i":"5841","d":"04/03/15 00:00:00","l":"MALIZIA SAVON","m":"15000"},{"i":"5874","d":"04/03/15 00:00:00","l":"ACHAT DE MARCHANDISE A BAMAKO","m":"2457000"},{"i":"5887","d":"04/03/15 00:00:00","l":"ACHAT DE CENT EURO ET VINGT","m":"875000"},{"i":"6128","d":"04/04/15 00:00:00","l":"FACTURE COURANT ET FRAIS DE LAVAGE DE LA VOITURE D'ABOU","m":"55000"},{"i":"6340","d":"04/05/15 00:00:00","l":"frais de courant a la maison","m":"150000"},{"i":"6584","d":"04/06/15 00:00:00","l":"VENTE DE CARTE SD 2GB","m":"30000"},{"i":"6598","d":"04/06/15 00:00:00","l":"DIVERS DEPENSES","m":"60000"},{"i":"6653","d":"04/06/15 00:00:00","l":"frais de courant","m":"40000"},{"i":"6671","d":"04/07/15 00:00:00","l":"ACHAT DE 51 DOLLARS USD","m":"336000"},{"i":"6870","d":"04/08/15 00:00:00","l":"DVD-R 2","m":"10000"},{"i":"7051","d":"04/09/15 00:00:00","l":"FACTURE COURANT","m":"29000"},{"i":"7065","d":"04/09/15 00:00:00","l":"achat de caprisonne pour mes filles","m":"10000"},{"i":"7082","d":"04/10/15 00:00:00","l":"VENTE DE CARTE SD 4GB","m":"40000"},{"i":"7310","d":"04/15/15 00:00:00","l":"SIM COUPE","m":"5000"},{"i":"7425","d":"05/01/15 00:00:00","l":"REGLEMENT D'ALFRED CAMARA TRANSFERT DANS MON COMPTE ECOBANK","m":"1050000"},{"i":"7505","d":"05/02/15 00:00:00","l":"REGLEMENT DE KWAME EST DEPOSEE DANS MON COMPTE ECOBANK","m":"4600000"},{"i":"7560","d":"05/02/15 00:00:00","l":"REGLEMENT DE LA FACT DE IBRAHIMa SORY YANSANE EST VERSE DANS MON COMPTE ECOBANK","m":"200000"},{"i":"7819","d":"05/06/15 00:00:00","l":"REMBOURSEMENT DE ALY CLEMENT","m":"100000"},{"i":"8107","d":"05/07/15 00:00:00","l":"VENTE DE 4500 FCFA","m":"50000"},{"i":"8367","d":"05/09/15 00:00:00","l":"DIVA HUILLE","m":"30000"},{"i":"8847","d":"05/16/15 00:00:00","l":"CAMEE PARFUM BLANC PM","m":"25000"},{"i":"8923","d":"05/18/15 00:00:00","l":"REGLEMENT EN VALEUR DE RIZ","m":"290000"},{"i":"9282","d":"05/24/15 00:00:00","l":"ACHAT DE DEVIS","m":"183000"},{"i":"9791","d":"06/02/15 00:00:00","l":"TONDEUSE POUR LE SALON","m":"230000"},{"i":"10547","d":"06/17/15 00:00:00","l":"REMBOURSEMENT D'UNE DETTE DE 3 ANNS PAR ALY CMENT","m":"100000"},{"i":"11445","d":"07/11/15 00:00:00","l":"","m":""},{"i":"11463","d":"07/11/15 00:00:00","l":"ACHAT DE TELEPHONE","m":"46249000"},{"i":"12469","d":"08/12/15 00:00:00","l":"ACHAT DE TELEPHONE A BAMAKO","m":"13628500"},{"i":"12647","d":"08/20/15 00:00:00","l":"DIVERS DEPENSE","m":"10000000"},{"i":"12745","d":"08/23/15 00:00:00","l":"TRANFEREE DANS MON COMPTE ECOBANK","m":"1200000"},{"i":"12754","d":"08/23/15 00:00:00","l":"FRAIS DE TRANSPORT DE LAMINE BERETE POUR MOUZAANBIQUE","m":"2340000"},{"i":"12837","d":"08/26/15 00:00:00","l":"FRAIS DE L'IMPOT DES EXSERSISE DE ANNEE 2015","m":"560000"},{"i":"13044","d":"08/31/15 00:00:00","l":"REGLEMENT DE JUSTIN D,E VINCENT TRANFEREE DANS MON COMPTE ECOBANK","m":"765000"},{"i":"14889","d":"09/08/15 00:00:00","l":"REGLEMENT DE MAMOUDOU DRAME EST VERSEE A NAINY KOUROUMA","m":"1300000"},{"i":"14971","d":"09/08/15 00:00:00","l":"REGLEMENT DE BAH ALPHA AMADOU VERSEE DANS MON COMPTE ECOBANK","m":"2000000"},{"i":"16033","d":"09/27/15 00:00:00","l":"DVD VIERCE 2 PIECES","m":"10000"},{"i":"17601","d":"10/31/15 00:00:00","l":"CAMEE PARFUM PM","m":"25000"},{"i":"17874","d":"11/03/15 00:00:00","l":"DVD VIERCE 4 PIECES","m":"20000"},{"i":"18247","d":"11/17/15 00:00:00","l":"SAVON DODO 3 PIECES","m":"30000"},{"i":"20304","d":"01/10/16 00:00:00","l":"POUR LE SALON","m":"240000"},{"i":"20802","d":"01/28/16 00:00:00","l":"DONT POUR PARTICULIER","m":"18500"}]
+  fournisseurs: [], // Fournisseurs supprimés — à saisir via le module Fournisseurs ou importer depuis Firestore
+  depenses: [] // Données historiques 2015 supprimées — utiliser le module Dépenses
 };
 
 DB_LOCAL = STATIC_DB;
@@ -3145,7 +3163,9 @@ let _rtListeners = []; // pour pouvoir unsubscribe si besoin
 
 // Compteur pour savoir quand toutes les collections sont prêtes
 let _rtReady = {};
-const _RT_COLLECTIONS = ['produits','appros','clients','fournisseurs','depenses','credits_remboursements'];
+// 'ventes' inclus : initAllModules() ne s'exécute qu'une fois POS_VENTES chargé
+// → élimine la race condition où Dashboard/Crédits/Rapports voient POS_VENTES=[]
+const _RT_COLLECTIONS = ['produits','appros','clients','fournisseurs','depenses','credits_remboursements','ventes'];
 let _appInitialized = false;
 
 function _checkAllReady() {
@@ -3162,20 +3182,29 @@ function loadData() {
   document.getElementById('loader').style.display = 'flex';
   document.getElementById('loader-txt').textContent = 'Chargement des données...';
 
-  // Vérifier si Firestore est disponible (une collection test)
-  db.collection('produits').limit(1).get()
+  // ✅ CORRECTIF — Détection Firestore via un document de config dédié
+  // (évite le faux-négatif si la collection produits est vide sur un nouveau déploiement)
+  db.collection('_config').doc('app').get()
     .then(snap => {
-      if (!snap.empty) {
-        // Firestore disponible → activer les listeners temps réel
+      if (snap.exists) {
+        // Document config trouvé → Firestore actif, activer les listeners temps réel
         dataSource = 'firebase';
         _startRealtimeListeners();
       } else {
-        // Firestore vide → données statiques locales
-        dataSource = 'local';
-        DB_LOCAL = STATIC_DB;
-        document.getElementById('loader').style.display = 'none';
-        setSyncStatus('ok');
-        initAllModules();
+        // Pas de doc config → tenter quand même avec produits pour rétrocompatibilité
+        return db.collection('produits').limit(1).get().then(pSnap => {
+          if (!pSnap.empty) {
+            dataSource = 'firebase';
+            _startRealtimeListeners();
+          } else {
+            // Firestore vide ou non configuré → données statiques locales
+            dataSource = 'local';
+            DB_LOCAL = STATIC_DB;
+            document.getElementById('loader').style.display = 'none';
+            setSyncStatus('ok');
+            initAllModules();
+          }
+        });
       }
     })
     .catch(() => {
@@ -3262,6 +3291,35 @@ function _startRealtimeListeners() {
       _checkAllReady();
       if (_appInitialized) { try { initCredits(); } catch(e){} }
     }, _rtError)
+  );
+
+  // ── ventes (listener unifié — remplace posLoadFromFirestore séparé) ──
+  // Inclus dans _RT_COLLECTIONS : initAllModules() attend ce snapshot avant de démarrer.
+  // Pagination : on charge d'abord les 500 plus récentes ; l'utilisateur peut charger plus via posLoadOlderVentes().
+  _rtListeners.push(
+    db.collection('ventes').orderBy('date', 'desc').limit(500)
+      .onSnapshot({ includeMetadataChanges: false }, snap => {
+        if (!snap.empty) {
+          POS_VENTES = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+          try { localStorage.setItem('manfara_ventes', JSON.stringify(POS_VENTES)); } catch(e) {}
+        }
+        _rtReady['ventes'] = true;
+        _checkAllReady(); // débloque initAllModules() si toutes les collections sont prêtes
+        if (_appInitialized) {
+          try { ventesRender(); initCredits(); initRapports(); initDashboard(); } catch(e) {}
+        }
+      }, e => { console.warn('POS ventes listener:', e); _rtReady['ventes'] = true; _checkAllReady(); })
+  );
+
+  // Points de vente (pas dans _RT_COLLECTIONS car non-bloquant pour l'init)
+  _rtListeners.push(
+    db.collection('points_de_vente').onSnapshot({ includeMetadataChanges: false }, snap => {
+      if (!snap.empty) {
+        POINTS_DE_VENTE = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        try { localStorage.setItem('manfara_pdv', JSON.stringify(POINTS_DE_VENTE)); } catch(e) {}
+      }
+      try { posUpdateCartSelect(); pdvRender(); } catch(e) {}
+    }, e => console.warn('POS PDV listener:', e))
   );
 }
 
@@ -3365,6 +3423,16 @@ const FAM_COLORS = { 'COSMETIQUE':'#C77DFF','ELECTRONIQUE':'#D4AF37','ELECTRO ME
 const FAM_COLOR_LIST = Object.values(FAM_COLORS);
 const ROLE_COLORS = { admin:'#D4AF37', gerant:'#2980B9', vendeur:'#3DA85A' };
 
+
+// ─── HELPER DÉPENSES ───────────────────────────────────────────
+// Quand Firestore est actif, DEP_DATA contient déjà toutes les dépenses.
+// DB_LOCAL.depenses est réservé au mode local/offline (STATIC_DB vide désormais).
+// Cette fonction évite les doublons.
+function getAllDepenses() {
+  if (dataSource === 'firebase') return [...DEP_DATA];
+  return getAllDepenses();
+}
+
 // ─── INIT ALL ──────────────────────────────────────────────────
 function initAllModules() {
   smsLoadConfig(); clotureCaisseLoadLocal(); retoursLoadLocal();
@@ -3381,7 +3449,8 @@ let POS_TICKET_NB = 1;
 let ventesPage = 0;
 const VENTES_PER_PAGE = 30;
 
-// Charger depuis localStorage + Firestore si disponible
+// Charger depuis localStorage (mode local/offline uniquement)
+// En mode Firebase, les ventes sont chargées par le listener unifié dans _startRealtimeListeners.
 function posLoadStorage() {
   try {
     const pdv = localStorage.getItem('manfara_pdv');
@@ -3391,41 +3460,15 @@ function posLoadStorage() {
     if(ventes) POS_VENTES = JSON.parse(ventes);
     if(nb) POS_TICKET_NB = parseInt(nb);
   } catch(e) {}
-  // Sync depuis Firestore si connecté
-  if(dataSource === 'firebase') {
-    posLoadFromFirestore();
-  }
+  // Firestore : listener géré centralement dans _startRealtimeListeners (pas de doublon)
+  // Mode local uniquement : charger les PDV depuis localStorage suffit
 }
 
 let _posListeners = [];
-function posLoadFromFirestore() {
-  // Détacher anciens listeners
-  _posListeners.forEach(u => u());
-  _posListeners = [];
-
-  // ── points_de_vente ──
-  _posListeners.push(
-    db.collection('points_de_vente').onSnapshot({ includeMetadataChanges: false }, snap => {
-      if (!snap.empty) {
-        POINTS_DE_VENTE = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        try { localStorage.setItem('manfara_pdv', JSON.stringify(POINTS_DE_VENTE)); } catch(e) {}
-      }
-      try { posUpdateCartSelect(); pdvRender(); } catch(e) {}
-    }, e => console.warn('POS PDV listener:', e))
-  );
-
-  // ── ventes ──
-  _posListeners.push(
-    db.collection('ventes').orderBy('date', 'desc').limit(500)
-      .onSnapshot({ includeMetadataChanges: false }, snap => {
-        if (!snap.empty) {
-          POS_VENTES = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          try { localStorage.setItem('manfara_ventes', JSON.stringify(POS_VENTES)); } catch(e) {}
-        }
-        try { ventesRender(); initCredits(); initRapports(); initDashboard(); } catch(e) {}
-      }, e => console.warn('POS ventes listener:', e))
-  );
-}
+// posLoadFromFirestore() supprimé (v15) — le listener ventes est désormais
+// géré de façon centralisée dans _startRealtimeListeners() avec _checkAllReady().
+// Cela élimine la race condition où Dashboard/Crédits/Rapports s'initialisaient
+// avec POS_VENTES=[] avant l'arrivée du premier snapshot Firestore.
 
 function posSaveStorage(nouvelleVente) {
   try {
@@ -3899,18 +3942,27 @@ function posValiderVente() {
   };
   POS_VENTES.unshift(vente);
   stockEnregistrerSortieVente(vente);
-  // Décrémenter p.s dans DB_LOCAL et Firestore pour chaque article vendu
-  vente.articles.forEach(art => {
-    const prod = DB_LOCAL.produits.find(p => p.c === art.code);
-    if (prod) {
-      const ancienStock = parseInt(prod.s) || 0;
-      const nouveauStock = Math.max(0, ancienStock - art.qty);
-      prod.s = String(nouveauStock);
-      if (dataSource === 'firebase') {
-        db.collection('produits').doc('prd_' + prod.c).update({ s: prod.s }).catch(() => {});
+  // ✅ CORRECTIF — Décrément stock en batch atomique (évite les conflits de concurrence)
+  if (dataSource === 'firebase') {
+    const batch = db.batch();
+    vente.articles.forEach(art => {
+      const prod = DB_LOCAL.produits.find(p => p.c === art.code);
+      if (prod) {
+        const nouveauStock = Math.max(0, (parseInt(prod.s) || 0) - art.qty);
+        prod.s = String(nouveauStock);
+        const ref = db.collection('produits').doc('prd_' + prod.c);
+        batch.update(ref, { s: prod.s });
       }
-    }
-  });
+    });
+    batch.commit().catch(e => console.warn('Batch stock update failed:', e));
+  } else {
+    vente.articles.forEach(art => {
+      const prod = DB_LOCAL.produits.find(p => p.c === art.code);
+      if (prod) {
+        prod.s = String(Math.max(0, (parseInt(prod.s) || 0) - art.qty));
+      }
+    });
+  }
   posSaveStorage(vente);
   posShowTicket(vente);
   // SMS notifications
@@ -4027,6 +4079,11 @@ function ventesRender() {
       </tr>`).join('');
   }
   document.getElementById('ventes-info').textContent = total > 0 ? (page*VENTES_PER_PAGE+1)+'–'+Math.min((page+1)*VENTES_PER_PAGE,total)+' / '+total : '0 vente';
+  // Afficher le bouton "Charger plus" si on a exactement la limite (500) = probablement plus d'historique
+  const moreWrap = document.getElementById('ventes-load-more-wrap');
+  if (moreWrap && dataSource === 'firebase') {
+    moreWrap.style.display = POS_VENTES.length >= 500 ? 'block' : 'none';
+  }
   // Pagination
   const pbtns = document.getElementById('ventes-pag-btns');
   pbtns.innerHTML = '';
@@ -4042,6 +4099,42 @@ function ventesRender() {
     mk('‹',page-1,page===0);
     for(let i=Math.max(0,page-2);i<=Math.min(pages-1,page+2);i++) mk(i+1,i,false,i===page);
     mk('›',page+1,page>=pages-1);
+  }
+}
+
+// ─── CHARGEMENT HISTORIQUE ÉTENDU (>500 ventes) ───────────────
+// Fix #9 : lève la limite hard de 500 en chargeant tout l'historique en une requête paginée.
+// N'utilise PAS onSnapshot (lecture unique get()) pour éviter la surcharge mémoire.
+// Le listener temps-réel reste actif pour les nouvelles ventes.
+let _posAllVentesLoaded = false;
+async function posLoadOlderVentes() {
+  if (_posAllVentesLoaded || dataSource !== 'firebase') return;
+  const btn = document.getElementById('ventes-load-more-btn');
+  const info = document.getElementById('ventes-load-more-info');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Chargement...'; }
+  try {
+    // Récupérer toutes les ventes sans limite (par batch de 1000 si nécessaire)
+    let allDocs = [];
+    let lastDoc = null;
+    let batchSize = 1000;
+    do {
+      let q = db.collection('ventes').orderBy('date', 'desc').limit(batchSize);
+      if (lastDoc) q = q.startAfter(lastDoc);
+      const snap = await q.get();
+      allDocs = allDocs.concat(snap.docs);
+      lastDoc = snap.docs.length === batchSize ? snap.docs[snap.docs.length - 1] : null;
+    } while (lastDoc);
+    POS_VENTES = allDocs.map(d => ({ id: d.id, ...d.data() }));
+    try { localStorage.setItem('manfara_ventes', JSON.stringify(POS_VENTES)); } catch(e) {}
+    _posAllVentesLoaded = true;
+    ventesRender(); initCredits(); initRapports(); initDashboard();
+    const wrap = document.getElementById('ventes-load-more-wrap');
+    if (wrap) wrap.style.display = 'none';
+    showToast(`✅ ${POS_VENTES.length.toLocaleString('fr-FR')} ventes chargées`, 'success');
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = '⬇ Charger l\'historique complet'; }
+    if (info) info.textContent = 'Erreur : ' + e.message;
+    showToast('Erreur chargement historique : ' + e.message, 'error');
   }
 }
 
@@ -4295,6 +4388,8 @@ function approCalcReste() {
 
 async function approSauvegarder() {
   try {
+    // 🔒 SÉCURITÉ — modification appros réservée aux admins et gérants
+    if (!currentUser || currentUser.role === 'vendeur') { showToast('⛔ Droits insuffisants', 'error'); return; }
     const editId = document.getElementById('appro-form').dataset.editId;
     const date   = document.getElementById('appro-date').value;
     const frs    = document.getElementById('appro-frs').value.trim();
@@ -4581,6 +4676,8 @@ function frnsEditer(id) {
 
 async function frnsSauvegarder() {
   try {
+  // 🔒 SÉCURITÉ — modification fournisseurs réservée aux admins et gérants
+  if (!currentUser || currentUser.role === 'vendeur') { showToast('⛔ Droits insuffisants', 'error'); return; }
   const nom = document.getElementById('frns-form-nom').value.trim();
   if(!nom) { document.getElementById('frns-form-msg').textContent = '⚠️ Le nom est obligatoire.'; return; }
   const id = document.getElementById('frns-form-id').value.trim();
@@ -4621,6 +4718,8 @@ async function frnsSauvegarder() {
 }
 
 async function frnsSupprimer(id) {
+  // 🔒 SÉCURITÉ — suppression réservée aux admins et gérants
+  if (!currentUser || currentUser.role === 'vendeur') { showToast('⛔ Droits insuffisants', 'error'); return; }
   const f = DB_LOCAL.fournisseurs.find(x => x.i == id);
   if(!f) return;
   if(!confirm('Supprimer le fournisseur "' + f.n + '" ?')) return;
@@ -4694,6 +4793,8 @@ function prodEditer(code) {
 
 async function prodSauvegarder() {
   try {
+  // 🔒 SÉCURITÉ — modification catalogue réservée aux admins et gérants
+  if (!currentUser || currentUser.role === 'vendeur') { showToast('⛔ Droits insuffisants', 'error'); return; }
   const code = document.getElementById('prod-form-code').value.trim();
   const lib = document.getElementById('prod-form-lib').value.trim();
   if(!code || !lib) { document.getElementById('prod-form-msg').textContent = '⚠️ Code et libellé obligatoires.'; return; }
@@ -4743,6 +4844,8 @@ async function prodSauvegarder() {
 }
 
 async function prodSupprimer(code) {
+  // 🔒 SÉCURITÉ — suppression réservée aux admins et gérants
+  if (!currentUser || currentUser.role === 'vendeur') { showToast('⛔ Droits insuffisants', 'error'); return; }
   const p = DB_LOCAL.produits.find(x => x.c == code);
   if(!p) return;
   if(!confirm('Supprimer le produit "' + p.l + '" (code ' + code + ') ?')) return;
@@ -5623,7 +5726,7 @@ function depFilter() {
 
 function depRenderAll() {
   // Fusionner avec données statiques
-  const allDep = [...DEP_DATA, ...(DB_LOCAL.depenses||[])];
+  const allDep = getAllDepenses();
   const now = new Date();
   const moisCourant = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
   const total = allDep.reduce((s,d)=>s+(parseFloat(d.mnt||d.m)||0), 0);
@@ -5952,7 +6055,7 @@ function rptGenererVentes() {
 function rptGenererDepenses() {
   const du = document.getElementById('rpt-dep-du').value;
   const au = document.getElementById('rpt-dep-au').value;
-  const allDep = [...DEP_DATA, ...(DB_LOCAL.depenses||[])];
+  const allDep = getAllDepenses();
   const filtered = allDep.filter(d => {
     const date = d.date || (d.d ? d.d.split('/').reverse().join('-') : '');
     return date >= du && date <= au;
@@ -6209,13 +6312,7 @@ function adminTab(name, btn) {
 
 const RST_KEYS = {
   ventes:   ['manfara_ventes','manfara_ticket_nb'],
-  depenses: ['manfara_depenses'],
-  credits:  ['manfara_credits','manfara_credits_versements'],
-  clotures: ['manfara_clotures'],
-  retours:  ['manfara_retours'],
-  stock:    ['manfara_stock_mvt','manfara_stock_inv'],
-  achats:   ['manfara_achats'],
-  sms:      ['manfara_sms_history']
+  depenses: [] // Données historiques 2015 supprimées — utiliser le module Dépenses
 };
 
 function rstLog(msg, ok=true) {
@@ -6277,6 +6374,17 @@ function rstStaticClients() {
   showToast('✅ Clients hardcodés supprimés', 'success');
 }
 
+function rstStaticFournisseurs() {
+  if (!currentUser || currentUser.role !== 'admin') { showToast('⛔ Accès refusé — réservé à l\'administrateur', 'error'); return; }
+  if (!confirm('⚠️ Vider tous les fournisseurs hardcodés (STATIC_DB.fournisseurs) ?\n\nLes fournisseurs saisis via Firestore ne sont pas affectés.')) return;
+  if (typeof STATIC_DB !== 'undefined') STATIC_DB.fournisseurs = [];
+  if (DB_LOCAL) DB_LOCAL.fournisseurs = [];
+  rstLog('✅ Fournisseurs hardcodés vidés en mémoire.');
+  showToast('✅ Fournisseurs hardcodés supprimés', 'success');
+  // Rafraîchir la liste si le module est visible
+  try { initFournisseurs(); } catch(e) {}
+}
+
 function rstStaticAppros() {
   if (!confirm('⚠️ Vider toutes les appros hardcodées (STATIC_DB.appros) ?\n\nLes appros saisies en localStorage ne sont pas affectées.')) return;
   if (typeof STATIC_DB !== 'undefined') STATIC_DB.appros = [];
@@ -6306,6 +6414,8 @@ function rstStaticAll() {
 }
 
 function rstAll() {
+  // 🔒 SÉCURITÉ — réservé aux admins uniquement
+  if (!currentUser || currentUser.role !== 'admin') { showToast('⛔ Accès refusé — réservé à l\'administrateur', 'error'); return; }
   if (!confirm('☢️ RÉINITIALISATION COMPLÈTE\n\nToutes les données locales manfara_* seront supprimées ET le STATIC_DB vidé.\n\nCette action est IRRÉVERSIBLE.')) return;
   if (!confirm('⚠️ Confirmer une deuxième fois : supprimer TOUTES les données ?')) return;
   const keys = Object.keys(localStorage).filter(k => k.startsWith('manfara_'));
@@ -6352,6 +6462,11 @@ function rstReloadMemory(modules) {
 // REMISE À ZÉRO TOTALE FIREBASE + LOCAL
 // ═══════════════════════════════════════════════════════════════
 async function rstFirebaseTotal() {
+  // 🔒 SÉCURITÉ — réservé aux admins uniquement
+  if (!currentUser || currentUser.role !== 'admin') {
+    showToast('⛔ Accès refusé — réservé à l\'administrateur', 'error');
+    return;
+  }
   if (!confirm('🔥 REMISE À ZÉRO TOTALE\n\nCeci va supprimer TOUTES les données Firebase (produits, clients, fournisseurs, ventes, achats, dépenses, stock, points de vente, crédits, clôtures, retours) ET toutes les données locales.\n\nCette action est IRRÉVERSIBLE. Continuez ?')) return;
   if (!confirm('⚠️ DERNIÈRE CONFIRMATION\n\nToutes les données seront perdues définitivement.\n\nÊtes-vous absolument certain ?')) return;
 
@@ -6506,7 +6621,7 @@ function actDrawKPIs() {
   const nb = ventes.length;
   const panier = nb ? Math.round(ca / nb) : 0;
   const credit = ventes.filter(v => v.paiement === 'CREDIT').reduce((s,v)=>s+(parseFloat(v.total)||0),0);
-  const articles = ventes.reduce((s,v) => s + (v.items ? v.items.reduce((a,i)=>a+(parseInt(i.qty)||0),0) : 0), 0);
+  const articles = ventes.reduce((s,v) => s + (v.articles||[]).reduce((a,i)=>a+(parseInt(i.qty)||0),0), 0);
 
   document.getElementById('act-kpi-ca').textContent   = fmtFull(ca);
   document.getElementById('act-kpi-nb').textContent   = nb.toLocaleString('fr-FR');
@@ -6846,7 +6961,7 @@ function exportCSV(type) {
     filename = 'manfara_ventes.csv';
   } else if (type === 'depenses') {
     headers = ['ID','Date','Libellé','Catégorie','Montant GNF','Saisi par'];
-    rows = [...DEP_DATA,...(DB_LOCAL.depenses||[])].map(d=>[d.id||d.i,d.date||d.d,d.lib||d.l,d.cat||'',d.mnt||d.m,d.saisiepar||'']);
+    rows = getAllDepenses().map(d=>[d.id||d.i,d.date||d.d,d.lib||d.l,d.cat||'',d.mnt||d.m,d.saisiepar||'']);
     filename = 'manfara_depenses.csv';
   } else if (type === 'credits') {
     headers = ['Ticket','Date','Client','Point de Vente','Échéance','Total GNF','Remboursé','Reste','Versements','Statut'];
@@ -6860,6 +6975,16 @@ function exportCSV(type) {
     });
     filename = 'manfara_credits.csv';
   }
+  // ✅ CORRECTIF — téléchargement effectif (était absent pour tous les types)
+  if (!rows.length) { showToast('Aucune donnée à exporter', 'error'); return; }
+  const allRows = [headers, ...rows];
+  const csv = allRows.map(r => r.map(c => '"' + String(c == null ? '' : c).replace(/"/g, '""') + '"').join(',')).join('\n');
+  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast('✅ Export CSV téléchargé', 'success');
 }
 // ══════════════════════════════════════════
 // QR CODE PRODUIT
@@ -7157,7 +7282,7 @@ function rptGenererPL() {
   const margebrute = ca - cmvd;
   const tauxMarge = ca > 0 ? (margebrute / ca * 100).toFixed(1) : 0;
   // Dépenses
-  const allDep = [...DEP_DATA, ...(DB_LOCAL.depenses||[])];
+  const allDep = getAllDepenses();
   const depP = allDep.filter(d => { const date=d.date||(d.d?d.d.split('/').reverse().join('-'):''); return date>=du && date<=au; });
   const totalDep = depP.reduce((s,d)=>s+(parseFloat(d.mnt||d.m)||0),0);
   const beneficeNet = margebrute - totalDep;
@@ -7288,12 +7413,12 @@ function rptAlertesCredits() {
 function exportBackupComplet() {
   const backup = {
     exportDate: new Date().toISOString(),
-    app: 'MANFARA-SHOP v14',
+    app: 'MANFARA-SHOP v15',
     produits: DB_LOCAL.produits,
     clients: DB_LOCAL.clients,
     fournisseurs: DB_LOCAL.fournisseurs,
     appros: DB_LOCAL.appros,
-    depenses: [...DEP_DATA, ...(DB_LOCAL.depenses||[])],
+    depenses: getAllDepenses(),
     ventes: POS_VENTES,
     credits_remboursements: CRED_REMBOURSES,
     credits_versements: CRED_VERSEMENTS,
