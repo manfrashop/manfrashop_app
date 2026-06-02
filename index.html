@@ -4268,11 +4268,15 @@ document.querySelectorAll('nav a').forEach(a => {
 
 // ─── DASHBOARD ─────────────────────────────────────────────────
 function initDashboard(){
-  const prod=DB_LOCAL.produits, appros=DB_LOCAL.appros, clients=DB_LOCAL.clients, frns=DB_LOCAL.fournisseurs, dep=DB_LOCAL.depenses;
+  const prod=DB_LOCAL.produits, clients=DB_LOCAL.clients, frns=DB_LOCAL.fournisseurs, dep=DB_LOCAL.depenses;
+  // Fusionner appros saisies manuellement + données Firebase/statiques
+  approLoadStorage();
+  const _staticAppros = DB_LOCAL.appros.map(a => ({ id:'static-'+(a.i||Math.random()), num:a.i, date:a.d, frs:a.f, total:parseFloat(a.to)||0, paye:parseFloat(a.pa)||0, reste:parseFloat(a.re)||0, statut:a.ty, note:a.or, fam:a.fam||'', desc:'', _static:true }));
+  const appros = [...APPRO_DATA_SAISIE, ..._staticAppros];
   document.getElementById('kpi-produits').textContent = prod.length.toLocaleString('fr-FR');
   document.getElementById('kpi-clients').textContent  = clients.length.toLocaleString('fr-FR');
   document.getElementById('kpi-frns').textContent     = frns.length.toLocaleString('fr-FR');
-  const totalAppros = appros.reduce((s,a)=>s+(parseFloat(a.to)||0),0);
+  const totalAppros = appros.reduce((s,a)=>s+(parseFloat(a.total||a.to)||0),0);
   document.getElementById('kpi-appros').textContent     = fmt(totalAppros);
   document.getElementById('kpi-appros-sub').textContent = fmtFull(totalAppros)+' GNF';
   dashVentesKpi();
@@ -4310,7 +4314,7 @@ function initDashboard(){
 
   // Bar chart
   const moisData={};
-  appros.forEach(a=>{ const m=a.d.match(/(\d+)\/(\d+)\/(\d+)/); if(!m) return; const y=m[3].length===2?'20'+m[3]:m[3],mo=m[1].padStart(2,'0'); const k=`${y}-${mo}`; moisData[k]=(moisData[k]||0)+(parseFloat(a.to)||0); });
+  appros.forEach(a=>{ const raw=a.date||a.d||''; const mISO=raw.match(/(\d{4})-(\d{2})-(\d{2})/); const mFR=raw.match(/(\d+)\/(\d+)\/(\d+)/); let y,mo; if(mISO){y=mISO[1];mo=mISO[2];}else if(mFR){y=mFR[3].length===2?'20'+mFR[3]:mFR[3];mo=mFR[1].padStart(2,'0');}else return; const k=y+'-'+mo; moisData[k]=(moisData[k]||0)+(parseFloat(a.total||a.to)||0); });
   const moisSorted=Object.entries(moisData).sort((a,b)=>a[0].localeCompare(b[0])).slice(-12);
   const maxVal=Math.max(...moisSorted.map(x=>x[1]));
   const barChart=document.getElementById('bar-chart');
@@ -4324,7 +4328,7 @@ function initDashboard(){
 
   // Top fournisseurs
   const frnsCount={};
-  appros.forEach(a=>{ if(a.f) frnsCount[a.f]=(frnsCount[a.f]||0)+1; });
+  appros.forEach(a=>{ const fn=a.frs||a.f; if(fn) frnsCount[fn]=(frnsCount[fn]||0)+1; });
   const topFrns=Object.entries(frnsCount).sort((a,b)=>b[1]-a[1]).slice(0,8);
   const topFrnsEl=document.getElementById('top-frns');
   topFrnsEl.innerHTML='';
