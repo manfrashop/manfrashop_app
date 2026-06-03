@@ -17,10 +17,7 @@
 <!-- QR Code -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<!-- Firebase SDK supprimé — mode localStorage uniquement -->
 
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -840,12 +837,13 @@ tbody tr:last-child td { border-bottom:none; }
    RESPONSIVE — MOBILE  ≤ 768px
 ═══════════════════════════════════════ */
 @media(max-width:768px){
-  /* Sidebar : masquée, glisse à l'ouverture */
+  /* Sidebar : masquée complètement, glisse à l'ouverture */
   #sidebar {
-    transform:translateX(-220px);
+    transform:translateX(-100%);
     z-index:200;
+    overflow-y:auto;
   }
-  #sidebar.open { transform:translateX(0); }
+  #sidebar.open { transform:translateX(0); box-shadow:4px 0 24px rgba(0,0,0,0.4); }
   #sidebar-overlay.open { display:block; }
 
   /* Hamburger visible */
@@ -1106,7 +1104,7 @@ nav a.active::before {
 
 /* Responsive tweaks for new sidebar width */
 @media(max-width:768px){
-  #sidebar { width:230px; transform:translateX(-230px); }
+  #sidebar { width:260px; transform:translateX(-100%); }
   #sidebar.open { transform:translateX(0); }
 }
 
@@ -1610,12 +1608,138 @@ textarea:focus {
   #anl-kpi-row { grid-template-columns:1fr 1fr !important; }
   #sec-analytique [style*="grid-template-columns"] { grid-template-columns:1fr !important; }
 }
+
+/* ══════════════════════════════════════════════
+   MODULE CLAUDE IA
+══════════════════════════════════════════════ */
+#sec-ai { display:flex; flex-direction:column; height:calc(100vh - var(--topbar-h) - 40px); }
+.ai-header-bar {
+  display:flex; align-items:center; justify-content:space-between;
+  margin-bottom:16px; flex-shrink:0;
+}
+.ai-badge {
+  display:inline-flex; align-items:center; gap:6px;
+  background:linear-gradient(135deg,rgba(201,162,39,.15),rgba(201,162,39,.05));
+  border:1px solid rgba(201,162,39,.35); border-radius:20px;
+  padding:4px 12px; font-size:12px; color:var(--or); font-weight:700; letter-spacing:.5px;
+}
+.ai-badge::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--or); animation:pulse .9s infinite; }
+/* ── Sélecteur de mode ──────────────────────── */
+.ai-mode-switch {
+  display:flex; align-items:center; gap:0;
+  background:var(--bg3); border:1px solid var(--brd2); border-radius:22px;
+  padding:3px; flex-shrink:0;
+}
+.ai-mode-btn {
+  padding:5px 14px; border-radius:18px; border:none; cursor:pointer;
+  font-family:'Raleway',sans-serif; font-size:12px; font-weight:700;
+  letter-spacing:.3px; transition:all .2s; background:transparent; color:var(--txt3);
+}
+.ai-mode-btn.active-cloud { background:linear-gradient(135deg,#4A9EFF,#74B8FF); color:#fff; box-shadow:0 2px 8px rgba(74,158,255,.4); }
+.ai-mode-btn.active-local { background:linear-gradient(135deg,#16A34A,#22C55E); color:#fff; box-shadow:0 2px 8px rgba(22,163,74,.4); }
+/* ── Config locale ──────────────────────────── */
+.ai-local-config {
+  background:var(--bg2); border:1px solid var(--grn); border-radius:var(--radius);
+  padding:10px 14px; margin-bottom:10px; flex-shrink:0;
+  display:none; gap:10px; align-items:center; flex-wrap:wrap;
+}
+.ai-local-config.show { display:flex; }
+.ai-local-config label { font-size:12px; color:var(--txt3); white-space:nowrap; }
+.ai-local-config input, .ai-local-config select {
+  background:var(--bg3); border:1px solid var(--brd2); border-radius:6px;
+  padding:5px 9px; color:var(--txt); font-family:'JetBrains Mono',monospace;
+  font-size:12px; outline:none; transition:border .2s;
+}
+.ai-local-config input:focus, .ai-local-config select:focus { border-color:var(--grn); }
+.ai-local-config .cfg-status {
+  font-size:11px; padding:3px 9px; border-radius:10px;
+  font-weight:700; white-space:nowrap;
+}
+.cfg-ok  { background:rgba(22,163,74,.15); color:var(--grn); border:1px solid rgba(22,163,74,.3); }
+.cfg-err { background:rgba(220,38,38,.15); color:var(--red); border:1px solid rgba(220,38,38,.3); }
+.cfg-pending { background:rgba(201,162,39,.15); color:var(--or); border:1px solid rgba(201,162,39,.3); }
+/* ── Contexte ───────────────────────────────── */
+.ai-context-bar {
+  background:var(--bg2); border:1px solid var(--brd); border-radius:var(--radius);
+  padding:10px 16px; margin-bottom:14px; flex-shrink:0;
+  display:flex; gap:16px; flex-wrap:wrap; align-items:center;
+}
+.ai-ctx-item { font-size:12px; color:var(--txt3); display:flex; align-items:center; gap:5px; }
+.ai-ctx-item strong { color:var(--or); font-family:'JetBrains Mono',monospace; }
+.ai-chat-wrap {
+  flex:1; overflow-y:auto; background:var(--bg2); border:1px solid var(--brd);
+  border-radius:var(--radius-lg); padding:16px; margin-bottom:12px;
+  display:flex; flex-direction:column; gap:12px;
+  scroll-behavior:smooth;
+}
+.ai-msg { display:flex; gap:10px; animation:sectionIn .25s ease; }
+.ai-msg.user { flex-direction:row-reverse; }
+.ai-bubble {
+  max-width:78%; padding:11px 15px; border-radius:14px;
+  font-size:14px; line-height:1.65; font-family:'Raleway',sans-serif;
+  white-space:pre-wrap; word-break:break-word;
+}
+.ai-msg.ai .ai-bubble {
+  background:var(--bg3); border:1px solid var(--brd);
+  color:var(--txt); border-bottom-left-radius:4px;
+}
+.ai-msg.user .ai-bubble {
+  background:linear-gradient(135deg,var(--or),var(--or2));
+  color:#0a0a0a; font-weight:600; border-bottom-right-radius:4px;
+}
+.ai-avatar {
+  width:32px; height:32px; border-radius:50%; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+  border:2px solid var(--brd2);
+}
+.ai-avatar.ai-av { background:linear-gradient(135deg,#6B48FF,#9B6BFF); }
+.ai-avatar.user-av { background:linear-gradient(135deg,var(--or),var(--or2)); font-size:13px; color:#0a0a0a; font-family:'Cinzel',serif; font-weight:700; }
+.ai-typing { display:flex; gap:4px; align-items:center; padding:4px 0; }
+.ai-typing span { width:7px; height:7px; border-radius:50%; background:var(--txt3); animation:typingDot 1.2s infinite; }
+.ai-typing span:nth-child(2) { animation-delay:.2s; }
+.ai-typing span:nth-child(3) { animation-delay:.4s; }
+@keyframes typingDot { 0%,80%,100%{opacity:.2;transform:scale(.8)} 40%{opacity:1;transform:scale(1)} }
+.ai-input-row {
+  display:flex; gap:8px; flex-shrink:0; align-items:flex-end;
+}
+#ai-input {
+  flex:1; background:var(--bg2); border:1.5px solid var(--brd2);
+  border-radius:12px; padding:10px 14px; color:var(--txt);
+  font-family:'Raleway',sans-serif; font-size:14px; outline:none;
+  resize:none; min-height:44px; max-height:120px; transition:border .2s;
+  line-height:1.5;
+}
+#ai-input:focus { border-color:var(--or); }
+#ai-send-btn {
+  width:44px; height:44px; background:linear-gradient(135deg,var(--or),var(--or2));
+  border:none; border-radius:12px; color:#0a0a0a; font-size:18px;
+  cursor:pointer; flex-shrink:0; transition:var(--transition);
+  display:flex; align-items:center; justify-content:center;
+}
+#ai-send-btn:hover { transform:scale(1.08); box-shadow:0 4px 16px rgba(201,162,39,.4); }
+#ai-send-btn:disabled { opacity:.4; cursor:not-allowed; transform:none; }
+.ai-quick-btns {
+  display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; flex-shrink:0;
+}
+.ai-quick-btn {
+  padding:5px 12px; background:var(--bg3); border:1px solid var(--brd2);
+  border-radius:20px; color:var(--txt2); font-size:12px; cursor:pointer;
+  font-family:'Raleway',sans-serif; transition:var(--transition);
+}
+.ai-quick-btn:hover { border-color:var(--or); color:var(--or); background:var(--or3); }
+.ai-empty {
+  flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center;
+  color:var(--txt3); text-align:center; gap:10px; padding:40px;
+}
+.ai-empty-icon { font-size:52px; opacity:.4; }
+.ai-empty h3 { font-family:'Cinzel',serif; font-size:17px; color:var(--txt2); }
+.ai-empty p { font-size:13px; max-width:340px; line-height:1.7; }
 </style>
 </head>
 <body>
 
 <!-- HAMBURGER (mobile) -->
-<button id="hamburger" aria-label="Menu" style="display:none">
+<button id="hamburger" aria-label="Menu">
   <span></span><span></span><span></span>
 </button>
 
@@ -1654,7 +1778,7 @@ textarea:focus {
 <div id="topbar" style="display:none">
   <div class="sync-indicator">
     <div class="sync-dot" id="sync-dot"></div>
-    <span id="sync-label">Firebase</span>
+    <span id="sync-label">Local</span>
   </div>
   <div class="topbar-user" title="Mon profil">
     <div class="topbar-avatar" id="topbar-avatar">?</div>
@@ -1699,6 +1823,8 @@ textarea:focus {
     <a onclick="clotureCaisseModal()" style="cursor:pointer"><span class="ico">🏦</span> Clôture Caisse</a>
     <a onclick="rptAlertesCredits()" style="cursor:pointer"><span class="ico">⚠️</span> Alertes Crédits</a>
     <a data-sec="admin" class="admin-only"><span class="ico">⚙️</span> Utilisateurs</a>
+    <div class="nav-section-title">Intelligence</div>
+    <a data-sec="ai"><span class="ico">🤖</span> Assistant IA</a>
   </nav>
   <div class="sidebar-footer">
   </div>
@@ -2821,6 +2947,77 @@ textarea:focus {
     </div>
   </div>
 
+  <!-- ASSISTANT IA — CLAUDE -->
+  <div id="sec-ai" class="section">
+
+    <div class="ai-header-bar">
+      <div>
+        <div class="page-title">🤖 Assistant IA</div>
+        <div class="page-sub">Posez vos questions sur vos données MANFRA-SHOP</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <!-- Sélecteur Cloud / Local -->
+        <div class="ai-mode-switch">
+          <button class="ai-mode-btn active-cloud" id="ai-btn-cloud" onclick="aiSetMode('cloud')" title="API Anthropic Claude (internet)">☁️ Cloud</button>
+          <button class="ai-mode-btn" id="ai-btn-local" onclick="aiSetMode('local')" title="Modèle local Ollama / LM Studio">🏠 Local</button>
+        </div>
+        <div class="ai-badge" id="ai-badge-label">Claude · Cloud</div>
+        <button onclick="aiClearChat()" style="padding:6px 14px;background:var(--bg3);border:1px solid var(--brd);border-radius:20px;color:var(--txt3);font-size:12px;cursor:pointer;font-family:'Raleway',sans-serif">🗑 Effacer</button>
+      </div>
+    </div>
+
+    <!-- Config Locale (visible seulement en mode Local) -->
+    <div class="ai-local-config" id="ai-local-config">
+      <label>🔗 URL</label>
+      <input type="text" id="ai-local-url" value="http://localhost:11434/api/chat" style="width:260px" placeholder="http://localhost:11434/api/chat">
+      <label>Modèle</label>
+      <select id="ai-local-engine">
+        <option value="ollama">Ollama</option>
+        <option value="lmstudio">LM Studio (OpenAI compat.)</option>
+      </select>
+      <input type="text" id="ai-local-model" value="llama3" placeholder="ex: llama3, mistral, phi3..." style="width:130px">
+      <button onclick="aiTestLocal()" style="padding:5px 12px;background:rgba(22,163,74,.12);border:1px solid rgba(22,163,74,.3);border-radius:6px;color:var(--grn);font-size:12px;cursor:pointer;font-family:'Raleway',sans-serif;font-weight:700">⚡ Tester</button>
+      <span class="cfg-status cfg-pending" id="ai-local-status">Non testé</span>
+    </div>
+
+    <!-- Barre de contexte live -->
+    <div class="ai-context-bar" id="ai-ctx-bar">
+      <div class="ai-ctx-item">📦 Produits : <strong id="ai-ctx-produits">—</strong></div>
+      <div class="ai-ctx-item">🛒 Ventes : <strong id="ai-ctx-ventes">—</strong></div>
+      <div class="ai-ctx-item">💳 Crédits actifs : <strong id="ai-ctx-credits">—</strong></div>
+      <div class="ai-ctx-item">💸 Dépenses (mois) : <strong id="ai-ctx-dep">—</strong></div>
+      <div class="ai-ctx-item">🏪 PDV : <strong id="ai-ctx-pdv">—</strong></div>
+    </div>
+
+    <!-- Suggestions rapides -->
+    <div class="ai-quick-btns" id="ai-quick-btns">
+      <button class="ai-quick-btn" onclick="aiQuick('Quel est mon chiffre d\'affaires du mois en cours ?')">📊 CA du mois</button>
+      <button class="ai-quick-btn" onclick="aiQuick('Quels produits sont en rupture de stock ou stock bas ?')">⚠️ Ruptures stock</button>
+      <button class="ai-quick-btn" onclick="aiQuick('Qui sont mes meilleurs clients en termes de ventes ?')">👥 Top clients</button>
+      <button class="ai-quick-btn" onclick="aiQuick('Quels crédits sont échus et non remboursés ?')">💳 Crédits échus</button>
+      <button class="ai-quick-btn" onclick="aiQuick('Donne-moi un résumé de la performance globale de mon commerce.')">📋 Résumé global</button>
+      <button class="ai-quick-btn" onclick="aiQuick('Quels sont mes 5 produits les plus vendus ?')">🏆 Top produits</button>
+    </div>
+
+    <!-- Zone de chat -->
+    <div class="ai-chat-wrap" id="ai-chat-wrap">
+      <div class="ai-empty" id="ai-empty-state">
+        <div class="ai-empty-icon">🤖</div>
+        <h3>Assistant MANFRA-SHOP</h3>
+        <p>Je connais vos produits, ventes, crédits, dépenses et clients en temps réel.<br>
+        Choisissez le mode <strong>☁️ Cloud</strong> (internet requis) ou <strong>🏠 Local</strong> (Ollama / LM Studio installé sur votre machine).</p>
+      </div>
+    </div>
+
+    <!-- Zone de saisie -->
+    <div class="ai-input-row">
+      <textarea id="ai-input" placeholder="Posez votre question... (Entrée pour envoyer, Shift+Entrée pour aller à la ligne)" rows="1"
+        onkeydown="aiHandleKey(event)" oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,120)+'px'"></textarea>
+      <button id="ai-send-btn" onclick="aiSend()" title="Envoyer">➤</button>
+    </div>
+
+  </div>
+
   <!-- ADMIN — GESTION UTILISATEURS (admin seulement) -->
   <div id="sec-admin" class="section">
     <div class="page-header">
@@ -3294,37 +3491,25 @@ textarea:focus {
                Collection "users" > Document (uid de l'admin) >
                { displayName:"Admin", role:"admin", disabled:false }
 ═══════════════════════════════════════════════════════════════ */
-const FIREBASE_CONFIG = {
-  // ⚠️  SÉCURITÉ — Ces clés sont visibles dans le source HTML.
-  // Protection obligatoire :
-  //   1. Restreindre cette clé API aux domaines autorisés dans Google Cloud Console
-  //      (APIs & Services → Credentials → Application Restrictions → HTTP Referrers)
-  //   2. Les Firestore Security Rules DOIVENT bloquer les accès non authentifiés
-  //      et contrôler les droits en écriture selon le rôle (admin/gerant/vendeur)
-  //   3. Activer Firebase App Check pour bloquer les appels hors de votre app
-  apiKey:            "AIzaSyA0Yq_S2WNuhVpY2AR70EYAWEPvSqjyCXU",
-  authDomain:        "manfrashop-b865f.firebaseapp.com",
-  projectId:         "manfrashop-b865f",
-  storageBucket:     "manfrashop-b865f.firebasestorage.app",
-  messagingSenderId: "834409601622",
-  appId:             "1:834409601622:web:72e58155be99f0a9cc39f7"
+/* ═══════════════════════════════════════════════════════════════
+   MODE LOCAL — Stockage localStorage uniquement
+   Firebase supprimé. Authentification via comptes locaux.
+═══════════════════════════════════════════════════════════════ */
+
+// Stub db pour éviter les erreurs résiduelles dans les fonctions qui appellent db.*
+const db = {
+  collection: () => ({
+    doc: () => ({ set: ()=>Promise.resolve(), get: ()=>Promise.resolve({exists:false,data:()=>({})}), update: ()=>Promise.resolve(), delete: ()=>Promise.resolve() }),
+    add: ()=>Promise.resolve(),
+    get: ()=>Promise.resolve({empty:true,docs:[]}),
+    limit: function(){ return this; },
+    orderBy: function(){ return this; },
+    where: function(){ return this; },
+    onSnapshot: (opts, cb) => { if(typeof opts==='function') opts({empty:true,docs:[],metadata:{fromCache:false}}); else if(typeof cb==='function') cb({empty:true,docs:[],metadata:{fromCache:false}}); return ()=>{}; },
+    batch: ()=>({ set:()=>{}, delete:()=>{}, commit:()=>Promise.resolve() })
+  }),
+  batch: ()=>({ set:()=>{}, delete:()=>{}, commit:()=>Promise.resolve() })
 };
-/* ═══════════════════════════════════════════════════════════════ */
-
-// Init Firebase
-firebase.initializeApp(FIREBASE_CONFIG);
-const auth = firebase.auth();
-const db   = firebase.firestore();
-
-// ─── Persistance offline Firestore ────────────────────────────
-db.enablePersistence({ synchronizeTabs: true })
-  .catch(err => {
-    if (err.code === 'failed-precondition') {
-      console.warn('Offline: plusieurs onglets ouverts, persistance désactivée.');
-    } else if (err.code === 'unimplemented') {
-      console.warn('Offline: navigateur non supporté pour la persistance.');
-    }
-  });
 
 // ─── État global ───────────────────────────────────────────────
 let currentUser   = null; // { uid, email, displayName, role }
@@ -3351,36 +3536,17 @@ function setSyncStatus(state) {
   lbl.textContent = state==='ok' ? 'Connecté' : state==='syncing' ? 'Sync...' : state==='offline' ? 'Hors ligne' : 'Erreur';
 }
 
-// ─── AUTH ──────────────────────────────────────────────────────
-auth.onAuthStateChanged(async user => {
+// ─── AUTH LOCAL — Vérification session localStorage ───────────
+(function initAuth() {
   document.getElementById('loader').style.display = 'none';
-  if (!user) {
+  const session = (() => { try { return JSON.parse(localStorage.getItem('manfara_session') || 'null'); } catch(e) { return null; } })();
+  if (session && session.uid) {
+    currentUser = session;
+    showApp();
+  } else {
     showAuthScreen();
-    return;
   }
-  // Charger le profil Firestore (cache d'abord, puis reseau si dispo)
-  try {
-    let snap = null;
-    try {
-      snap = await db.collection('users').doc(user.uid).get({ source: 'cache' });
-    } catch(_) {
-      snap = await db.collection('users').doc(user.uid).get({ source: 'server' });
-    }
-    if (!snap || !snap.exists || snap.data().disabled === true) {
-      await auth.signOut();
-      showAuthScreen('Compte desactive ou introuvable.');
-      return;
-    }
-    const profile = snap.data();
-    currentUser = { uid: user.uid, email: user.email, displayName: profile.displayName || user.email, role: profile.role || 'vendeur' };
-    showApp();
-  } catch(e) {
-    // Toujours pas de donnees -> mode offline degrade
-    currentUser = { uid: user.uid, email: user.email, displayName: user.email, role: 'vendeur' };
-    setSyncStatus('offline');
-    showApp();
-  }
-});
+})();
 
 function showAuthScreen(errMsg) {
   document.getElementById('auth-screen').style.display = 'flex';
@@ -3422,20 +3588,29 @@ async function doLogin() {
   errEl.classList.remove('show');
   if (!email || !pwd) { errEl.textContent='Veuillez remplir tous les champs.'; errEl.classList.add('show'); return; }
   btn.disabled = true; btn.textContent = 'Connexion...';
-  try {
-    await auth.signInWithEmailAndPassword(email, pwd);
-  } catch(e) {
-    const msgs = {
-      'auth/user-not-found':'Email introuvable.',
-      'auth/wrong-password':'Mot de passe incorrect.',
-      'auth/invalid-email':'Email invalide.',
-      'auth/too-many-requests':'Trop de tentatives. Réessayez plus tard.',
-      'auth/network-request-failed':'Pas de connexion réseau.'
-    };
-    errEl.textContent = msgs[e.code] || ('Erreur: ' + e.message);
+
+  // Charger les comptes locaux
+  let users = [];
+  try { users = JSON.parse(localStorage.getItem('manfara_users') || '[]'); } catch(e) {}
+
+  // Compte admin par défaut si aucun compte existant
+  if (users.length === 0) {
+    users = [{ uid:'admin001', email:'admin@manfara.gn', pwd:'admin123', displayName:'Administrateur', role:'admin', disabled:false }];
+    localStorage.setItem('manfara_users', JSON.stringify(users));
+  }
+
+  const user = users.find(u => u.email === email && u.pwd === pwd && !u.disabled);
+  if (!user) {
+    errEl.textContent = 'Email ou mot de passe incorrect.';
     errEl.classList.add('show');
     btn.disabled = false; btn.textContent = 'Se connecter';
+    return;
   }
+  const session = { uid: user.uid, email: user.email, displayName: user.displayName, role: user.role };
+  localStorage.setItem('manfara_session', JSON.stringify(session));
+  currentUser = session;
+  btn.disabled = false; btn.textContent = 'Se connecter';
+  showApp();
 }
 
 document.getElementById('auth-pwd').addEventListener('keydown', e => {
@@ -3443,23 +3618,15 @@ document.getElementById('auth-pwd').addEventListener('keydown', e => {
 });
 
 async function doLogout() {
-  try {
-  await auth.signOut();
+  localStorage.removeItem('manfara_session');
   currentUser = null;
-  } catch(e) {
-    showToast((e.message || String(e)), 'error');
-  }
+  showAuthScreen();
 }
 
-// ─── CHARGEMENT DONNÉES (REALTIME) ───────────────────────────
-// Listeners onSnapshot actifs — mise à jour automatique en temps réel
-let _rtListeners = []; // pour pouvoir unsubscribe si besoin
-
-// Compteur pour savoir quand toutes les collections sont prêtes
+// ─── Chargement des données locales ────────────────────────────
+let _rtListeners = [];
 let _rtReady = {};
-// 'ventes' inclus : initAllModules() ne s'exécute qu'une fois POS_VENTES chargé
-// → élimine la race condition où Dashboard/Crédits/Rapports voient POS_VENTES=[]
-const _RT_COLLECTIONS = ['produits','appros','clients','fournisseurs','depenses','credits_remboursements','ventes'];
+const _RT_COLLECTIONS = [];
 let _appInitialized = false;
 
 function _checkAllReady() {
@@ -3472,156 +3639,15 @@ function _checkAllReady() {
 }
 
 function loadData() {
-  setSyncStatus('syncing');
-  document.getElementById('loader').style.display = 'flex';
-  document.getElementById('loader-txt').textContent = 'Chargement des données...';
-
-  // ✅ CORRECTIF — Détection Firestore via un document de config dédié
-  // (évite le faux-négatif si la collection produits est vide sur un nouveau déploiement)
-  db.collection('_config').doc('app').get()
-    .then(snap => {
-      if (snap.exists) {
-        // Document config trouvé → Firestore actif, activer les listeners temps réel
-        dataSource = 'firebase';
-        _startRealtimeListeners();
-      } else {
-        // Pas de doc config → tenter quand même avec produits pour rétrocompatibilité
-        return db.collection('produits').limit(1).get().then(pSnap => {
-          if (!pSnap.empty) {
-            dataSource = 'firebase';
-            _startRealtimeListeners();
-          } else {
-            // Firestore vide ou non configuré → données statiques locales
-            dataSource = 'local';
-            DB_LOCAL = STATIC_DB;
-            document.getElementById('loader').style.display = 'none';
-            setSyncStatus('ok');
-            initAllModules();
-          }
-        });
-      }
-    })
-    .catch(() => {
-      // Pas de réseau → fallback local (cache Firestore pris en charge par onSnapshot)
-      dataSource = 'local';
-      DB_LOCAL = STATIC_DB;
-      setSyncStatus('offline');
-      document.getElementById('loader').style.display = 'none';
-      initAllModules();
-    });
+  dataSource = 'local';
+  setSyncStatus('ok');
+  document.getElementById('loader').style.display = 'none';
+  DB_LOCAL = STATIC_DB;
+  initAllModules();
 }
 
-function _startRealtimeListeners() {
-  // Détacher les anciens listeners si relance
-  _rtListeners.forEach(u => u());
-  _rtListeners = [];
-  _rtReady = {};
-  DB_LOCAL = { produits:[], appros:[], clients:[], fournisseurs:[], depenses:[] };
+function _startRealtimeListeners() { /* no-op en mode local */ }
 
-  // ── produits ──
-  _rtListeners.push(
-    db.collection('produits').onSnapshot({ includeMetadataChanges: false }, snap => {
-      DB_LOCAL.produits = snap.docs.map(d => d.data());
-      _rtReady['produits'] = true;
-      setSyncStatus(snap.metadata && snap.metadata.fromCache ? 'offline' : 'ok');
-      _checkAllReady();
-      if (_appInitialized) { try { initProduits(); initStock(); initDashboard(); } catch(e){} }
-    }, _rtError)
-  );
-
-  // ── appros ──
-  _rtListeners.push(
-    db.collection('appros').onSnapshot({ includeMetadataChanges: false }, snap => {
-      DB_LOCAL.appros = snap.docs.map(d => d.data());
-      _rtReady['appros'] = true;
-      _checkAllReady();
-      if (_appInitialized) { try { initAppros(); initDashboard(); } catch(e){} }
-    }, _rtError)
-  );
-
-  // ── clients ──
-  _rtListeners.push(
-    db.collection('clients').onSnapshot({ includeMetadataChanges: false }, snap => {
-      DB_LOCAL.clients = snap.docs.map(d => d.data());
-      _rtReady['clients'] = true;
-      _checkAllReady();
-      if (_appInitialized) { try { initClients(); } catch(e){} }
-    }, _rtError)
-  );
-
-  // ── fournisseurs ──
-  _rtListeners.push(
-    db.collection('fournisseurs').onSnapshot({ includeMetadataChanges: false }, snap => {
-      DB_LOCAL.fournisseurs = snap.docs.map(d => d.data());
-      _rtReady['fournisseurs'] = true;
-      _checkAllReady();
-      if (_appInitialized) { try { initFournisseurs(); } catch(e){} }
-    }, _rtError)
-  );
-
-  // ── dépenses (BUG-C2 FIX: uniformisé sur depenses_live, cohérent avec depSauvegarder) ──
-  _rtListeners.push(
-    db.collection('depenses_live').orderBy('createdAt','desc').limit(500).onSnapshot({ includeMetadataChanges: false }, snap => {
-      DEP_DATA = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      DB_LOCAL.depenses = DEP_DATA; // compatibilité modules qui lisent DB_LOCAL.depenses
-      _rtReady['depenses'] = true;
-      _checkAllReady();
-      if (_appInitialized) { try { initDepenses(); initDashboard(); } catch(e){} }
-    }, _rtError)
-  );
-
-  // ── crédits / remboursements ──
-  _rtListeners.push(
-    db.collection('credits_remboursements').onSnapshot({ includeMetadataChanges: false }, snap => {
-      snap.docs.forEach(d => {
-        const data = d.data();
-        CRED_REMBOURSES[d.id] = data.rembourse || 0;
-        if (data.versements) CRED_VERSEMENTS[d.id] = data.versements;
-      });
-      try {
-        localStorage.setItem('manfara_credits', JSON.stringify(CRED_REMBOURSES));
-        localStorage.setItem('manfara_credits_versements', JSON.stringify(CRED_VERSEMENTS));
-      } catch(e) {}
-      _rtReady['credits_remboursements'] = true;
-      _checkAllReady();
-      if (_appInitialized) { try { initCredits(); } catch(e){} }
-    }, _rtError)
-  );
-
-  // ── ventes (listener unifié — remplace posLoadFromFirestore séparé) ──
-  // Inclus dans _RT_COLLECTIONS : initAllModules() attend ce snapshot avant de démarrer.
-  // Pagination : on charge d'abord les 500 plus récentes ; l'utilisateur peut charger plus via posLoadOlderVentes().
-  _rtListeners.push(
-    db.collection('ventes').orderBy('date', 'desc').limit(100) // BUG-m6 FIX: 100 récentes au démarrage, historique complet via 'Charger plus'
-      .onSnapshot({ includeMetadataChanges: false }, snap => {
-        if (!snap.empty) {
-          POS_VENTES = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          safeSave('manfara_ventes', POS_VENTES);
-        }
-        _rtReady['ventes'] = true;
-        _checkAllReady(); // débloque initAllModules() si toutes les collections sont prêtes
-        if (_appInitialized) {
-          try { ventesRender(); initCredits(); initRapports(); initDashboard(); } catch(e) {}
-        }
-      }, e => { console.warn('POS ventes listener:', e); _rtReady['ventes'] = true; _checkAllReady(); })
-  );
-
-  // Points de vente (pas dans _RT_COLLECTIONS car non-bloquant pour l'init)
-  _rtListeners.push(
-    db.collection('points_de_vente').onSnapshot({ includeMetadataChanges: false }, snap => {
-      if (!snap.empty) {
-        POINTS_DE_VENTE = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        try { localStorage.setItem('manfara_pdv', JSON.stringify(POINTS_DE_VENTE)); } catch(e) {}
-      }
-      try { posUpdateCartSelect(); pdvRender(); } catch(e) {}
-    }, e => console.warn('POS PDV listener:', e))
-  );
-}
-
-function _rtError(e) {
-  console.warn('Realtime listener error:', e);
-  setSyncStatus('offline');
-}
 
 // ─── HAMBURGER / SIDEBAR MOBILE ────────────────────────────────
 (function(){
@@ -3639,13 +3665,6 @@ function _rtError(e) {
     overlay.classList.remove('open');
     hamburger.classList.remove('open');
   }
-
-  // Show hamburger only on small screens (CSS hides it on desktop)
-  function updateHamburger(){
-    hamburger.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
-  }
-  updateHamburger();
-  window.addEventListener('resize', updateHamburger);
 
   hamburger.addEventListener('click', () => {
     if(sidebar.classList.contains('open')) closeSidebar();
@@ -3681,6 +3700,7 @@ document.querySelectorAll('nav a').forEach(a => {
     if (a.dataset.sec === 'analytique') { initAnalytique(); }
     if (a.dataset.sec === 'activites') { initActivites(); }
     if (a.dataset.sec === 'points') { initPointsDeVente(); }
+    if (a.dataset.sec === 'ai') { initAI(); }
   });
 });
 
@@ -4436,34 +4456,10 @@ function ventesRender() {
 // Le listener temps-réel reste actif pour les nouvelles ventes.
 let _posAllVentesLoaded = false;
 async function posLoadOlderVentes() {
-  if (_posAllVentesLoaded || dataSource !== 'firebase') return;
-  const btn = document.getElementById('ventes-load-more-btn');
-  const info = document.getElementById('ventes-load-more-info');
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Chargement...'; }
-  try {
-    // Récupérer toutes les ventes sans limite (par batch de 1000 si nécessaire)
-    let allDocs = [];
-    let lastDoc = null;
-    let batchSize = 1000;
-    do {
-      let q = db.collection('ventes').orderBy('date', 'desc').limit(batchSize);
-      if (lastDoc) q = q.startAfter(lastDoc);
-      const snap = await q.get();
-      allDocs = allDocs.concat(snap.docs);
-      lastDoc = snap.docs.length === batchSize ? snap.docs[snap.docs.length - 1] : null;
-    } while (lastDoc);
-    POS_VENTES = allDocs.map(d => ({ id: d.id, ...d.data() }));
-    try { localStorage.setItem('manfara_ventes', JSON.stringify(POS_VENTES)); } catch(e) {}
-    _posAllVentesLoaded = true;
-    ventesRender(); initCredits(); initRapports(); initDashboard();
-    const wrap = document.getElementById('ventes-load-more-wrap');
-    if (wrap) wrap.style.display = 'none';
-    showToast(`✅ ${POS_VENTES.length.toLocaleString('fr-FR')} ventes chargées`, 'success');
-  } catch(e) {
-    if (btn) { btn.disabled = false; btn.textContent = '⬇ Charger l\'historique complet'; }
-    if (info) info.textContent = 'Erreur : ' + e.message;
-    showToast('Erreur chargement historique : ' + e.message, 'error');
-  }
+  // Mode local — toutes les ventes déjà en localStorage
+  showToast('Toutes les ventes sont déjà chargées (mode local)', 'info');
+  const wrap = document.getElementById('ventes-load-more-wrap');
+  if (wrap) wrap.style.display = 'none';
 }
 
 // ─── POINTS DE VENTE (MULTI-POS) ──────────────────────────────
@@ -5202,42 +5198,35 @@ async function prodSupprimer(code) {
 async function loadUsersList() {
   if (currentUser.role !== 'admin') return;
   const listEl = document.getElementById('users-list');
-  listEl.innerHTML = '<li style="color:var(--txt3);font-size:17px;padding:12px 0">Chargement...</li>';
-  try {
-    const snap = await db.collection('users').orderBy('displayName').get();
-    if (snap.empty) { listEl.innerHTML='<li style="color:var(--txt3);font-size:17px;padding:12px 0">Aucun utilisateur.</li>'; return; }
-    listEl.innerHTML = '';
-    snap.docs.forEach(doc => {
-      const u = doc.data();
-      const uid = doc.id;
-      const color = ROLE_COLORS[u.role] || '#888';
-      const initials = (u.displayName||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
-      const isMe = uid === currentUser.uid;
-      const li = document.createElement('li');
-      li.className = 'user-item' + (u.disabled ? ' user-disabled' : '');
-      li.innerHTML = `
-        <div class="user-avatar-sm" style="background:linear-gradient(135deg,${color},${color}99)">${initials}</div>
-        <div class="user-info">
-          <div class="user-info-name">${u.displayName || '—'}${isMe?' <span style="color:var(--txt3);font-size:16px">(moi)</span>':''}</div>
-          <div class="user-info-email">${u.email || '—'}</div>
-        </div>
-        <span class="role-badge role-${u.role}">${u.role}</span>
-        ${!isMe ? `<button class="${u.disabled?'btn-enable':'btn-disable'}" onclick="toggleUser('${uid}',${!u.disabled})">${u.disabled?'Activer':'Désactiver'}</button>` : ''}
-      `;
-      listEl.appendChild(li);
-    });
-  } catch(e) {
-    listEl.innerHTML=`<li style="color:var(--red);font-size:16px;padding:12px 0">Erreur: ${esc(e.message)}</li>`;
-  }
+  let users = [];
+  try { users = JSON.parse(localStorage.getItem('manfara_users') || '[]'); } catch(e) {}
+  if (!users.length) { listEl.innerHTML='<li style="color:var(--txt3);font-size:17px;padding:12px 0">Aucun utilisateur.</li>'; return; }
+  listEl.innerHTML = '';
+  users.forEach(u => {
+    const color = ROLE_COLORS[u.role] || '#888';
+    const initials = (u.displayName||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+    const isMe = u.uid === currentUser.uid;
+    const li = document.createElement('li');
+    li.className = 'user-item' + (u.disabled ? ' user-disabled' : '');
+    li.innerHTML = `
+      <div class="user-avatar-sm" style="background:linear-gradient(135deg,${color},${color}99)">${initials}</div>
+      <div class="user-info">
+        <div class="user-info-name">${u.displayName || '—'}${isMe?' <span style="color:var(--txt3);font-size:16px">(moi)</span>':''}</div>
+        <div class="user-info-email">${u.email || '—'}</div>
+      </div>
+      <span class="role-badge role-${u.role}">${u.role}</span>
+      ${!isMe ? `<button class="${u.disabled?'btn-enable':'btn-disable'}" onclick="toggleUser('${u.uid}',${!u.disabled})">${u.disabled?'Activer':'Désactiver'}</button>` : ''}
+    `;
+    listEl.appendChild(li);
+  });
 }
 
 async function toggleUser(uid, disable) {
-  try {
-    await db.collection('users').doc(uid).update({ disabled: disable });
-    loadUsersList();
-  } catch(e) {
-    alert('Erreur: ' + e.message);
-  }
+  let users = [];
+  try { users = JSON.parse(localStorage.getItem('manfara_users') || '[]'); } catch(e) {}
+  const u = users.find(u => u.uid === uid);
+  if (u) { u.disabled = disable; localStorage.setItem('manfara_users', JSON.stringify(users)); }
+  loadUsersList();
 }
 
 // Créer un nouvel utilisateur (via Firebase Auth + profil Firestore)
@@ -5268,24 +5257,25 @@ async function createUser() {
 
   btn.disabled = true; btn.textContent = 'Création...';
   try {
-    // Créer dans Firebase Auth (ATTENTION: déconnecte l'admin temporairement sur client)
-    // Solution robuste: Cloud Function createUser. Ici on utilise une 2e instance Firebase.
-    const secondaryApp = firebase.initializeApp(firebase.app().options, 'secondary');
-    const secondaryAuth = secondaryApp.auth();
-    const cred = await secondaryAuth.createUserWithEmailAndPassword(email, pwd);
-    const newUid = cred.user.uid;
-    await secondaryAuth.signOut();
-    secondaryApp.delete();
-
-    // Créer profil dans Firestore
-    await db.collection('users').doc(newUid).set({
+    // Création compte local
+    let users = [];
+    try { users = JSON.parse(localStorage.getItem('manfara_users') || '[]'); } catch(e) {}
+    if (users.find(u => u.email === email)) {
+      msgEl.textContent = 'Cet email est déjà utilisé.';
+      msgEl.className = 'admin-msg err';
+      btn.disabled = false; btn.textContent = 'Créer le compte';
+      return;
+    }
+    const newUser = {
+      uid: 'u_' + Date.now(),
+      email, pwd,
       displayName: name,
-      email: email,
-      role: role,
-      disabled: false,
-      createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      role, disabled: false,
+      createdAt: new Date().toISOString(),
       createdBy: currentUser.uid
-    });
+    };
+    users.push(newUser);
+    localStorage.setItem('manfara_users', JSON.stringify(users));
 
     msgEl.textContent = `✅ Compte "${name}" créé avec succès.`;
     msgEl.className = 'admin-msg ok';
@@ -5294,13 +5284,7 @@ async function createUser() {
     document.getElementById('new-pwd').value = '';
     loadUsersList();
   } catch(e) {
-    const msgs = {
-      'auth/email-already-in-use':'Cet email est déjà utilisé.',
-      'auth/invalid-email':'Email invalide.',
-      'auth/weak-password':'Mot de passe trop faible (min 6 caractères).',
-      'auth/network-request-failed':'Pas de connexion réseau.'
-    };
-    msgEl.textContent = msgs[e.code] || ('Erreur: ' + e.message);
+    msgEl.textContent = 'Erreur: ' + e.message;
     msgEl.className = 'admin-msg err';
   }
   btn.disabled = false; btn.textContent = 'Créer le compte';
@@ -6002,7 +5986,7 @@ function stockRenderAlertes() {
 
 </script>
 </body>
-</html><script>
+<script>
 // ══════════════════════════════════════════════════════
 // MODULE DÉPENSES — Saisie + Firebase + localStorage
 // ══════════════════════════════════════════════════════
@@ -6762,7 +6746,7 @@ function rstStockZero() {
 function rstStaticProduits() {
   showConfirmModal({
     title: '⚠️ Vider les produits hardcodés ?',
-    message: 'Le STATIC_DB.produits sera vidé en mémoire. Aucun produit préchargé ne sera visible jusqu'au rechargement.',
+    message: 'Le STATIC_DB.produits sera vidé en mémoire. Aucun produit préchargé ne sera visible jusqu\'au rechargement.',
     labelOk: '🗂️ Vider',
     danger: true,
     onConfirm: () => {
@@ -6824,7 +6808,7 @@ function rstStaticAppros() {
 function rstStaticAll() {
   showConfirmModal({
     title: '🔥 Vider tout le STATIC_DB ?',
-    message: 'Produits, clients, fournisseurs et appros hardcodés seront vidés en mémoire. Action irréversible jusqu'au rechargement de la page.',
+    message: 'Produits, clients, fournisseurs et appros hardcodés seront vidés en mémoire. Action irréversible jusqu\'au rechargement de la page.',
     labelOk: '🔥 Vider tout',
     danger: true,
     onConfirm: () => {
@@ -9071,7 +9055,37 @@ function rptPdfDepenses() {
   _pdfBase('Rapport des Dépenses', `Période : ${du} → ${au}`, content, `${filtered.length} dépenses · Total : ${fmtFull(total)} GNF`);
 }
 
-// ── 3. PDF COMPTE DE RÉSULTAT P&L ────────────────────────────────
+// ── 3. PDF STOCK BAS ─────────────────────────────────────────────
+function rptPdfStockBas() {
+  const seuil = parseInt(document.getElementById('rpt-seuil')?.value || '5');
+  const items = (DB_LOCAL.produits || []).filter(p => (p.stock || 0) <= seuil);
+  if (!items.length) { showToast('✅ Aucun produit en stock bas', 'success'); return; }
+
+  const rows = items.map(p =>
+    `<tr>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee">${p.nom || ''}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center">${p.stock ?? 0}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:center">${p.seuilAlerte ?? seuil}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #eee;text-align:right">${fmtFull(p.prixVente || 0)} GNF</td>
+    </tr>`
+  ).join('');
+
+  const content = `<table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead>
+      <tr style="background:#f5f5f5">
+        <th style="padding:8px 10px;text-align:left;border-bottom:2px solid #ddd">Produit</th>
+        <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #ddd">Stock actuel</th>
+        <th style="padding:8px 10px;text-align:center;border-bottom:2px solid #ddd">Seuil alerte</th>
+        <th style="padding:8px 10px;text-align:right;border-bottom:2px solid #ddd">Prix vente</th>
+      </tr>
+    </thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+
+  _pdfBase('Rapport Stock Bas', `Seuil ≤ ${seuil} unités`, content, `${items.length} produit(s) en alerte`);
+}
+
+// ── 4. PDF COMPTE DE RÉSULTAT P&L ────────────────────────────────
 function rptPdfPL() {
   const du = document.getElementById('rpt-pl-du')?.value || '';
   const au = document.getElementById('rpt-pl-au')?.value || '';
@@ -9272,6 +9286,400 @@ function rptPdfCreditsEchus() {
   _pdfBase('Alertes Crédits Échus', `Au ${new Date().toLocaleDateString('fr-FR')}`, content, `${credEnRetard.length} crédits · ${fmtFull(totalImpaye)} GNF impayés`);
 }
 
+// ══════════════════════════════════════════════════════════════
+// MODULE ASSISTANT IA — DUAL MODE : CLOUD (Claude) + LOCAL (Ollama/LM Studio)
+// ══════════════════════════════════════════════════════════════
+
+let AI_HISTORY = [];
+let AI_BUSY    = false;
+let AI_MODE    = 'cloud'; // 'cloud' | 'local'
+
+// ── Init ──────────────────────────────────────────────────────
+function initAI() {
+  aiRefreshContext();
+  aiLoadPrefs();
+}
+
+// ── Sauvegarde / restauration préférences ────────────────────
+function aiLoadPrefs() {
+  try {
+    const p = JSON.parse(localStorage.getItem('manfara_ai_prefs') || '{}');
+    if (p.mode) aiSetMode(p.mode, false);
+    if (p.url)    document.getElementById('ai-local-url').value    = p.url;
+    if (p.engine) document.getElementById('ai-local-engine').value = p.engine;
+    if (p.model)  document.getElementById('ai-local-model').value  = p.model;
+  } catch(e) {}
+}
+function aiSavePrefs() {
+  try {
+    const prefs = {
+      mode:   AI_MODE,
+      url:    document.getElementById('ai-local-url')?.value    || '',
+      engine: document.getElementById('ai-local-engine')?.value || 'ollama',
+      model:  document.getElementById('ai-local-model')?.value  || 'llama3'
+    };
+    localStorage.setItem('manfara_ai_prefs', JSON.stringify(prefs));
+  } catch(e) {}
+}
+
+// ── Basculement de mode ──────────────────────────────────────
+function aiSetMode(mode, save=true) {
+  AI_MODE = mode;
+  const btnCloud  = document.getElementById('ai-btn-cloud');
+  const btnLocal  = document.getElementById('ai-btn-local');
+  const cfgPanel  = document.getElementById('ai-local-config');
+  const badge     = document.getElementById('ai-badge-label');
+
+  if (mode === 'cloud') {
+    btnCloud?.classList.add('active-cloud');
+    btnCloud?.classList.remove('active-local');
+    btnLocal?.classList.remove('active-cloud','active-local');
+    if (cfgPanel) cfgPanel.classList.remove('show');
+    if (badge) badge.textContent = 'Claude · Cloud ☁️';
+  } else {
+    btnLocal?.classList.add('active-local');
+    btnLocal?.classList.remove('active-cloud');
+    btnCloud?.classList.remove('active-cloud','active-local');
+    if (cfgPanel) cfgPanel.classList.add('show');
+    if (badge) badge.textContent = 'IA · Local 🏠';
+  }
+  if (save) aiSavePrefs();
+}
+
+// ── Test de connexion locale ─────────────────────────────────
+async function aiTestLocal() {
+  const statusEl = document.getElementById('ai-local-status');
+  const url      = (document.getElementById('ai-local-url')?.value || '').trim();
+  const engine   = document.getElementById('ai-local-engine')?.value || 'ollama';
+  const model    = (document.getElementById('ai-local-model')?.value || '').trim();
+
+  if (!url) { aiSetStatus('cfg-err','⚠ URL manquante'); return; }
+  aiSetStatus('cfg-pending','⏳ Test...');
+
+  try {
+    let testUrl, testBody;
+    if (engine === 'ollama') {
+      testUrl  = url.replace(/\/api\/chat$/, '') + '/api/tags';
+      testBody = null;
+      const r  = await fetch(testUrl, { method:'GET', signal: AbortSignal.timeout(5000) });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const data = await r.json();
+      const models = (data.models || []).map(m => m.name).join(', ');
+      aiSetStatus('cfg-ok', '✓ Ollama OK' + (models ? ' · ' + models.substring(0,40) : ''));
+    } else {
+      // LM Studio / OpenAI-compat
+      testUrl  = url.replace(/\/chat\/completions$/, '') + '/models';
+      const r  = await fetch(testUrl, { method:'GET', signal: AbortSignal.timeout(5000) });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      aiSetStatus('cfg-ok', '✓ LM Studio OK');
+    }
+    aiSavePrefs();
+  } catch(e) {
+    aiSetStatus('cfg-err', '✗ ' + (e.message || 'Inaccessible'));
+  }
+}
+function aiSetStatus(cls, txt) {
+  const el = document.getElementById('ai-local-status');
+  if (!el) return;
+  el.className = 'cfg-status ' + cls;
+  el.textContent = txt;
+}
+
+// ── Contexte live ────────────────────────────────────────────
+function aiRefreshContext() {
+  try {
+    const moisCourant = new Date().toISOString().substring(0,7);
+    const credits = (POS_VENTES||[]).filter(v => v.paiement==='CREDIT');
+    const nbCreditsActifs = credits.filter(v => Math.max(0, v.total-(CRED_REMBOURSES[v.id]||0)) > 0).length;
+    const depMois = getAllDepenses().filter(d => {
+      const dt = d.date||(d.d?d.d.split('/').reverse().join('-'):'');
+      return dt && dt.startsWith(moisCourant);
+    }).reduce((s,d) => s+(parseFloat(d.mnt||d.m)||0), 0);
+    const g = id => document.getElementById(id);
+    if (g('ai-ctx-produits')) g('ai-ctx-produits').textContent = (DB_LOCAL.produits?.length||0).toLocaleString('fr-FR');
+    if (g('ai-ctx-ventes'))   g('ai-ctx-ventes').textContent   = (POS_VENTES?.length||0).toLocaleString('fr-FR');
+    if (g('ai-ctx-credits'))  g('ai-ctx-credits').textContent  = nbCreditsActifs;
+    if (g('ai-ctx-dep'))      g('ai-ctx-dep').textContent      = fmtFull(depMois)+' GNF';
+    if (g('ai-ctx-pdv'))      g('ai-ctx-pdv').textContent      = POINTS_DE_VENTE?.length||0;
+  } catch(e) {}
+}
+
+// ── Contexte données injecté dans le prompt ──────────────────
+function aiBuildContext() {
+  try {
+    const today = new Date();
+    const mois  = today.toISOString().substring(0,7);
+    const ventes = POS_VENTES||[];
+    const ventesMois = ventes.filter(v => v.date&&v.date.startsWith(mois));
+    const caMois  = ventesMois.reduce((s,v)=>s+(v.total||0),0);
+    const caTotal = ventes.reduce((s,v)=>s+(v.total||0),0);
+    const caEsp   = ventes.reduce((s,v)=>v.paiement==='ESPECES'?s+(v.total||0):s,0);
+    const caMob   = ventes.reduce((s,v)=>['MOBILE','ORANGE'].includes(v.paiement)?s+(v.total||0):s,0);
+    const caCred  = ventes.reduce((s,v)=>v.paiement==='CREDIT'?s+(v.total||0):s,0);
+
+    // Top produits vendus
+    const artMap = {};
+    ventes.forEach(v => (v.articles||[]).forEach(a => {
+      const k = a.nom||'?'; if(!artMap[k]) artMap[k]={qty:0,ca:0};
+      artMap[k].qty+=(a.qty||1); artMap[k].ca+=(a.prix||0)*(a.qty||1);
+    }));
+    const topProd = Object.entries(artMap).sort((a,b)=>b[1].qty-a[1].qty).slice(0,8)
+      .map(([n,d])=>`${n}: ${d.qty} unités / ${fmtFull(d.ca)} GNF`).join('\n  ');
+
+    // Crédits
+    const credEnCours = ventes.filter(v=>v.paiement==='CREDIT').map(v=>({
+      ...v, reste: Math.max(0,v.total-(CRED_REMBOURSES[v.id]||0))
+    })).filter(v=>v.reste>0);
+    const totalReste  = credEnCours.reduce((s,v)=>s+v.reste,0);
+    const credEchus   = credEnCours.filter(v=>v.echeance&&new Date(v.echeance)<today).length;
+    const topCredMap  = {};
+    credEnCours.forEach(v=>{ const c=v.client||'—'; topCredMap[c]=(topCredMap[c]||0)+v.reste; });
+    const topCred = Object.entries(topCredMap).sort((a,b)=>b[1]-a[1]).slice(0,5)
+      .map(([c,r])=>`${c}: ${fmtFull(r)} GNF`).join('\n  ');
+
+    // Stock
+    const produits   = DB_LOCAL.produits||[];
+    const enRupture  = produits.filter(p=>parseInt(p.s||0)<=0);
+    const stockBas   = produits.filter(p=>parseInt(p.s||0)>0&&parseInt(p.s||0)<=5);
+
+    // Dépenses
+    const depenses     = getAllDepenses?getAllDepenses():(DEP_DATA||[]);
+    const depMois      = depenses.filter(d=>{const dt=d.date||(d.d?d.d.split('/').reverse().join('-'):''); return dt&&dt.startsWith(mois);});
+    const totalDepMois = depMois.reduce((s,d)=>s+(parseFloat(d.mnt||d.m)||0),0);
+    const parCat = {};
+    depMois.forEach(d=>{const c=d.cat||'AUTRE'; parCat[c]=(parCat[c]||0)+(parseFloat(d.mnt||d.m)||0);});
+    const depCatStr = Object.entries(parCat).sort((a,b)=>b[1]-a[1]).slice(0,5)
+      .map(([c,v])=>`${c}: ${fmtFull(v)} GNF`).join('\n  ');
+
+    // Top clients
+    const topCliMap = {};
+    ventes.forEach(v=>{const c=v.client||'Passage'; if(!topCliMap[c])topCliMap[c]={nb:0,ca:0}; topCliMap[c].nb++; topCliMap[c].ca+=v.total||0;});
+    const topCli = Object.entries(topCliMap).sort((a,b)=>b[1].ca-a[1].ca).slice(0,8)
+      .map(([c,d])=>`${c}: ${d.nb} achats / ${fmtFull(d.ca)} GNF`).join('\n  ');
+
+    // PDV
+    const pdvStr = (POINTS_DE_VENTE||[]).map(p=>{
+      const ca = ventes.filter(v=>v.pointId===p.id).reduce((s,v)=>s+(v.total||0),0);
+      return `${p.nom} (${p.loc}): CA ${fmtFull(ca)} GNF`;
+    }).join('\n  ');
+
+    return `=== DONNÉES MANFRA-SHOP — ${today.toLocaleDateString('fr-FR')} ===
+VENTES
+  Total historique : ${ventes.length} ventes · CA ${fmtFull(caTotal)} GNF
+  Ce mois (${mois}) : ${ventesMois.length} ventes · CA ${fmtFull(caMois)} GNF
+  Espèces: ${fmtFull(caEsp)} | Mobile/Orange: ${fmtFull(caMob)} | Crédit: ${fmtFull(caCred)} GNF
+
+TOP PRODUITS VENDUS
+  ${topProd||'Aucune donnée'}
+
+STOCK
+  Catalogue: ${produits.length} produits
+  Ruptures (stock=0): ${enRupture.length} → ${enRupture.slice(0,5).map(p=>p.l).join(', ')}
+  Stock bas (≤5): ${stockBas.length} → ${stockBas.slice(0,4).map(p=>p.l+' ('+p.s+')').join(', ')}
+
+CRÉDITS CLIENTS
+  En cours non soldés: ${credEnCours.length} · Total restant: ${fmtFull(totalReste)} GNF
+  Échus (retard): ${credEchus}
+  Top débiteurs:
+  ${topCred||'Aucun crédit'}
+
+DÉPENSES CE MOIS
+  Total: ${fmtFull(totalDepMois)} GNF
+  Par catégorie:
+  ${depCatStr||'Aucune dépense'}
+
+TOP CLIENTS (par CA)
+  ${topCli||'Aucune donnée'}
+  Clients enregistrés: ${(DB_LOCAL.clients||[]).length}
+
+POINTS DE VENTE
+  ${pdvStr||'Aucun PDV'}
+
+Devise: GNF. Commerce: Lero, Siguiri, Guinée.`;
+  } catch(e) { return 'Données MANFRA-SHOP disponibles.'; }
+}
+
+// ── Appel Cloud (Anthropic) ──────────────────────────────────
+async function aiCallCloud(messages, systemPrompt) {
+  const response = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: systemPrompt,
+      messages
+    })
+  });
+  if (!response.ok) {
+    const err = await response.json().catch(()=>({}));
+    throw new Error(err.error?.message || 'Erreur API Cloud ('+response.status+')');
+  }
+  const data = await response.json();
+  return data.content?.find(b=>b.type==='text')?.text || '(Réponse vide)';
+}
+
+// ── Appel Local (Ollama ou LM Studio) ───────────────────────
+async function aiCallLocal(messages, systemPrompt) {
+  const url    = (document.getElementById('ai-local-url')?.value||'').trim();
+  const engine = document.getElementById('ai-local-engine')?.value||'ollama';
+  const model  = (document.getElementById('ai-local-model')?.value||'llama3').trim();
+  if (!url) throw new Error('URL locale non configurée. Configurez l\'URL dans le panneau Local.');
+
+  let body, response;
+
+  if (engine === 'ollama') {
+    // Format Ollama /api/chat
+    body = JSON.stringify({
+      model,
+      stream: false,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages
+      ]
+    });
+    response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      signal: AbortSignal.timeout(60000)
+    });
+    if (!response.ok) throw new Error('Ollama HTTP ' + response.status);
+    const data = await response.json();
+    return data.message?.content || data.response || '(Réponse vide)';
+
+  } else {
+    // Format LM Studio / OpenAI-compat /v1/chat/completions
+    body = JSON.stringify({
+      model,
+      stream: false,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        ...messages
+      ]
+    });
+    const endpoint = url.includes('/chat/completions') ? url : url.replace(/\/?$/, '/chat/completions');
+    response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body,
+      signal: AbortSignal.timeout(60000)
+    });
+    if (!response.ok) throw new Error('LM Studio HTTP ' + response.status);
+    const data = await response.json();
+    return data.choices?.[0]?.message?.content || '(Réponse vide)';
+  }
+}
+
+// ── Rendu message chat ───────────────────────────────────────
+function aiAppendMsg(role, text) {
+  const wrap = document.getElementById('ai-chat-wrap');
+  if (!wrap) return;
+  const empty = document.getElementById('ai-empty-state');
+  if (empty) empty.style.display = 'none';
+  const div = document.createElement('div');
+  div.className = 'ai-msg ' + role;
+  const isAI = role === 'ai';
+  const av   = isAI ? '🤖' : (currentUser?.displayName?.charAt(0)?.toUpperCase()||'👤');
+  div.innerHTML = `<div class="ai-avatar ${isAI?'ai-av':'user-av'}">${av}</div>
+    <div class="ai-bubble">${escAI(text)}</div>`;
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+function escAI(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
+}
+
+// ── Indicateur de frappe ─────────────────────────────────────
+function aiShowTyping() {
+  const wrap = document.getElementById('ai-chat-wrap');
+  if (!wrap) return null;
+  const div = document.createElement('div');
+  div.className = 'ai-msg ai'; div.id = 'ai-typing-indicator';
+  const modeLabel = AI_MODE==='cloud'?'Claude ☁️':'IA Locale 🏠';
+  div.innerHTML = `<div class="ai-avatar ai-av">🤖</div>
+    <div class="ai-bubble">
+      <div style="font-size:11px;color:var(--txt3);margin-bottom:4px">${modeLabel} · génération...</div>
+      <div class="ai-typing"><span></span><span></span><span></span></div>
+    </div>`;
+  wrap.appendChild(div); wrap.scrollTop = wrap.scrollHeight;
+  return div;
+}
+
+// ── Envoi principal ──────────────────────────────────────────
+async function aiSend() {
+  if (AI_BUSY) return;
+  const input    = document.getElementById('ai-input');
+  const question = (input?.value||'').trim();
+  if (!question) return;
+  input.value = ''; input.style.height = 'auto';
+  AI_BUSY = true;
+  document.getElementById('ai-send-btn').disabled = true;
+
+  aiAppendMsg('user', question);
+  AI_HISTORY.push({ role:'user', content:question });
+  const typingEl = aiShowTyping();
+
+  try {
+    const contextData  = aiBuildContext();
+    const systemPrompt = `Tu es l'assistant IA de MANFRA-SHOP APP, gestion commerciale pour Ets Manfara & Fils à Lero, Siguiri, Guinée.
+Tu as accès aux données en temps réel du commerce. Réponds toujours en français, de façon précise et concise.
+Utilise les montants en GNF. N'invente jamais de données — base-toi uniquement sur les données fournies.
+
+DONNÉES ACTUELLES :
+${contextData}`;
+
+    const messages = AI_HISTORY.slice(-14);
+    let reply;
+
+    if (AI_MODE === 'cloud') {
+      reply = await aiCallCloud(messages, systemPrompt);
+    } else {
+      reply = await aiCallLocal(messages, systemPrompt);
+    }
+
+    typingEl?.remove();
+    aiAppendMsg('ai', reply);
+    AI_HISTORY.push({ role:'assistant', content:reply });
+
+  } catch(e) {
+    typingEl?.remove();
+    let msg = e.message||'Erreur inconnue';
+    if (msg.includes('Failed to fetch')||msg.includes('NetworkError')) {
+      msg = AI_MODE==='cloud'
+        ? '❌ Connexion à l\'API Cloud impossible. Vérifiez votre connexion internet.'
+        : '❌ Modèle local inaccessible. Vérifiez qu\'Ollama / LM Studio est démarré et que l\'URL est correcte.';
+    }
+    aiAppendMsg('ai', msg);
+  } finally {
+    AI_BUSY = false;
+    document.getElementById('ai-send-btn').disabled = false;
+    document.getElementById('ai-input')?.focus();
+  }
+}
+
+// ── Raccourcis ───────────────────────────────────────────────
+function aiHandleKey(e) {
+  if (e.key==='Enter'&&!e.shiftKey) { e.preventDefault(); aiSend(); }
+}
+function aiQuick(question) {
+  const inp = document.getElementById('ai-input');
+  if (inp) { inp.value=question; inp.style.height='auto'; inp.style.height=Math.min(inp.scrollHeight,120)+'px'; }
+  aiSend();
+}
+function aiClearChat() {
+  AI_HISTORY = [];
+  const wrap = document.getElementById('ai-chat-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = `<div class="ai-empty" id="ai-empty-state">
+    <div class="ai-empty-icon">🤖</div>
+    <h3>Assistant MANFRA-SHOP</h3>
+    <p>Je connais vos produits, ventes, crédits, dépenses et clients en temps réel.<br>
+    Choisissez le mode <strong>☁️ Cloud</strong> (internet requis) ou <strong>🏠 Local</strong> (Ollama / LM Studio installé sur votre machine).</p>
+  </div>`;
+}
+
 function showToast(msg, type='info') {
   const t = document.createElement('div');
   const bg = type==='success'?'#1a5c2a':type==='error'?'#5c1a1a':'#2a3a5c';
@@ -9281,3 +9689,4 @@ function showToast(msg, type='info') {
   setTimeout(() => t.remove(), 3500);
 }
 </script>
+</body></html>
