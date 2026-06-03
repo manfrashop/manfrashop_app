@@ -1845,7 +1845,7 @@ textarea:focus {
       </div>
       <input type="hidden" id="prod-form-orig-code">
       <!-- QR Code Preview -->
-      <div id="prod-qr-wrap" style="display:none;margin:12px 0;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;align-items:center;gap:16px">
+      <div id="prod-qr-wrap" style="display:none;margin:12px 0;padding:12px;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;flex-direction:row;align-items:center;gap:16px">
         <div style="display:flex;align-items:center;gap:16px">
           <div id="prod-qr-canvas" style="background:#fff;padding:6px;border-radius:4px;line-height:0"></div>
           <div>
@@ -5151,7 +5151,7 @@ function prodEditer(code) {
 async function prodSauvegarder() {
   try {
   // 🔒 SÉCURITÉ — modification catalogue réservée aux admins et gérants
-  if (!currentUser || currentUser.role === 'vendeur') { showToast('⛔ Droits insuffisants', 'error'); return; }
+  if (currentUser && currentUser.role === 'vendeur') { showToast('⛔ Droits insuffisants', 'error'); return; }
   const code = document.getElementById('prod-form-code').value.trim();
   const lib = document.getElementById('prod-form-lib').value.trim();
   if(!code || !lib) { document.getElementById('prod-form-msg').textContent = '⚠️ Code et libellé obligatoires.'; return; }
@@ -7468,7 +7468,7 @@ function prodUpdateQR(code, lib) {
   const val = (code || '').trim();
   if(!val) { wrap.style.display = 'none'; return; }
 
-  wrap.style.display = 'block';
+  wrap.style.display = 'flex';
   canvas.innerHTML = '';
   label.textContent = val + (lib ? ' — ' + lib.substring(0, 28) : '');
 
