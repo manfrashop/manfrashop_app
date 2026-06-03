@@ -18,11 +18,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js" defer></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+<noscript><link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
 <style>
 /* ═══════════════════════════════════════════════════════
    THÈME PAR DÉFAUT : LUMIÈRE MARINE (Manfara Light)
@@ -3525,7 +3528,7 @@ function _startRealtimeListeners() {
       _rtReady['produits'] = true;
       setSyncStatus(snap.metadata && snap.metadata.fromCache ? 'offline' : 'ok');
       _checkAllReady();
-      if (_appInitialized) { try { initProduits(); initStock(); initDashboard(); } catch(e){} }
+      if (_appInitialized) { try { if(_modulesInit['produits']) initProduits(); if(_modulesInit['stock']) initStock(); initDashboard(); } catch(e){} }
     }, _rtError)
   );
 
@@ -3535,7 +3538,7 @@ function _startRealtimeListeners() {
       DB_LOCAL.appros = snap.docs.map(d => d.data());
       _rtReady['appros'] = true;
       _checkAllReady();
-      if (_appInitialized) { try { initAppros(); initDashboard(); } catch(e){} }
+      if (_appInitialized) { try { if(_modulesInit['appros']) initAppros(); initDashboard(); } catch(e){} }
     }, _rtError)
   );
 
@@ -3545,7 +3548,7 @@ function _startRealtimeListeners() {
       DB_LOCAL.clients = snap.docs.map(d => d.data());
       _rtReady['clients'] = true;
       _checkAllReady();
-      if (_appInitialized) { try { initClients(); } catch(e){} }
+      if (_appInitialized) { try { if(_modulesInit['clients']) initClients(); } catch(e){} }
     }, _rtError)
   );
 
@@ -3555,7 +3558,7 @@ function _startRealtimeListeners() {
       DB_LOCAL.fournisseurs = snap.docs.map(d => d.data());
       _rtReady['fournisseurs'] = true;
       _checkAllReady();
-      if (_appInitialized) { try { initFournisseurs(); } catch(e){} }
+      if (_appInitialized) { try { if(_modulesInit['fournisseurs']) initFournisseurs(); } catch(e){} }
     }, _rtError)
   );
 
@@ -3566,7 +3569,7 @@ function _startRealtimeListeners() {
       DB_LOCAL.depenses = DEP_DATA; // compatibilité modules qui lisent DB_LOCAL.depenses
       _rtReady['depenses'] = true;
       _checkAllReady();
-      if (_appInitialized) { try { initDepenses(); initDashboard(); } catch(e){} }
+      if (_appInitialized) { try { if(_modulesInit['depenses']) initDepenses(); initDashboard(); } catch(e){} }
     }, _rtError)
   );
 
@@ -3584,7 +3587,7 @@ function _startRealtimeListeners() {
       } catch(e) {}
       _rtReady['credits_remboursements'] = true;
       _checkAllReady();
-      if (_appInitialized) { try { initCredits(); } catch(e){} }
+      if (_appInitialized) { try { if(_modulesInit['credits']) initCredits(); } catch(e){} }
     }, _rtError)
   );
 
@@ -3601,7 +3604,7 @@ function _startRealtimeListeners() {
         _rtReady['ventes'] = true;
         _checkAllReady(); // débloque initAllModules() si toutes les collections sont prêtes
         if (_appInitialized) {
-          try { ventesRender(); initCredits(); initRapports(); initDashboard(); } catch(e) {}
+          try { ventesRender(); if(_modulesInit['credits']) initCredits(); if(_modulesInit['rapports']) initRapports(); initDashboard(); } catch(e) {}
         }
       }, e => { console.warn('POS ventes listener:', e); _rtReady['ventes'] = true; _checkAllReady(); })
   );
@@ -3666,21 +3669,24 @@ document.querySelectorAll('nav a').forEach(a => {
     document.querySelectorAll('.section').forEach(x => x.classList.remove('active'));
     a.classList.add('active');
     document.getElementById('sec-' + a.dataset.sec).classList.add('active');
-    if (a.dataset.sec === 'admin') loadUsersList();
-    if (a.dataset.sec === 'dashboard') initDashboard();
-    if (a.dataset.sec === 'produits') initProduits();
-    if (a.dataset.sec === 'ventes') { ventesPage=0; initVentes(); }
-    if (a.dataset.sec === 'stock') { initStock(); }
-    if (a.dataset.sec === 'appros') { initAppros(); }
-    if (a.dataset.sec === 'achats') { initAchats(); }
-    if (a.dataset.sec === 'clients') { initClients(); }
-    if (a.dataset.sec === 'credits') { initCredits(); }
-    if (a.dataset.sec === 'fournisseurs') { initFournisseurs(); }
-    if (a.dataset.sec === 'depenses') { initDepenses(); }
-    if (a.dataset.sec === 'rapports') { initRapports(); }
-    if (a.dataset.sec === 'analytique') { initAnalytique(); }
-    if (a.dataset.sec === 'activites') { initActivites(); }
-    if (a.dataset.sec === 'points') { initPointsDeVente(); }
+    const sec = a.dataset.sec;
+    // Toujours ré-init dashboard/produits (données temps réel)
+    if (sec === 'dashboard')    { initDashboard(); _modulesInit['dashboard']=true; }
+    if (sec === 'produits')     { initProduits(); _modulesInit['produits']=true; }
+    if (sec === 'ventes')       { ventesPage=0; initVentes(); }
+    if (sec === 'stock')        { initStock(); _modulesInit['stock']=true; }
+    // Modules lazy : init à la première visite, ré-init aux suivantes
+    if (sec === 'appros')       { initAppros(); _modulesInit['appros']=true; }
+    if (sec === 'achats')       { initAchats(); _modulesInit['achats']=true; }
+    if (sec === 'clients')      { initClients(); _modulesInit['clients']=true; }
+    if (sec === 'credits')      { initCredits(); _modulesInit['credits']=true; }
+    if (sec === 'fournisseurs') { initFournisseurs(); _modulesInit['fournisseurs']=true; }
+    if (sec === 'depenses')     { initDepenses(); _modulesInit['depenses']=true; }
+    if (sec === 'rapports')     { initRapports(); _modulesInit['rapports']=true; }
+    if (sec === 'analytique')   { initAnalytique(); }
+    if (sec === 'activites')    { initActivites(); }
+    if (sec === 'points')       { initPointsDeVente(); }
+    if (sec === 'admin')        { loadUsersList(); }
   });
 });
 
@@ -3763,10 +3769,26 @@ function getAllDepenses() {
 }
 
 // ─── INIT ALL ──────────────────────────────────────────────────
+// Suivi des modules déjà initialisés (lazy init)
+const _modulesInit = {};
+
 function initAllModules() {
   smsLoadConfig(); clotureCaisseLoadLocal(); retoursLoadLocal();
-  initDashboard(); initProduits(); initAppros(); initClients(); initFournisseurs(); initDepenses(); initStock(); initAchats(); initCredits(); initRapports(); initTheme();
-  initPOS(); initPointsDeVente();
+  // Seuls le dashboard, le thème et le POS sont initialisés au démarrage.
+  // Les autres modules sont initialisés à la première visite de la section (lazy).
+  initTheme();
+  initPOS();
+  // Dashboard en léger différé pour ne pas bloquer l'affichage initial
+  setTimeout(() => {
+    initDashboard();
+    _modulesInit['dashboard'] = true;
+  }, 0);
+  // Pré-charger produits/stock en arrière-plan après le dashboard
+  setTimeout(() => {
+    initProduits(); _modulesInit['produits'] = true;
+    initStock();    _modulesInit['stock']    = true;
+  }, 200);
+  // Les modules restants se chargent à la demande via nav (voir navigation ci-dessous)
 }
 
 // ─── POINT DE VENTE (POS) ─────────────────────────────────────
@@ -4588,8 +4610,8 @@ function initDashboard(){
   if (kpiProdSub) kpiProdSub.innerHTML = prodBas > 0
     ? `en catalogue · <span style="color:var(--red)">${prodBas} stock bas</span>`
     : 'en catalogue';
-  // Lancer toutes les fonctions avancées
-  dashRefreshAll();
+  // Calculs avancés différés pour ne pas bloquer le premier affichage
+  setTimeout(() => { dashRefreshAll(); }, 0);
 }
 
 // ─── PRODUITS ──────────────────────────────────────────────────
@@ -5380,6 +5402,13 @@ function achatCalcReste() {
 }
 
 async function achatSauvegarder() {
+  const btn = document.querySelector('#achat-form .btn-add[onclick="achatSauvegarder()"]');
+  const msg = document.getElementById('achat-form-msg');
+
+  // Protéger contre double-clic
+  if(btn && btn.disabled) return;
+  if(btn) { btn.disabled = true; btn.textContent = '⏳ Enregistrement...'; }
+
   try {
   const date   = document.getElementById('achat-date').value;
   const frs    = document.getElementById('achat-frs').value.trim();
@@ -5391,11 +5420,11 @@ async function achatSauvegarder() {
   const note   = document.getElementById('achat-note').value.trim();
   const fam    = document.getElementById('achat-famille').value;
   const numRaw = document.getElementById('achat-num').value.trim();
-  const msg    = document.getElementById('achat-form-msg');
 
   if(!date || !frs || total <= 0) {
     msg.style.color = 'var(--red)';
     msg.textContent = 'Date, Fournisseur et Montant total sont obligatoires.';
+    if(btn) { btn.disabled = false; btn.textContent = '✓ Enregistrer'; }
     return;
   }
 
@@ -5411,8 +5440,8 @@ async function achatSauvegarder() {
   ACHAT_DATA.unshift(achat);
   achatSaveStorage();
 
-  // BUG-M2 FIX: enregistrer le mouvement de stock (entrée marchandise)
-  stockEnregistrerEntreeAchat(achat);
+  // Enregistrer le mouvement de stock (entrée marchandise)
+  try { stockEnregistrerEntreeAchat(achat); } catch(e) { console.warn('stockEntreeAchat:', e); }
 
   // Sync Firebase si configuré
   if(dataSource === 'firebase') {
@@ -5431,9 +5460,13 @@ async function achatSauvegarder() {
   document.getElementById('achat-statut').value = 'EN COURS';
   document.getElementById('achat-famille').value = '';
   achatRenderAll();
-  setTimeout(() => { document.getElementById('achat-form').style.display = 'none'; }, 1200);
+  setTimeout(() => {
+    document.getElementById('achat-form').style.display = 'none';
+    if(btn) { btn.disabled = false; btn.textContent = '✓ Enregistrer'; }
+  }, 1200);
   } catch(e) {
     showToast((e.message || String(e)), 'error');
+    if(btn) { btn.disabled = false; btn.textContent = '✓ Enregistrer'; }
   }
 }
 
