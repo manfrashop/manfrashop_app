@@ -1435,6 +1435,7 @@ select option{background:var(--bg2);}
       <div class="ff"><label>Confirmer le mot de passe</label><input type="password" id="uu-pass2" placeholder="Répéter le mot de passe"></div>
     </div>
     <div id="uu-cloud-note" style="display:none;margin-top:12px;padding:10px 12px;background:var(--blue-glow);border:1px solid var(--blue);border-radius:var(--r-sm);font-size:12px;color:var(--text2)">☁️ En mode Cloud, l'utilisateur sera créé dans Supabase Auth + table utilisateurs.</div>
+    <div id="usr-cloud-st" style="margin-top:8px;font-size:12px;min-height:18px"></div>
     <div id="uu-reset-zone" style="display:none;margin-top:12px;padding:10px 12px;background:var(--orange-glow);border:1px solid var(--orange);border-radius:var(--r-sm)">
       <div style="font-size:12px;font-weight:600;color:var(--orange);margin-bottom:6px">🔑 Réinitialiser le mot de passe</div>
       <div style="display:flex;gap:8px">
@@ -1752,6 +1753,9 @@ async function doLogin(){
     }
     const d=DEMOS.find(u=>u.email===em&&u.pass===pw);
     if(d){CU=d;afterLogin();return;}
+    // Vérifier aussi les utilisateurs créés en mode local
+    const u=D.utilisateurs.find(u=>u.email===em&&u.pass===pw&&u.statut!=='inactif');
+    if(u){CU=u;afterLogin();return;}
     toast('Identifiants incorrects','error');
   }catch(e){toast('Erreur: '+e.message,'error');}
 }
@@ -2528,7 +2532,9 @@ async function saveVente(){
   if(!LV.length){toast('Ajoutez au moins un article','error');return;}
   const rem=+document.getElementById('v-rem').value||0,tot=Math.max(0,LV.reduce((s,l)=>s+l.qte*l.prix,0)-rem);
   const now=new Date().toISOString().slice(0,16).replace('T',' ');
-  const nv={id:nid('ventes'),num:'VTE-2026-'+String(nid('ventes')).padStart(3,'0'),date:now,
+  const yr=new Date().getFullYear();
+  const newId=nid('ventes');
+  const nv={id:newId,num:'VTE-'+yr+'-'+String(newId).padStart(3,'0'),date:now,
     articles:LV.length,montant:tot,paiement:document.getElementById('v-pay').value,statut:'finalisee',lignes:[...LV]};
   D.ventes.unshift(nv);
   for(const l of LV){
@@ -2553,7 +2559,7 @@ async function saveVente(){
 // ═══════════════════════════════
 async function saveCmd(){
   const fo=document.getElementById('c-fourn').value;if(!fo){toast('Fournisseur requis','error');return;}
-  const nc={id:nid('commandes'),num:'CMD-2026-'+String(nid('commandes')).padStart(3,'0'),fourn:fo,
+  const nc={id:nid('commandes'),num:'CMD-'+new Date().getFullYear()+'-'+String(nid('commandes')).padStart(3,'0'),fourn:fo,
     date:document.getElementById('c-date').value,prevue:document.getElementById('c-prev').value,
     montant:+document.getElementById('c-mnt').value||0,statut:'envoyee',notes:document.getElementById('c-note').value};
   D.commandes.unshift(nc);if(sb)await sb.from('commandes').insert(nc);
@@ -2808,7 +2814,7 @@ async function saveUser(){
     const newU={id:nid('utilisateurs'),nom,email:em,role,statut,pass,created_at:new Date().toISOString()};
     if(ACCESS_MODE==='cloud'&&sb){
       try{
-        const{data,error}=await sb.auth.admin.createUser({email:em,password:pass,email_confirm:true});
+        const{data,error}=await sb.auth.signUp({email:em,password:pass});
         if(error)throw error;
         await sb.from('utilisateurs').insert([{nom,email:em,role,statut}]);
         document.getElementById('usr-cloud-st').innerHTML='<span style="color:var(--green)">✅ Créé dans Supabase</span>';
@@ -3654,7 +3660,9 @@ async function posEncaisser(){
   const tot=Math.max(0,POS_CART.reduce((s,l)=>s+l.qte*l.prix,0)-rem);
   const clientId=+document.getElementById('pos-client').value||null;
   const now=new Date().toISOString().slice(0,16).replace('T',' ');
-  const nv={id:nid('ventes'),num:'VTE-2026-'+String(nid('ventes')).padStart(3,'0'),date:now,
+  const yr=new Date().getFullYear();
+  const newId=nid('ventes');
+  const nv={id:newId,num:'VTE-'+yr+'-'+String(newId).padStart(3,'0'),date:now,
     articles:POS_CART.length,montant:tot,paiement:pay==='credit'?'Crédit':pay,statut:'finalisee',
     lignes:[...POS_CART],client_id:clientId};
   D.ventes.unshift(nv);
@@ -4233,14 +4241,15 @@ document.addEventListener('DOMContentLoaded',()=>{
   document.getElementById('c-date').value=today;
   const fut=new Date();fut.setDate(fut.getDate()+5);
   document.getElementById('c-prev').value=fut.toISOString().slice(0,10);
-  // SSE simulation
+  // SSE simulation (démo uniquement — désactiver en production)
+  const DEBUG_SSE=false;
   const msgs=[
     {m:'Stock minimum atteint — Farine de Blé 1kg',t:'warning'},
     {m:'Nouvelle commande CMD-2026-009 reçue',t:'info'},
     {m:'Rupture imminente — Huile Végétale 5L',t:'error'},
     {m:'Synchronisation OK',t:'success'},
   ];let si=0;
-  setInterval(()=>{toast('🔴 '+msgs[si%msgs.length].m,msgs[si%msgs.length].t);si++;},22000);
+  if(DEBUG_SSE)setInterval(()=>{toast('🔴 '+msgs[si%msgs.length].m,msgs[si%msgs.length].t);si++;},22000);
 });
 </script>
 
@@ -4652,15 +4661,25 @@ document.addEventListener('DOMContentLoaded',()=>{
   </div>
 
   <div id="ai-suggestions">
-    <span class="ai-chip" onclick="aiAsk('Quel est le stock critique ?')">📦 Stock critique</span>
-    <span class="ai-chip" onclick="aiAsk('Ventes du jour ?')">💰 Ventes du jour</span>
-    <span class="ai-chip" onclick="aiAsk('Produits les plus vendus ?')">🏆 Top produits</span>
-    <span class="ai-chip" onclick="aiAsk('Résumé du tableau de bord')">📊 Résumé dashboard</span>
-    <span class="ai-chip" onclick="aiAsk('Dépenses ce mois ?')">💸 Dépenses</span>
-    <span class="ai-chip" onclick="aiAsk('Clients avec dettes ?')">👤 Clients dettes</span>
-    <span class="ai-chip" onclick="aiAsk('Conseils réapprovisionnement')">📦 Réappro</span>
-    <span class="ai-chip" onclick="aiAsk('Rapport journalier')">📋 Rapport jour</span>
     <span class="ai-chip" onclick="aiAsk('Alertes stock')">🔔 Alertes</span>
+    <span class="ai-chip" onclick="aiAsk('Ventes du jour ?')">💰 Ventes du jour</span>
+    <span class="ai-chip" onclick="aiAsk('Bénéfice net du jour ?')">📈 Bénéfice net</span>
+    <span class="ai-chip" onclick="aiAsk('Rapport journalier')">📋 Rapport jour</span>
+    <span class="ai-chip" onclick="aiAsk('Quel est le stock critique ?')">📦 Stock critique</span>
+    <span class="ai-chip" onclick="aiAsk('Produits en surstock ?')">🏔️ Surstock</span>
+    <span class="ai-chip" onclick="aiAsk('Valeur totale du stock ?')">💎 Valeur stock</span>
+    <span class="ai-chip" onclick="aiAsk('Marge et rentabilité des produits ?')">📊 Marges</span>
+    <span class="ai-chip" onclick="aiAsk('Mouvements de stock du jour ?')">🔄 Mouvements</span>
+    <span class="ai-chip" onclick="aiAsk('Commandes fournisseurs en cours ?')">📋 Commandes</span>
+    <span class="ai-chip" onclick="aiAsk('Fournisseurs principaux ?')">🏭 Fournisseurs</span>
+    <span class="ai-chip" onclick="aiAsk('Retours et remboursements ?')">🔁 Retours</span>
+    <span class="ai-chip" onclick="aiAsk('Clients avec dettes ?')">👤 Clients dettes</span>
+    <span class="ai-chip" onclick="aiAsk('Dépenses ce mois ?')">💸 Dépenses</span>
+    <span class="ai-chip" onclick="aiAsk('Produits les plus vendus ?')">🏆 Top produits</span>
+    <span class="ai-chip" onclick="aiAsk('Conseils réapprovisionnement')">🚚 Réappro</span>
+    <span class="ai-chip" onclick="aiAsk('Résumé du tableau de bord')">🏠 Dashboard</span>
+    <span class="ai-chip" onclick="aiAsk('Prévisions et tendances ventes ?')">🔮 Prévisions</span>
+    <span class="ai-chip" onclick="aiAsk('Dernières actions du journal ?')">🗒️ Journal</span>
     <span class="ai-chip" onclick="aiAsk('Conseils pour augmenter les ventes')">💡 Conseils ventes</span>
   </div>
 
@@ -4885,7 +4904,7 @@ async function aiLocalAnswer(q){
   // — Ventes —
   if(ql.includes('vente') || ql.includes('ca') || ql.includes('chiffre') || ql.includes('recette')){
     const today = new Date().toISOString().slice(0,10);
-    const vJ = ventes.filter(v => v.date === today);
+    const vJ = ventes.filter(v => (v.date||'').startsWith(today));
     const totJ = vJ.reduce((s,v)=>s+(+v.montant||0), 0);
     const totM = ventes.reduce((s,v)=>s+(+v.montant||0), 0);
     return `💰 **Ventes**\n\n• Aujourd'hui : **${vJ.length}** vente${vJ.length>1?'s':''} — **${totJ.toLocaleString('fr')} GNF**\n• Total enregistré : **${ventes.length}** ventes — **${totM.toLocaleString('fr')} GNF**`;
@@ -4915,7 +4934,7 @@ async function aiLocalAnswer(q){
   // — Dépenses —
   if(ql.includes('dépense') || ql.includes('charge') || ql.includes('dépenses')){
     const today = new Date().toISOString().slice(0,10);
-    const depJ = depenses.filter(d => d.date === today);
+    const depJ = depenses.filter(d => (d.date||'').startsWith(today));
     const totJ = depJ.reduce((s,d)=>s+(+d.montant||0),0);
     const totAll = depenses.reduce((s,d)=>s+(+d.montant||0),0);
     return `💸 **Dépenses**\n\n• Aujourd'hui : **${depJ.length}** dépense${depJ.length>1?'s':''} — **${totJ.toLocaleString('fr')} GNF**\n• Total enregistré : **${totAll.toLocaleString('fr')} GNF**`;
@@ -4924,7 +4943,7 @@ async function aiLocalAnswer(q){
   // — Dashboard / résumé —
   if(ql.includes('résumé') || ql.includes('tableau') || ql.includes('dashboard') || ql.includes('bilan')){
     const today = new Date().toISOString().slice(0,10);
-    const vJ = ventes.filter(v => v.date === today);
+    const vJ = ventes.filter(v => (v.date||'').startsWith(today));
     const totJ = vJ.reduce((s,v)=>s+(+v.montant||0), 0);
     const crit = prods.filter(p => p.etat==='rupture'||p.etat==='critique'||p.stock<=(p.min||5));
     const detteurs = clients.filter(c => (+c.dette||0) > 0);
@@ -4969,9 +4988,9 @@ async function aiLocalAnswer(q){
   if(ql.includes('rapport') || ql.includes('journalier') || ql.includes('bilan du jour') || ql.includes('fin de journée')){
     const today = new Date().toISOString().slice(0,10);
     const dateAff = new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-    const vJ = ventes.filter(v => v.date === today);
+    const vJ = ventes.filter(v => (v.date||'').startsWith(today));
     const caJ = vJ.reduce((s,v)=>s+(+v.montant||0),0);
-    const depJ = depenses.filter(d => d.date === today);
+    const depJ = depenses.filter(d => (d.date||'').startsWith(today));
     const depJtot = depJ.reduce((s,d)=>s+(+d.montant||0),0);
     const benefJ = caJ - depJtot;
     const ruptures = prods.filter(p => p.stock<=0||p.etat==='rupture');
@@ -4996,7 +5015,7 @@ async function aiLocalAnswer(q){
   // — Conseils ventes & bénéfices —
   if(ql.includes('conseil') || ql.includes('augmenter') || ql.includes('améliorer') || ql.includes('bénéfice') || ql.includes('profit')){
     const today = new Date().toISOString().slice(0,10);
-    const vJ = ventes.filter(v=>v.date===today);
+    const vJ = ventes.filter(v=>(v.date||'').startsWith(today));
     const caJ = vJ.reduce((s,v)=>s+(+v.montant||0),0);
     const ruptures = prods.filter(p=>p.stock<=0||p.etat==='rupture');
     const detteurs = clients.filter(c=>(+c.dette||0)>0);
@@ -5017,50 +5036,224 @@ async function aiLocalAnswer(q){
     return r;
   }
 
+  // — Bénéfice net —
+  if(ql.includes('bénéfice') || ql.includes('profit') || ql.includes('net')){
+    const today = new Date().toISOString().slice(0,10);
+    const curMonth = today.slice(0,7);
+    const vJ = ventes.filter(v=>(v.date||'').startsWith(today));
+    const vM = ventes.filter(v=>(v.date||'').startsWith(curMonth));
+    const caJ = vJ.reduce((s,v)=>s+(+v.montant||0),0);
+    const caM = vM.reduce((s,v)=>s+(+v.montant||0),0);
+    const depJ = depenses.filter(d=>(d.date||'').startsWith(today)).reduce((s,d)=>s+(+d.montant||0),0);
+    const depM = depenses.filter(d=>(d.date||'').startsWith(curMonth)).reduce((s,d)=>s+(+d.montant||0),0);
+    const benJ = caJ - depJ, benM = caM - depM;
+    return `📈 **Bénéfice net**\n\n**Aujourd'hui :**\n• CA : ${caJ.toLocaleString('fr')} GNF\n• Dépenses : -${depJ.toLocaleString('fr')} GNF\n• **Bénéfice : ${benJ>=0?'+':''}${benJ.toLocaleString('fr')} GNF** ${benJ>=0?'✅':'⚠️'}\n\n**Ce mois :**\n• CA : ${caM.toLocaleString('fr')} GNF\n• Dépenses : -${depM.toLocaleString('fr')} GNF\n• **Bénéfice : ${benM>=0?'+':''}${benM.toLocaleString('fr')} GNF** ${benM>=0?'✅':'🔴'}`;
+  }
+
+  // — Valeur du stock —
+  if(ql.includes('valeur') || ql.includes('patrimoine') || ql.includes('capital') || ql.includes('inventaire')){
+    const prods = D.produits || [];
+    const valAchat = prods.reduce((s,p)=>s+p.stock*p.achat,0);
+    const valVente = prods.reduce((s,p)=>s+p.stock*p.vente,0);
+    const plusVal = valVente - valAchat;
+    const topVal = [...prods].sort((a,b)=>(b.stock*b.achat)-(a.stock*a.achat)).slice(0,5);
+    let r = `💎 **Valeur du stock**\n\n• Prix d'achat : **${valAchat.toLocaleString('fr')} GNF**\n• Prix de vente : **${valVente.toLocaleString('fr')} GNF**\n• Plus-value potentielle : **+${plusVal.toLocaleString('fr')} GNF** 📈\n• Nombre de produits : ${prods.length}\n\n**Top 5 produits par valeur :**\n`;
+    r += topVal.map((p,i)=>`${i+1}. ${p.designation} — ${(p.stock*p.achat).toLocaleString('fr')} GNF (${p.stock} ${p.unite||'u.'})`).join('\n');
+    return r;
+  }
+
+  // — Surstock —
+  if(ql.includes('surstock') || ql.includes('excès') || ql.includes('trop de stock')){
+    const prods = D.produits || [];
+    const surstock = prods.filter(p=>p.etat==='surstock'||p.stock>=(p.max||Infinity));
+    if(!surstock.length) return `🏔️ **Surstock**\n\n✅ Aucun produit en surstock actuellement. Bonne gestion des stocks !`;
+    const val = surstock.reduce((s,p)=>s+(p.stock-(p.max||p.stock/2))*(p.achat||0),0);
+    let r = `🏔️ **Produits en Surstock (${surstock.length})**\n\n`;
+    r += surstock.map(p=>`• **${p.designation}** — ${p.stock} ${p.unite||'u.'} / max ${p.max} → *excès: ${p.stock-(p.max||0)} ${p.unite||'u.'}*`).join('\n');
+    r += `\n\n💡 Capital immobilisé en excès : ~${val.toLocaleString('fr')} GNF\n💡 Action conseillée : remises promotionnelles ou transfert de stock`;
+    return r;
+  }
+
+  // — Marge & rentabilité —
+  if(ql.includes('marge') || ql.includes('rentabilité') || ql.includes('rentable') || ql.includes('markup')){
+    const prods = D.produits || [];
+    const avecMarge = prods.filter(p=>p.achat>0&&p.vente>0).map(p=>({...p,mg:p.vente-p.achat,pct:Math.round((p.vente-p.achat)/p.achat*100)}));
+    if(!avecMarge.length) return `📊 Aucun produit avec prix d'achat et de vente définis.`;
+    const topMarge = [...avecMarge].sort((a,b)=>b.pct-a.pct).slice(0,5);
+    const botMarge = [...avecMarge].sort((a,b)=>a.pct-b.pct).slice(0,3);
+    const moyMarge = Math.round(avecMarge.reduce((s,p)=>s+p.pct,0)/avecMarge.length);
+    let r = `📊 **Analyse des Marges**\n\n• Marge moyenne : **${moyMarge}%**\n• Produits analysés : ${avecMarge.length}\n\n🥇 **Meilleures marges :**\n`;
+    r += topMarge.map(p=>`• ${p.designation} : **${p.pct}%** (+${p.mg.toLocaleString('fr')} GNF)`).join('\n');
+    r += `\n\n⚠️ **Marges faibles :**\n`;
+    r += botMarge.map(p=>`• ${p.designation} : **${p.pct}%**`).join('\n');
+    return r;
+  }
+
+  // — Mouvements de stock —
+  if(ql.includes('mouvement') || ql.includes('entrée') || ql.includes('sortie') || ql.includes('flux')){
+    const mvts = D.mouvements || [];
+    const today = new Date().toISOString().slice(0,10);
+    const mvtJ = mvts.filter(m=>(m.date||'').startsWith(today));
+    const entrees = mvtJ.filter(m=>m.type==='entree').reduce((s,m)=>s+m.qte,0);
+    const sorties = mvtJ.filter(m=>m.type==='sortie').reduce((s,m)=>s+m.qte,0);
+    const pertes = mvtJ.filter(m=>m.type==='perte').reduce((s,m)=>s+m.qte,0);
+    const mvtTotal = mvts.length;
+    const recentMvts = mvts.slice(0,5);
+    let r = `🔄 **Mouvements de Stock**\n\n**Aujourd'hui (${mvtJ.length} opération${mvtJ.length>1?'s':''}) :**\n• Entrées : **${entrees} unités**\n• Sorties : **${sorties} unités**\n• Pertes : **${pertes} unités**\n\n**Total enregistré : ${mvtTotal} mouvements**\n\n**5 derniers mouvements :**\n`;
+    r += recentMvts.length ? recentMvts.map(m=>`• [${m.type.toUpperCase()}] ${m.produit||'?'} × ${m.qte} — ${(m.date||'').slice(0,10)}`).join('\n') : '• Aucun mouvement';
+    return r;
+  }
+
+  // — Commandes fournisseurs —
+  if(ql.includes('commande') || ql.includes('livraison') || ql.includes('approvisionnement')){
+    const cmds = D.commandes || [];
+    const enCours = cmds.filter(c=>c.statut!=='livree'&&c.statut!=='annulee');
+    const livrees = cmds.filter(c=>c.statut==='livree');
+    const totEnCours = enCours.reduce((s,c)=>s+(+c.montant||0),0);
+    let r = `📋 **Commandes Fournisseurs**\n\n• En cours : **${enCours.length}** (${totEnCours.toLocaleString('fr')} GNF)\n• Livrées : **${livrees.length}**\n• Total : **${cmds.length}**\n`;
+    if(enCours.length){
+      r += `\n**Commandes en attente :**\n`;
+      r += enCours.slice(0,5).map(c=>`• ${c.num} — *${c.fourn}* — ${(+c.montant||0).toLocaleString('fr')} GNF — livraison: ${c.prevue||'?'} [${c.statut}]`).join('\n');
+    } else { r += `\n✅ Aucune commande en attente.`; }
+    return r;
+  }
+
+  // — Fournisseurs —
+  if(ql.includes('fournisseur') || ql.includes('vendeur') || ql.includes('grossiste')){
+    const fns = D.fournisseurs || [];
+    if(!fns.length) return `🏭 Aucun fournisseur enregistré.`;
+    // Compter les commandes par fournisseur
+    const cmds = D.commandes || [];
+    let r = `🏭 **Fournisseurs (${fns.length})**\n\n`;
+    r += fns.map(f=>{
+      const nb=cmds.filter(c=>c.fourn===f.nom).length;
+      return `• **${f.nom}** — ${f.pays} — délai ${f.delai}j — ${f.tel||'—'} — *${nb} commande${nb>1?'s':''}*`;
+    }).join('\n');
+    return r;
+  }
+
+  // — Retours & remboursements —
+  if(ql.includes('retour') || ql.includes('remboursement') || ql.includes('rembours')){
+    const rets = D.retours || [];
+    const enAttente = rets.filter(r=>r.statut==='en_attente');
+    const traites = rets.filter(r=>r.statut==='traite');
+    const totalRemb = rets.reduce((s,r)=>s+(+r.montant||0),0);
+    if(!rets.length) return `🔁 **Retours**\n\n✅ Aucun retour enregistré.`;
+    let r = `🔁 **Retours & Remboursements**\n\n• Total retours : **${rets.length}**\n• En attente : **${enAttente.length}**\n• Traités : **${traites.length}**\n• Montant total remboursé : **${totalRemb.toLocaleString('fr')} GNF**\n`;
+    if(enAttente.length){
+      r += `\n⚠️ **En attente de traitement :**\n`;
+      r += enAttente.slice(0,4).map(rt=>`• ${rt.num||'?'} — ${rt.client||'Client inconnu'} — ${rt.produit||'?'} — ${(+rt.montant||0).toLocaleString('fr')} GNF`).join('\n');
+    }
+    return r;
+  }
+
+  // — Prévisions & tendances —
+  if(ql.includes('prévision') || ql.includes('tendance') || ql.includes('projection') || ql.includes('forecast')){
+    const ventes = D.ventes || [];
+    const today = new Date().toISOString().slice(0,10);
+    const curMonth = today.slice(0,7);
+    const prevMonth = new Date(new Date().setMonth(new Date().getMonth()-1)).toISOString().slice(0,7);
+    const vCurM = ventes.filter(v=>(v.date||'').startsWith(curMonth));
+    const vPrevM = ventes.filter(v=>(v.date||'').startsWith(prevMonth));
+    const caCurM = vCurM.reduce((s,v)=>s+(+v.montant||0),0);
+    const caPrevM = vPrevM.reduce((s,v)=>s+(+v.montant||0),0);
+    const jourPasse = parseInt(today.slice(8,10));
+    const joursMois = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
+    const projCA = jourPasse > 0 ? Math.round(caCurM / jourPasse * joursMois) : 0;
+    const evol = caPrevM > 0 ? Math.round((caCurM-caPrevM)/caPrevM*100) : null;
+    let r = `🔮 **Prévisions & Tendances**\n\n**Mois en cours (${jourPasse}/${joursMois} jours) :**\n• CA réalisé : **${caCurM.toLocaleString('fr')} GNF** (${vCurM.length} ventes)\n• Projection fin de mois : **~${projCA.toLocaleString('fr')} GNF**\n`;
+    if(evol !== null) r += `• Évolution vs mois précédent : **${evol>=0?'+':''}${evol}%** ${evol>=0?'📈':'📉'}\n`;
+    r += `\n**Mois précédent :** ${caPrevM.toLocaleString('fr')} GNF (${vPrevM.length} ventes)\n`;
+    // Jours de la semaine les plus actifs
+    const byDay = {};
+    ventes.forEach(v=>{const d=new Date((v.date||'').slice(0,10));if(!isNaN(d)){const j=['Dim','Lun','Mar','Mer','Jeu','Ven','Sam'][d.getDay()];byDay[j]=(byDay[j]||0)+(+v.montant||0);}});
+    const bestDay = Object.entries(byDay).sort((a,b)=>b[1]-a[1])[0];
+    if(bestDay) r += `\n📅 Meilleur jour de vente historique : **${bestDay[0]}**`;
+    return r;
+  }
+
+  // — Journal d'audit —
+  if(ql.includes('journal') || ql.includes('audit') || ql.includes('historique') || ql.includes('activité')){
+    const journal = D.journal || [];
+    if(!journal.length) return `🗒️ Journal d'audit vide.`;
+    const recent = journal.slice(0,10);
+    const stats = {};
+    journal.forEach(e=>{stats[e.action]=(stats[e.action]||0)+1;});
+    let r = `🗒️ **Journal d'Audit**\n\n• Total entrées : **${journal.length}**\n• Types : ${Object.entries(stats).map(([k,v])=>`${k}×${v}`).join(', ')}\n\n**10 dernières actions :**\n`;
+    r += recent.map(e=>`• [${e.action}] ${(e.date||'').slice(0,16)} — *${e.user||'?'}* — ${(e.detail||'').slice(0,50)}`).join('\n');
+    return r;
+  }
+
   // — Aide —
   if(ql.includes('aide') || ql.includes('help') || ql.includes('que peux')){
-    return `🤖 **Ce que je peux faire en mode local :**\n\n• 📦 Analyser le stock et alertes\n• 💰 Résumé des ventes du jour\n• 🏆 Top produits vendus\n• 👤 Clients et encours dettes\n• 💸 Suivi des dépenses\n• 📊 Bilan global du dashboard\n• 🔔 Alertes stock (ruptures, critiques, surstock)\n• 📦 Conseils réapprovisionnement avec budget estimé\n• 📋 Rapport journalier complet\n• 💡 Conseils pour augmenter les ventes\n\n💡 Passez en mode **Cloud** pour des analyses encore plus avancées avec Claude AI !`;
+    return `🤖 **Ce que je peux faire en mode local :**\n\n📦 Stock & Produits\n• Stock critique / ruptures / surstock\n• Valeur totale du stock\n• Marge et rentabilité par produit\n\n💰 Ventes & Finance\n• Ventes du jour et du mois\n• Bénéfice net (CA − dépenses)\n• Prévisions et tendances\n• Top produits vendus\n\n🔄 Opérations\n• Mouvements de stock du jour\n• Commandes fournisseurs en cours\n• Fournisseurs et délais\n• Retours et remboursements\n\n👤 Clients\n• Clients avec dettes\n• Encours total crédit\n\n📊 Rapports\n• Rapport journalier complet\n• Dépenses par catégorie\n• Journal d'audit\n• Alertes actives\n• Conseils pour augmenter les ventes\n\n💡 Passez en mode **🖥️ LM Studio / OpenAI** pour des questions libres !`;
   }
 
   // — Réponse générique —
-  return `🤔 Je n'ai pas trouvé de correspondance pour : *"${q}"*\n\nEssayez :\n• "Alertes stock"\n• "Conseils réapprovisionnement"\n• "Rapport journalier"\n• "Conseils pour augmenter les ventes"\n• "Résumé du dashboard"\n\nOu passez en mode **🖥️ LM Studio / OpenAI** pour des questions libres !`;
+  return `🤔 Je n'ai pas trouvé de correspondance pour : *"${q}"*\n\nEssayez :\n• "Bénéfice net" · "Valeur stock" · "Marges"\n• "Mouvements" · "Commandes" · "Retours"\n• "Fournisseurs" · "Prévisions" · "Journal"\n• "Alertes stock" · "Rapport journalier"\n\nOu passez en mode **🖥️ LM Studio / OpenAI** pour des questions libres !`;
 }
 
 // ── MODE LM STUDIO / OPENAI : API compatible OpenAI ──
 async function aiLMStudioAnswer(q){
-  const prods    = D.produits  || [];
-  const ventes   = D.ventes    || [];
-  const clients  = D.clients   || [];
-  const depenses = D.depenses  || [];
+  const prods    = D.produits    || [];
+  const ventes   = D.ventes      || [];
+  const clients  = D.clients     || [];
+  const depenses = D.depenses    || [];
+  const mvts     = D.mouvements  || [];
+  const cmds     = D.commandes   || [];
+  const fns      = D.fournisseurs|| [];
+  const rets     = D.retours     || [];
 
   const today = new Date().toISOString().slice(0,10);
+  const curMonth = today.slice(0,7);
   const vJ  = ventes.filter(v => (v.date||'').startsWith(today));
+  const vM  = ventes.filter(v => (v.date||'').startsWith(curMonth));
   const totJ = vJ.reduce((s,v)=>s+(+v.montant||0), 0);
+  const totM = vM.reduce((s,v)=>s+(+v.montant||0), 0);
+  const depJ = depenses.filter(d=>(d.date||'').startsWith(today)).reduce((s,d)=>s+(+d.montant||0),0);
+  const depM = depenses.filter(d=>(d.date||'').startsWith(curMonth)).reduce((s,d)=>s+(+d.montant||0),0);
   const crit = prods.filter(p => p.etat==='rupture'||p.etat==='critique'||p.stock<=(p.min||5));
+  const surstock = prods.filter(p=>p.etat==='surstock');
+  const valStock = prods.reduce((s,p)=>s+p.stock*(p.achat||0),0);
+  const avecMarge = prods.filter(p=>p.achat>0&&p.vente>0);
+  const margeMoy = avecMarge.length ? Math.round(avecMarge.reduce((s,p)=>s+(p.vente-p.achat)/p.achat*100,0)/avecMarge.length) : 0;
+  const mvtJ = mvts.filter(m=>(m.date||'').startsWith(today));
+  const cmdsEnCours = cmds.filter(c=>c.statut!=='livree'&&c.statut!=='annulee');
+  const retsEnAttente = rets.filter(r=>r.statut==='en_attente');
+  const detteurs = clients.filter(c=>(+c.dette||0)>0);
+  const totDette = detteurs.reduce((s,c)=>s+(+c.dette||0),0);
 
-  const systemPrompt = `Tu es l'assistant IA intégré à MANFRA-SHOP, une application de gestion de boutique développée par HABATECH pour la Guinée.
-Tu réponds en français de façon concise, professionnelle et utile. Tu utilises des emojis contextuels.
+  const systemPrompt = `Tu es l'assistant IA intégré à MANFRA-SHOP, une application de gestion de boutique développée par HABATECH pour la Guinée (Siguiri).
+Tu réponds en français, de façon concise, professionnelle et actionnables. Tu utilises des emojis contextuels.
 
-DONNÉES TEMPS RÉEL DE LA BOUTIQUE (${today}) :
-- Produits total : ${prods.length} | En alerte stock : ${crit.length}
-- Ruptures : ${prods.filter(p=>p.stock<=0).length} | Stock critique : ${prods.filter(p=>p.stock>0&&p.stock<=(p.min||5)).length}
+═══ DONNÉES TEMPS RÉEL (${today}) ═══
+
+VENTES & FINANCES :
 - Ventes aujourd'hui : ${vJ.length} tickets | CA : ${totJ.toLocaleString('fr')} GNF
-- Clients : ${clients.length} | Avec dettes : ${clients.filter(c=>(+c.dette||0)>0).length} | Encours : ${clients.reduce((s,c)=>s+(+c.dette||0),0).toLocaleString('fr')} GNF
-- Dépenses enregistrées : ${depenses.length} | Total : ${depenses.reduce((s,d)=>s+(+d.montant||0),0).toLocaleString('fr')} GNF
-- Bénéfice net estimé aujourd'hui : ${(totJ - depenses.filter(d=>d.date===today).reduce((s,d)=>s+(+d.montant||0),0)).toLocaleString('fr')} GNF
+- Ventes ce mois : ${vM.length} tickets | CA mensuel : ${totM.toLocaleString('fr')} GNF
+- Dépenses aujourd'hui : ${depJ.toLocaleString('fr')} GNF | Ce mois : ${depM.toLocaleString('fr')} GNF
+- Bénéfice net aujourd'hui : ${(totJ-depJ).toLocaleString('fr')} GNF
+- Bénéfice net ce mois : ${(totM-depM).toLocaleString('fr')} GNF
 
-PRODUITS EN ALERTE : ${crit.slice(0,8).map(p=>`${p.designation} (stock:${p.stock}, min:${p.min||5})`).join(', ')||'aucun'}
-TOP 5 PRODUITS (stock) : ${prods.slice(0,5).map(p=>`${p.designation} (stock:${p.stock}, prix:${p.vente} GNF)`).join(', ')||'aucun'}
+STOCK & PRODUITS :
+- Total produits : ${prods.length} | Valeur stock : ${valStock.toLocaleString('fr')} GNF
+- Ruptures : ${prods.filter(p=>p.stock<=0).length} | Critiques : ${prods.filter(p=>p.stock>0&&p.stock<=(p.min||5)).length} | Surstock : ${surstock.length}
+- Marge moyenne : ${margeMoy}%
+- Produits alertes : ${crit.slice(0,6).map(p=>`${p.designation}(stk:${p.stock},min:${p.min||5})`).join(', ')||'aucun'}
 
-TES CAPACITÉS :
-- Alertes stock automatiques (ruptures, critiques, surstock)
-- Conseils réapprovisionnement avec quantités et budget estimé
-- Rapport journalier complet (CA, dépenses, bénéfice, top ventes)
-- Conseils stratégiques pour augmenter les ventes et bénéfices
-- Analyse des dettes clients et stratégie de recouvrement
-- Toute question en langage naturel sur la gestion de la boutique
+OPÉRATIONS :
+- Mouvements aujourd'hui : ${mvtJ.length} | Entrées : ${mvtJ.filter(m=>m.type==='entree').reduce((s,m)=>s+m.qte,0)} u. | Sorties : ${mvtJ.filter(m=>m.type==='sortie').reduce((s,m)=>s+m.qte,0)} u.
+- Commandes en cours : ${cmdsEnCours.length} (${cmdsEnCours.reduce((s,c)=>s+(+c.montant||0),0).toLocaleString('fr')} GNF) | Fournisseurs : ${fns.length}
+- Retours en attente : ${retsEnAttente.length} | Total retours : ${rets.length}
 
-Réponds en moins de 300 mots sauf si une analyse détaillée est demandée. Sois direct et actionnable.`;
+CLIENTS :
+- Total clients : ${clients.length} | Avec dettes : ${detteurs.length} | Encours total : ${totDette.toLocaleString('fr')} GNF
+${detteurs.length?'- Top débiteurs : '+detteurs.sort((a,b)=>(+b.dette)-(+a.dette)).slice(0,3).map(c=>`${c.nom}(${(+c.dette).toLocaleString('fr')} GNF)`).join(', '):''}
+
+TOP 5 PRODUITS STOCK : ${prods.slice(0,5).map(p=>`${p.designation}(stk:${p.stock}, px:${p.vente} GNF, marge:${p.achat>0?Math.round((p.vente-p.achat)/p.achat*100)+'%':'?'})`).join(' | ')||'—'}
+
+TES CAPACITÉS : stock, ventes, bénéfice, marges, mouvements, commandes, retours, fournisseurs, clients/dettes, dépenses, prévisions, conseils stratégiques.
+Réponds en moins de 350 mots sauf analyse détaillée demandée. Sois direct et actionnable.`;
 
   // Format OpenAI-compatible (messages array avec role system/user/assistant)
   const msgs = [
