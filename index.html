@@ -1310,7 +1310,7 @@ select option{background:var(--bg2);}
     <div class="fg">
       <div class="ff"><label>Nom complet *</label><input id="uu-nom" placeholder="Prénom NOM"></div>
       <div class="ff"><label>Email *</label><input type="email" id="uu-email" placeholder="email@habatech.com"></div>
-      <div><label>Rôle</label><select id="uu-role"><option value="admin">👑 Admin</option><option value="caissier">🏪 Caissier</option><option value="magasinier">📦 Magasinier</option></select></div>
+      <div><label>Rôle</label><select id="uu-role"><option value="admin">👑 Admin</option><option value="directeur_commercial">📈 Directeur Commercial</option><option value="vendeur">🛍️ Vendeur</option><option value="caissier">🏪 Caissier</option><option value="magasinier">📦 Magasinier</option></select></div>
       <div><label>Mot de passe</label><input type="password" id="uu-pass" placeholder="••••••••"></div>
     </div>
   </div>
@@ -4342,6 +4342,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     <span class="ai-chip" onclick="aiAsk('Résumé du tableau de bord')">📊 Résumé dashboard</span>
     <span class="ai-chip" onclick="aiAsk('Dépenses ce mois ?')">💸 Dépenses</span>
     <span class="ai-chip" onclick="aiAsk('Clients avec dettes ?')">👤 Clients dettes</span>
+    <span class="ai-chip" onclick="aiAsk('Conseils réapprovisionnement')">📦 Réappro</span>
+    <span class="ai-chip" onclick="aiAsk('Rapport journalier')">📋 Rapport jour</span>
+    <span class="ai-chip" onclick="aiAsk('Alertes stock')">🔔 Alertes</span>
+    <span class="ai-chip" onclick="aiAsk('Conseils pour augmenter les ventes')">💡 Conseils ventes</span>
   </div>
 
   <div id="ai-footer">
@@ -4368,8 +4372,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 // ══════════════════════════════════════════
 //  ASSISTANT IA — HABATECH MANFRA-SHOP
 // ══════════════════════════════════════════
-let AI_MODE = localStorage.getItem('ai_mode') || 'local'; // 'local' | 'cloud'
-let AI_KEY  = localStorage.getItem('ai_api_key') || '';
+let AI_MODE = localStorage.getItem('ai_mode') || 'cloud'; // 'local' | 'cloud'
+let AI_KEY  = localStorage.getItem('ai_api_key') || 'sk-ant-_';
 let AI_OPEN = false;
 let AI_BUSY = false;
 let aiHistory = []; // historique conversation
@@ -4424,11 +4428,18 @@ function aiSaveKey(){
 }
 
 function aiWelcome(){
+  const prods = (typeof PRODS !== 'undefined') ? PRODS : [];
+  const ruptures = prods.filter(p => p.stock<=0||p.etat==='rupture');
+  const critiques = prods.filter(p => p.stock>0&&p.stock<=(p.min||5)&&p.etat!=='rupture');
+  let alertLine = '';
+  if(ruptures.length||critiques.length){
+    alertLine = `\n\n⚠️ **${ruptures.length} rupture${ruptures.length>1?'s':''} + ${critiques.length} stock${critiques.length>1?'s':''} critique${critiques.length>1?'s':''}** détectés — tapez *"Alertes stock"* pour le détail.`;
+  }
   const greetings = {
-    local: `👋 Bonjour ! Je suis votre assistant **local** intégré à MANFRA-SHOP.\n\nJ'analyse vos données en temps réel (stock, ventes, dépenses, clients) sans connexion internet. Posez-moi n'importe quelle question sur votre boutique !`,
+    local: `👋 Bonjour ! Je suis votre assistant **local** MANFRA-SHOP.\n\nJ'analyse vos données en temps réel sans connexion internet.${alertLine}\n\nQue voulez-vous savoir ?`,
     cloud: AI_KEY
-      ? `☁️ Assistant **Claude AI** activé !\n\nJe peux analyser vos données boutique ET répondre à des questions complexes grâce à l'intelligence artificielle avancée. Comment puis-je vous aider ?`
-      : `☁️ Mode **Cloud** sélectionné.\n\nPour utiliser Claude AI, veuillez entrer votre clé API Anthropic ci-dessous. Vous pouvez l'obtenir sur [console.anthropic.com](https://console.anthropic.com).`
+      ? `☁️ Assistant **Claude AI** activé !${alertLine}\n\nJe combine vos données boutique et l'IA avancée. Comment puis-je vous aider ?`
+      : `☁️ Mode **Cloud** sélectionné.\n\nEntrez votre clé API Anthropic ci-dessous pour activer Claude AI.`
   };
   aiAddMsg('bot', greetings[AI_MODE]);
 }
@@ -4495,7 +4506,16 @@ async function aiSend(){
       if(!AI_KEY){ aiRemoveTyping(); aiAddMsg('bot','⚠️ Veuillez d\'abord sauvegarder votre clé API.'); AI_BUSY=false; document.getElementById('ai-send').disabled=false; return; }
       const reply = await aiCloudAnswer(q);
       aiRemoveTyping();
-      aiAddMsg('bot', reply);
+      // Détecter action facture PDF
+      const actionMatch = reply.match(/\[ACTION:FACTURE:([^\]]+)\]/);
+      if(actionMatch){
+        const ref = actionMatch[1].trim();
+        const cleanReply = reply.replace(/\[ACTION:FACTURE:[^\]]+\]/, '').trim();
+        if(cleanReply) aiAddMsg('bot', cleanReply);
+        await aiHandleFacture(ref, q);
+      } else {
+        aiAddMsg('bot', reply);
+      }
     }
   } catch(e){
     aiRemoveTyping();
@@ -4577,13 +4597,99 @@ async function aiLocalAnswer(q){
     return `📊 **Résumé MANFRA-SHOP**\n\n💰 Ventes du jour : **${totJ.toLocaleString('fr')} GNF** (${vJ.length} ticket${vJ.length>1?'s':''})\n📦 Produits : **${prods.length}** dont **${crit.length}** en alerte stock\n👤 Clients : **${clients.length}** dont **${detteurs.length}** avec dettes\n💸 Total dépenses enregistrées : **${depenses.length}** opération${depenses.length>1?'s':''}`;
   }
 
+  // — Alertes stock —
+  if(ql.includes('alerte') || ql.includes('urgent') || ql.includes('attention')){
+    const ruptures = prods.filter(p => p.stock <= 0 || p.etat === 'rupture');
+    const critiques = prods.filter(p => p.stock > 0 && p.stock <= (p.min||5) && p.etat !== 'rupture');
+    const surstock = prods.filter(p => p.max && p.stock >= p.max * 0.9);
+    let r = `🔔 **Alertes Stock**\n\n`;
+    if(!ruptures.length && !critiques.length && !surstock.length){
+      return `🔔 **Alertes Stock**\n\n✅ Aucune alerte critique — stock globalement sain !`;
+    }
+    if(ruptures.length) r += `🔴 **Ruptures (${ruptures.length}) :**\n`+ruptures.slice(0,5).map(p=>`• ${p.designation}`).join('\n')+'\n\n';
+    if(critiques.length) r += `🟠 **Seuil min atteint (${critiques.length}) :**\n`+critiques.slice(0,5).map(p=>`• ${p.designation} — stock : ${p.stock} ${p.unite||''} / min : ${p.min}`).join('\n')+'\n\n';
+    if(surstock.length) r += `🔵 **Surstock (${surstock.length}) :**\n`+surstock.slice(0,3).map(p=>`• ${p.designation} — ${p.stock} unités`).join('\n');
+    return r.trim();
+  }
+
+  // — Conseils réapprovisionnement —
+  if(ql.includes('réappro') || ql.includes('commander') || ql.includes('restock') || ql.includes('réapprovisionnement')){
+    const aCommander = prods.filter(p => p.stock <= (p.min||5)).sort((a,b)=>a.stock-b.stock);
+    if(!aCommander.length) return `📦 **Réapprovisionnement**\n\n✅ Aucun produit ne nécessite de commande urgente pour le moment.`;
+    const totalEstime = aCommander.reduce((s,p)=>{
+      const qteCmd = Math.max(0,(p.max||50) - p.stock);
+      return s + qteCmd * (p.achat||0);
+    },0);
+    let r = `📦 **Conseils Réapprovisionnement**\n\n${aCommander.length} produit${aCommander.length>1?'s':''} à commander :\n\n`;
+    r += aCommander.slice(0,8).map(p=>{
+      const qteCmd = Math.max(1, (p.max||50) - p.stock);
+      const cout = qteCmd * (p.achat||0);
+      return `• **${p.designation}** — stock : ${p.stock} | À commander : ~${qteCmd} ${p.unite||''} ${p.achat ? `(${cout.toLocaleString('fr')} GNF)` : ''}`;
+    }).join('\n');
+    if(totalEstime > 0) r += `\n\n💰 Budget estimé : **${totalEstime.toLocaleString('fr')} GNF**`;
+    if(aCommander.length > 8) r += `\n\n_…et ${aCommander.length-8} autre${aCommander.length-8>1?'s':''} produit${aCommander.length-8>1?'s':''}_`;
+    return r;
+  }
+
+  // — Rapport journalier —
+  if(ql.includes('rapport') || ql.includes('journalier') || ql.includes('bilan du jour') || ql.includes('fin de journée')){
+    const today = new Date().toISOString().slice(0,10);
+    const dateAff = new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+    const vJ = ventes.filter(v => v.date === today);
+    const caJ = vJ.reduce((s,v)=>s+(+v.montant||0),0);
+    const depJ = depenses.filter(d => d.date === today);
+    const depJtot = depJ.reduce((s,d)=>s+(+d.montant||0),0);
+    const benefJ = caJ - depJtot;
+    const ruptures = prods.filter(p => p.stock<=0||p.etat==='rupture');
+    const critiques = prods.filter(p => p.stock>0&&p.stock<=(p.min||5));
+    // Top produit du jour
+    const cntJ = {};
+    vJ.forEach(v=>{
+      const lignes = Array.isArray(v.lignes)?v.lignes:(v.lignes?JSON.parse(v.lignes):[]);
+      lignes.forEach(l=>{const n=l.nom||l.designation||l.code||'?';cntJ[n]=(cntJ[n]||0)+(+l.qte||1);});
+    });
+    const topJ = Object.entries(cntJ).sort((a,b)=>b[1]-a[1])[0];
+    let r = `📋 **Rapport Journalier — ${dateAff}**\n\n`;
+    r += `**💰 Ventes**\n• Tickets : ${vJ.length} | CA : **${caJ.toLocaleString('fr')} GNF**\n`;
+    if(topJ) r += `• Meilleure vente : *${topJ[0]}* (${topJ[1]} unités)\n`;
+    r += `\n**💸 Dépenses**\n• ${depJ.length} opération${depJ.length>1?'s':''} — **${depJtot.toLocaleString('fr')} GNF**\n`;
+    r += `\n**📈 Bénéfice net estimé**\n• **${benefJ>=0?'+':''}${benefJ.toLocaleString('fr')} GNF** ${benefJ>=0?'✅':'⚠️'}\n`;
+    r += `\n**📦 Stock**\n• Ruptures : ${ruptures.length} | Critiques : ${critiques.length}`;
+    if(ruptures.length||critiques.length) r += ` ⚠️`;
+    return r;
+  }
+
+  // — Conseils ventes & bénéfices —
+  if(ql.includes('conseil') || ql.includes('augmenter') || ql.includes('améliorer') || ql.includes('bénéfice') || ql.includes('profit')){
+    const today = new Date().toISOString().slice(0,10);
+    const vJ = ventes.filter(v=>v.date===today);
+    const caJ = vJ.reduce((s,v)=>s+(+v.montant||0),0);
+    const ruptures = prods.filter(p=>p.stock<=0||p.etat==='rupture');
+    const detteurs = clients.filter(c=>(+c.dette||0)>0);
+    const totDette = detteurs.reduce((s,c)=>s+(+c.dette||0),0);
+    // Marges
+    const prodsAvecMarge = prods.filter(p=>p.achat>0&&p.vente>0);
+    const margeMoy = prodsAvecMarge.length ? prodsAvecMarge.reduce((s,p)=>s+((p.vente-p.achat)/p.achat*100),0)/prodsAvecMarge.length : 0;
+    let r = `💡 **Conseils pour booster vos ventes**\n\n`;
+    const conseils = [];
+    if(ruptures.length) conseils.push(`🔴 **Réapprovisionner d'urgence** ${ruptures.length} produit${ruptures.length>1?'s':''} en rupture — chaque rupture = ventes perdues`);
+    if(detteurs.length) conseils.push(`💰 **Recouvrer les dettes** : ${detteurs.length} client${detteurs.length>1?'s':''} vous doivent **${totDette.toLocaleString('fr')} GNF** — relancez-les cette semaine`);
+    if(margeMoy < 20) conseils.push(`📈 **Revoir les prix de vente** : marge moyenne de ${margeMoy.toFixed(0)}% semble faible — visez au moins 25-30%`);
+    if(vJ.length === 0) conseils.push(`🛒 **Aucune vente aujourd'hui** — pensez à des promotions flash ou à contacter vos clients réguliers`);
+    if(prods.filter(p=>p.stock>=(p.max||50)).length > 0) conseils.push(`📦 **Produits en surstock** détectés — envisagez des remises pour écouler le stock et libérer de la trésorerie`);
+    conseils.push(`📱 **Fidélisation** : relancez les clients n'ayant pas acheté depuis +30 jours`);
+    conseils.push(`🏷️ **Bundling** : proposez des lots (ex: achat 3 = -10%) pour augmenter le panier moyen`);
+    r += conseils.map((c,i)=>`${i+1}. ${c}`).join('\n\n');
+    return r;
+  }
+
   // — Aide —
   if(ql.includes('aide') || ql.includes('help') || ql.includes('que peux')){
-    return `🤖 **Ce que je peux faire en mode local :**\n\n• 📦 Analyser le stock et alertes\n• 💰 Résumé des ventes du jour\n• 🏆 Top produits vendus\n• 👤 Clients et encours dettes\n• 💸 Suivi des dépenses\n• 📊 Bilan global du dashboard\n\n💡 Passez en mode **Cloud** pour des analyses plus avancées avec Claude AI !`;
+    return `🤖 **Ce que je peux faire en mode local :**\n\n• 📦 Analyser le stock et alertes\n• 💰 Résumé des ventes du jour\n• 🏆 Top produits vendus\n• 👤 Clients et encours dettes\n• 💸 Suivi des dépenses\n• 📊 Bilan global du dashboard\n• 🔔 Alertes stock (ruptures, critiques, surstock)\n• 📦 Conseils réapprovisionnement avec budget estimé\n• 📋 Rapport journalier complet\n• 💡 Conseils pour augmenter les ventes\n\n💡 Passez en mode **Cloud** pour des analyses encore plus avancées avec Claude AI !`;
   }
 
   // — Réponse générique —
-  return `🤔 Je n'ai pas trouvé de correspondance précise pour : *"${q}"*\n\nEssayez des questions comme :\n• "Quel est le stock critique ?"\n• "Ventes du jour"\n• "Résumé du dashboard"\n• "Clients avec dettes"\n\nOu activez le mode **Cloud** pour des questions en langage naturel avancé !`;
+  return `🤔 Je n'ai pas trouvé de correspondance pour : *"${q}"*\n\nEssayez :\n• "Alertes stock"\n• "Conseils réapprovisionnement"\n• "Rapport journalier"\n• "Conseils pour augmenter les ventes"\n• "Résumé du dashboard"\n\nOu activez le mode **Cloud** pour des questions libres !`;
 }
 
 // ── MODE CLOUD : Claude AI via Anthropic API ──
@@ -4603,14 +4709,32 @@ async function aiCloudAnswer(q){
 Tu réponds en français de façon concise, professionnelle et utile. Tu utilises des emojis contextuels.
 
 DONNÉES TEMPS RÉEL DE LA BOUTIQUE (${today}) :
-- Produits total : ${prods.length} | En alerte : ${crit.length}
+- Produits total : ${prods.length} | En alerte stock : ${crit.length}
+- Ruptures : ${prods.filter(p=>p.stock<=0).length} | Stock critique : ${prods.filter(p=>p.stock>0&&p.stock<=(p.min||5)).length}
 - Ventes aujourd'hui : ${vJ.length} tickets | CA : ${totJ.toLocaleString('fr')} GNF
-- Clients : ${clients.length} | Avec dettes : ${clients.filter(c=>(+c.dette||0)>0).length}
-- Dépenses enregistrées : ${depenses.length}
+- Clients : ${clients.length} | Avec dettes : ${clients.filter(c=>(+c.dette||0)>0).length} | Encours : ${clients.reduce((s,c)=>s+(+c.dette||0),0).toLocaleString('fr')} GNF
+- Dépenses enregistrées : ${depenses.length} | Total : ${depenses.reduce((s,d)=>s+(+d.montant||0),0).toLocaleString('fr')} GNF
+- Bénéfice net estimé aujourd'hui : ${(totJ - depenses.filter(d=>d.date===today).reduce((s,d)=>s+(+d.montant||0),0)).toLocaleString('fr')} GNF
 
-TOP 5 PRODUITS (stock) : ${prods.slice(0,5).map(p=>`${p.designation} (stock: ${p.stock})`).join(', ')||'aucun'}
+PRODUITS EN ALERTE : ${crit.slice(0,8).map(p=>`${p.designation} (stock:${p.stock}, min:${p.min||5})`).join(', ')||'aucun'}
+TOP 5 PRODUITS (stock) : ${prods.slice(0,5).map(p=>`${p.designation} (stock:${p.stock}, prix:${p.vente} GNF)`).join(', ')||'aucun'}
 
-Réponds en moins de 200 mots sauf si une analyse détaillée est demandée.`;
+TES CAPACITÉS :
+- Alertes stock automatiques (ruptures, critiques, surstock)
+- Conseils réapprovisionnement avec quantités et budget estimé
+- Rapport journalier complet (CA, dépenses, bénéfice, top ventes)
+- Conseils stratégiques pour augmenter les ventes et bénéfices
+- Analyse des dettes clients et stratégie de recouvrement
+- Toute question en langage naturel sur la gestion de la boutique
+- GÉNÉRATION DE FACTURE PDF enrichie avec analyse IA
+
+ACTION FACTURE PDF :
+Si l'utilisateur demande une facture, un PDF de vente, ou mentionne une référence de vente (ex: "facture VTE-2026-018", "génère la facture 18", "pdf pour Mamadou"), identifie la référence.
+Réponds avec une courte analyse de la vente, puis AJOUTE À LA FIN exactement ce tag : [ACTION:FACTURE:REF] où REF = numéro ou id trouvé.
+Exemple : facture VTE-2026-018 → inclus [ACTION:FACTURE:VTE-2026-018] à la fin.
+Si aucune référence trouvée, demande à l'utilisateur de préciser le numéro de vente.
+
+Réponds en moins de 250 mots sauf si une analyse détaillée est demandée. Sois direct et actionnable.`;
 
   // Construire historique pour contexte multi-tour (max 6 derniers)
   const msgs = aiHistory.slice(-6).map(m => ({role: m.role, content: m.content}));
@@ -4633,6 +4757,182 @@ Réponds en moins de 200 mots sauf si une analyse détaillée est demandée.`;
   }
   const data = await res.json();
   return data.content?.[0]?.text || 'Pas de réponse.';
+}
+
+
+// ══════════════════════════════════════════════════════════
+//  IA — GÉNÉRATION FACTURE PDF ENRICHIE
+// ══════════════════════════════════════════════════════════
+async function aiHandleFacture(ref, originalQuestion){
+  // Chercher la vente par num ou id
+  const ventes = D.ventes || [];
+  let vente = ventes.find(v =>
+    v.num === ref ||
+    String(v.id) === String(ref) ||
+    v.num?.toLowerCase().includes(ref.toLowerCase())
+  );
+  // Cherche aussi par client si pas trouvé
+  if(!vente && ref){
+    const clients = D.clients || [];
+    const cli = clients.find(c => c.nom?.toLowerCase().includes(ref.toLowerCase()));
+    if(cli) vente = ventes.filter(v => v.client_id === cli.id).sort((a,b)=> b.id - a.id)[0];
+  }
+  if(!vente){
+    aiAddMsg('bot', '⚠️ Vente introuvable pour la référence **' + ref + '**. Vérifiez le numéro (ex: VTE-2026-018) ou l'ID.');
+    return;
+  }
+  // Demander une analyse IA de la vente
+  aiAddMsg('bot', '⏳ Génération de la facture PDF enrichie…');
+  try {
+    const analysisPrompt = buildInvoiceAnalysisPrompt(vente);
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json','x-api-key':AI_KEY,'anthropic-version':'2023-06-01'},
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        system: 'Tu es un assistant de gestion commerciale. Génère une courte analyse professionnelle de cette vente pour la facture (3-4 lignes max). Langue : français. Pas de markdown, texte brut.',
+        messages: [{role:'user', content: analysisPrompt}]
+      })
+    });
+    const data = await res.json();
+    const analysis = data.content?.[0]?.text || '';
+    aiGenerateInvoicePDF(vente, analysis);
+    aiAddMsg('bot', '✅ Facture PDF générée avec analyse IA pour **' + vente.num + '** — ' + (vente.montant||0).toLocaleString('fr') + ' GNF');
+  } catch(e) {
+    aiGenerateInvoicePDF(vente, '');
+    aiAddMsg('bot', '✅ Facture PDF générée pour **' + vente.num + '**.');
+  }
+}
+
+function buildInvoiceAnalysisPrompt(vente){
+  const client = vente.client_id ? (D.clients||[]).find(c=>c.id===vente.client_id) : null;
+  const lignes = Array.isArray(vente.lignes) ? vente.lignes : (vente.lignes ? JSON.parse(vente.lignes) : []);
+  let txt = 'Vente N°' + vente.num + ' du ' + (vente.date||'').slice(0,10) + '
+';
+  txt += 'Montant total : ' + (vente.montant||0).toLocaleString('fr') + ' GNF
+';
+  txt += 'Mode de paiement : ' + (vente.paiement||'Espèces') + '
+';
+  if(client) txt += 'Client : ' + client.nom + (client.dette > 0 ? ' (encours dette : ' + (+client.dette).toLocaleString('fr') + ' GNF)' : '') + '
+';
+  if(lignes.length) txt += 'Articles : ' + lignes.map(l => l.produit + ' x' + l.qte + ' à ' + (l.prix||0).toLocaleString('fr') + ' GNF').join(', ');
+  txt += '
+Rédige une courte note professionnelle pour cette facture (remerciements, observations, recommandation client).';
+  return txt;
+}
+
+function aiGenerateInvoicePDF(v, aiAnalysis){
+  const {jsPDF} = window.jspdf;
+  const doc = new jsPDF();
+  const client = v.client_id ? (D.clients||[]).find(c=>c.id===v.client_id) : null;
+  const lignes = Array.isArray(v.lignes) ? v.lignes : (v.lignes ? JSON.parse(v.lignes) : []);
+
+  // ── EN-TÊTE ──
+  doc.setFillColor(15,23,42); doc.rect(0,0,210,48,'F');
+  // Badge IA
+  doc.setFillColor(59,130,246); doc.roundedRect(148,6,55,10,2,2,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7);
+  doc.text('✦ FACTURE ENRICHIE PAR IA',150.5,12.5);
+  // Titre société
+  doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.setTextColor(255,255,255);
+  doc.text('MANFRA-SHOP',14,22);
+  doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor(148,163,184);
+  doc.text('HABATECH © 2026 — Siguiri, Guinée',14,29);
+  doc.text('Tél: +224 622 000 000 | admin@habatech.com',14,35);
+  // Numéro facture
+  doc.setFontSize(18); doc.setFont('helvetica','bold'); doc.setTextColor(56,189,248);
+  doc.text('FACTURE',148,24);
+  doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor(200,215,230);
+  doc.text(v.num||'—',148,31);
+  doc.text('Date: ' + (v.date||'').slice(0,10),148,37);
+  // Séparateur
+  doc.setDrawColor(59,130,246); doc.setLineWidth(1); doc.line(0,49,210,49);
+
+  // ── INFOS CLIENT + PAIEMENT ──
+  let y = 60;
+  doc.setTextColor(30,40,60);
+  doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.text('FACTURÉ À :',14,y);
+  doc.setFont('helvetica','normal'); doc.setFontSize(8.5);
+  y += 6; doc.text(client ? client.nom : 'Client comptoir', 14, y);
+  if(client?.tel){ y+=5; doc.text('Tél: ' + client.tel, 14, y); }
+  if(client?.adresse){ y+=5; doc.text(client.adresse, 14, y); }
+  if(client?.dette > 0){
+    y+=5; doc.setTextColor(239,68,68);
+    doc.text('Encours crédit : ' + (+client.dette).toLocaleString('fr') + ' GNF', 14, y);
+    doc.setTextColor(30,40,60);
+  }
+  // Paiement (droite)
+  doc.setFont('helvetica','bold'); doc.setFontSize(9);
+  doc.text('Mode paiement :', 120, 60);
+  doc.setFont('helvetica','normal'); doc.text(v.paiement||'Espèces', 163, 60);
+  doc.text('Statut :', 120, 67);
+  doc.setTextColor(16,185,129); doc.text('✓ Finalisée', 140, 67); doc.setTextColor(30,40,60);
+
+  // ── TABLEAU ARTICLES ──
+  y = Math.max(y + 12, 90);
+  const cols = [14, 92, 120, 163];
+  doc.setFillColor(15,23,42); doc.roundedRect(13,y-5,184,9,2,2,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+  doc.text('Désignation',cols[0]+2,y);
+  doc.text('Qté',cols[1]+2,y);
+  doc.text('P.U. (GNF)',cols[2]+2,y);
+  doc.text('Total (GNF)',cols[3]+2,y);
+  y += 8; doc.setTextColor(30,40,60); doc.setFont('helvetica','normal');
+  if(lignes.length === 0){
+    doc.setFillColor(248,250,252); doc.rect(13,y-4,184,8,'F');
+    doc.setFontSize(8); doc.setTextColor(100,116,139);
+    doc.text('Voir détail en caisse — ' + (v.articles||0) + ' article(s)', cols[0]+2, y);
+    doc.text(String(v.articles||0), cols[1]+2, y);
+    doc.text('—', cols[2]+2, y);
+    doc.text((v.montant||0).toLocaleString('fr-FR'), cols[3]+2, y);
+    doc.setTextColor(30,40,60); y += 8;
+  } else {
+    lignes.forEach((l,idx)=>{
+      if(idx%2===0){doc.setFillColor(248,250,252);doc.rect(13,y-4,184,8,'F');}
+      doc.setFontSize(8.5);
+      doc.text((l.produit||l.nom||'—').substring(0,38), cols[0]+2, y);
+      doc.text(String(l.qte||1), cols[1]+2, y);
+      doc.text((l.prix||0).toLocaleString('fr-FR'), cols[2]+2, y);
+      doc.text(((l.qte||1)*(l.prix||0)).toLocaleString('fr-FR'), cols[3]+2, y);
+      y += 8;
+    });
+  }
+  doc.setDrawColor(200,210,225); doc.setLineWidth(0.3); doc.line(13,y,197,y);
+
+  // ── TOTAL ──
+  y += 7;
+  doc.setFillColor(15,23,42); doc.roundedRect(130,y-5,67,14,3,3,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(11);
+  doc.text('TOTAL TTC',133,y+2);
+  doc.setTextColor(56,189,248); doc.setFontSize(10);
+  doc.text((v.montant||0).toLocaleString('fr-FR') + ' GNF',133,y+9);
+
+  // ── ANALYSE IA ──
+  if(aiAnalysis){
+    y += 22;
+    // Fond badge IA
+    doc.setFillColor(239,246,255); doc.roundedRect(13,y-4,184,32,3,3,'F');
+    doc.setDrawColor(59,130,246); doc.setLineWidth(0.5); doc.roundedRect(13,y-4,184,32,3,3,'S');
+    doc.setFillColor(59,130,246); doc.roundedRect(14,y-2,28,7,2,2,'F');
+    doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(7);
+    doc.text('✦ ANALYSE IA',15.5,y+3);
+    y += 10;
+    doc.setTextColor(30,40,60); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+    const lines = doc.splitTextToSize(aiAnalysis, 176);
+    lines.slice(0,4).forEach(line => { doc.text(line, 16, y); y += 5.5; });
+  }
+
+  // ── PIED DE PAGE ──
+  y += 16;
+  doc.setDrawColor(200,210,225); doc.setLineWidth(0.3); doc.line(13,y,197,y); y+=5;
+  doc.setTextColor(100,116,139); doc.setFontSize(7.5); doc.setFont('helvetica','normal');
+  doc.text('Merci pour votre confiance. HABATECH — Siguiri, Guinée © 2026', 105, y, {align:'center'});
+  doc.text('Document généré automatiquement par MANFRA-SHOP avec assistance IA', 105, y+5, {align:'center'});
+
+  doc.save('Facture_IA_' + (v.num||'export') + '_' + new Date().toISOString().slice(0,10) + '.pdf');
+  toast('📄 Facture IA téléchargée', 'success');
+  logAction('CREATE','Facture IA PDF : ' + (v.num||v.id));
 }
 
 // Initialisation au chargement
