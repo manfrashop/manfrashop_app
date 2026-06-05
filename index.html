@@ -4147,7 +4147,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   <div class="bnav-item" onclick="goPage('produits',document.querySelector('[onclick*=produits]'));bnav(this)">📦<span>Produits</span></div>
   <div class="bnav-fab" onclick="openM('m-vente')">🛒</div>
   <div class="bnav-item" onclick="goPage('ventes',document.querySelector('[onclick*=ventes]'));bnav(this)">💰<span>Ventes</span></div>
-  <div class="bnav-item" onclick="openPOS()">⚡<span>POS</span></div>
+  <div class="bnav-item" onclick="toggleAI()" style="color:var(--purple)">🤖<span>IA</span></div>
 </nav>
 
 <style>
@@ -4310,19 +4310,8 @@ document.addEventListener('DOMContentLoaded',()=>{
 #ai-status-dot.err{background:var(--red);}
 
 /* Bouton flottant mobile */
-#ai-fab{
-  display:none;position:fixed;right:16px;bottom:76px;
-  width:50px;height:50px;border-radius:50%;
-  background:linear-gradient(135deg,var(--purple),var(--blue));
-  border:none;cursor:pointer;z-index:300;
-  box-shadow:0 4px 20px var(--purple-glow);
-  font-size:22px;align-items:center;justify-content:center;
-  transition:.18s;color:#fff;
-}
-#ai-fab:active{transform:scale(.92);}
 @media(max-width:768px){
   #ai-panel{width:100vw;border-left:none;}
-  #ai-fab{display:flex;}
   #ai-open-btn{display:none;}
 }
 </style>
@@ -4373,8 +4362,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   </div>
 </div>
 
-<!-- FAB mobile -->
-<button id="ai-fab" onclick="toggleAI()">🤖</button>
+
 
 <script>
 // ══════════════════════════════════════════
