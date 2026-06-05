@@ -467,17 +467,28 @@ select option{background:var(--bg2);}
     <button class="mode-select-btn sel-local" id="login-mode-local" onclick="setLoginMode('local')">💾 Local</button>
     <button class="mode-select-btn" id="login-mode-cloud" onclick="setLoginMode('cloud')">☁️ Cloud</button>
   </div>
-  <!-- CLOUD CONFIG (affiché si mode cloud) -->
-  <div id="login-cloud-cfg">
-    <label>URL Supabase</label>
-    <input id="lcfg-url" placeholder="https://xxxxx.supabase.co" oninput="syncCfgFromLogin()">
-    <label>Clé anon publique</label>
-    <input id="lcfg-key" type="password" placeholder="eyJhbGciOi..." oninput="syncCfgFromLogin()">
-    <div style="margin-top:8px;display:flex;gap:6px">
-      <button class="btn btn-outline btn-sm" style="flex:1" onclick="testLoginCloud()">🔌 Tester</button>
-      <button class="btn btn-primary btn-sm" style="flex:1" onclick="saveLoginCloud()">💾 Sauvegarder</button>
-    </div>
-    <div id="lcfg-st" style="font-size:11px;margin-top:6px;color:var(--text3)"></div>
+  <!-- CLOUD CONFIG — accès rapide via mini-modal -->
+  <div id="login-cloud-cfg" style="display:none">
+    <!-- champs masqués conservés pour compatibilité JS existant -->
+    <input type="hidden" id="lcfg-url">
+    <input type="hidden" id="lcfg-key">
+    <div id="lcfg-st"></div>
+  </div>
+  <!-- Bouton accès rapide config Supabase (affiché si mode cloud) -->
+  <div id="login-cloud-btn" style="display:none;margin-bottom:14px">
+    <button onclick="openLoginCloudModal()"
+      style="width:100%;display:flex;align-items:center;justify-content:space-between;
+             padding:10px 14px;background:var(--bg3);border:1px solid var(--border);
+             border-radius:var(--r-sm);cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif">
+      <span style="display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);font-weight:600">
+        ☁️ Configuration Supabase
+      </span>
+      <span id="login-cloud-status-dot" style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text3)">
+        <span id="login-sb-indicator" style="width:7px;height:7px;border-radius:50%;background:var(--text3);display:inline-block"></span>
+        <span id="login-sb-label">Non configuré</span>
+        <span style="color:var(--text3)">›</span>
+      </span>
+    </button>
   </div>
   <div class="fgrp"><label>Email</label><input type="email" id="l-email" value="admin@habatech.com"></div>
   <div class="fgrp"><label>Mot de passe</label><input type="password" id="l-pass" value="admin123" onkeydown="if(event.key==='Enter')doLogin()"></div>
@@ -1271,11 +1282,13 @@ function initSB(){
   // Remplir champs config admin si URL/KEY sauvegardés
   if(SB_URL){const u=document.getElementById('cfg-url');if(u)u.value=SB_URL;}
   if(SB_KEY){const k=document.getElementById('cfg-key');if(k)k.value=SB_KEY;}
-  // Remplir champs login cloud
+  // Sync champs login hidden
   if(SB_URL){const u=document.getElementById('lcfg-url');if(u)u.value=SB_URL;}
   if(SB_KEY){const k=document.getElementById('lcfg-key');if(k)k.value=SB_KEY;}
   // Appliquer le mode sauvegardé
   setLoginMode(ACCESS_MODE, false);
+  // Mettre à jour indicateur statut
+  updateLoginSBStatus();
   // Si mode cloud et URL/KEY dispos → instancier SB silencieusement
   if(ACCESS_MODE==='cloud'&&SB_URL&&SB_KEY){
     try{sb=supabase.createClient(SB_URL,SB_KEY);}catch(e){sb=null;}
@@ -1291,14 +1304,107 @@ function setLoginMode(mode, save=true){
   const bl=document.getElementById('login-mode-local'),bc=document.getElementById('login-mode-cloud');
   if(bl){bl.className='mode-select-btn'+(isCloud?'':' sel-local');}
   if(bc){bc.className='mode-select-btn'+(isCloud?' sel-cloud':'');}
-  // Panneau config cloud
-  const cfg=document.getElementById('login-cloud-cfg');
-  if(cfg)cfg.style.display=isCloud?'block':'none';
+  // Bouton accès rapide config Cloud
+  const cfgBtn=document.getElementById('login-cloud-btn');
+  if(cfgBtn)cfgBtn.style.display=isCloud?'block':'none';
+  // Mettre à jour l'indicateur de statut Supabase
+  updateLoginSBStatus();
   // Comptes démo: masquer si cloud (on utilise Supabase Auth)
   const demos=document.querySelector('.demos');
   if(demos)demos.style.display=isCloud?'none':'block';
   // Topbar toggle (si déjà connecté)
   updateModeUI();
+}
+
+function updateLoginSBStatus(){
+  const dot=document.getElementById('login-sb-indicator');
+  const lbl=document.getElementById('login-sb-label');
+  if(!dot||!lbl)return;
+  if(SB_URL&&SB_KEY){
+    dot.style.background='var(--green)';
+    lbl.textContent='Configuré ✓';
+    lbl.style.color='var(--green)';
+  } else {
+    dot.style.background='var(--orange)';
+    lbl.textContent='Non configuré';
+    lbl.style.color='var(--orange)';
+  }
+}
+
+function openLoginCloudModal(){
+  // Pré-remplir les champs du modal admin cloud depuis les valeurs sauvegardées
+  const mu=document.getElementById('m-cloud-quick');
+  if(!mu){
+    // Créer le mini-modal à la volée si pas encore dans le DOM
+    buildQuickCloudModal();
+  }
+  const u=document.getElementById('qcfg-url'),k=document.getElementById('qcfg-key');
+  if(u&&SB_URL)u.value=SB_URL;
+  if(k&&SB_KEY)k.value=SB_KEY;
+  document.getElementById('qcfg-st').textContent='';
+  document.getElementById('m-cloud-quick').classList.add('open');
+}
+
+function buildQuickCloudModal(){
+  const div=document.createElement('div');
+  div.className='overlay';div.id='m-cloud-quick';
+  div.onclick=function(e){if(e.target===div)div.classList.remove('open');};
+  div.innerHTML=`
+  <div class="modal" style="max-width:420px">
+    <div class="modal-head">
+      <h3>☁️ Configuration Supabase</h3>
+      <span class="modal-close" onclick="document.getElementById('m-cloud-quick').classList.remove('open')">×</span>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:16px;line-height:1.5">
+        Renseignez les identifiants de votre projet Supabase pour activer la synchronisation Cloud.
+      </p>
+      <div class="fgrp"><label>URL du projet</label><input id="qcfg-url" placeholder="https://xxxxx.supabase.co"></div>
+      <div class="fgrp"><label>Clé anon publique</label><input id="qcfg-key" type="password" placeholder="eyJhbGciOi..."></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="testQuickCloud()">🔌 Tester la connexion</button>
+        <button class="btn btn-primary btn-sm" onclick="saveQuickCloud()">💾 Sauvegarder</button>
+      </div>
+      <div id="qcfg-st" style="margin-top:10px;font-size:12px;color:var(--text3)"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-outline" onclick="document.getElementById('m-cloud-quick').classList.remove('open')">Fermer</button>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+
+async function testQuickCloud(){
+  const u=(document.getElementById('qcfg-url')?.value||'').trim();
+  const k=(document.getElementById('qcfg-key')?.value||'').trim();
+  const st=document.getElementById('qcfg-st');
+  if(!u||!k){st.innerHTML='<span style="color:var(--red)">⚠️ Remplissez URL et clé</span>';return;}
+  st.innerHTML='<span style="color:var(--text3)">Test en cours…</span>';
+  try{
+    const t=supabase.createClient(u,k);
+    const{error}=await t.from('produits').select('id').limit(1);
+    if(error)throw error;
+    st.innerHTML='<span style="color:var(--green)">✅ Connexion réussie !</span>';
+  }catch(e){st.innerHTML='<span style="color:var(--red)">❌ '+e.message+'</span>';}
+}
+
+function saveQuickCloud(){
+  const u=(document.getElementById('qcfg-url')?.value||'').trim();
+  const k=(document.getElementById('qcfg-key')?.value||'').trim();
+  if(!u||!k){document.getElementById('qcfg-st').innerHTML='<span style="color:var(--red)">⚠️ URL et clé requis</span>';return;}
+  SB_URL=u;SB_KEY=k;
+  localStorage.setItem('sb_url',SB_URL);localStorage.setItem('sb_key',SB_KEY);
+  // Sync avec les champs admin
+  const cu=document.getElementById('cfg-url');if(cu)cu.value=SB_URL;
+  const ck=document.getElementById('cfg-key');if(ck)ck.value=SB_KEY;
+  // Sync champs login (hidden)
+  const lu=document.getElementById('lcfg-url');if(lu)lu.value=SB_URL;
+  const lk=document.getElementById('lcfg-key');if(lk)lk.value=SB_KEY;
+  try{sb=supabase.createClient(SB_URL,SB_KEY);}catch(e){sb=null;}
+  document.getElementById('qcfg-st').innerHTML='<span style="color:var(--green)">✅ Configuration sauvegardée</span>';
+  updateLoginSBStatus();
+  toast('Configuration Cloud sauvegardée','success');
+  setTimeout(()=>{document.getElementById('m-cloud-quick')?.classList.remove('open');},1200);
 }
 
 // ── Switch mode depuis la topbar (si déjà connecté) ──
@@ -1405,6 +1511,10 @@ function syncCfgFromLogin(){
   const k=document.getElementById('lcfg-key')?.value.trim()||'';
   SB_URL=u;SB_KEY=k;
 }
+// Alias de compatibilité (anciens appels depuis login-cloud-cfg)
+function testLoginCloud(){testQuickCloud();}
+function saveLoginCloud(){saveQuickCloud();}
+
 async function testLoginCloud(){
   syncCfgFromLogin();
   if(!SB_URL||!SB_KEY){document.getElementById('lcfg-st').innerHTML='<span style="color:var(--red)">⚠️ Remplissez URL et clé</span>';return;}
