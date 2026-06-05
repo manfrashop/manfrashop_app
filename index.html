@@ -630,10 +630,8 @@ select option{background:var(--bg2);}
       <button class="mode-btn active-local" id="tb-mode-local" onclick="switchMode('local')" title="Mode Local (hors ligne)">💾 Local</button>
       <button class="mode-btn" id="tb-mode-cloud" onclick="switchMode('cloud')" title="Mode Cloud (Supabase)">☁️ Cloud</button>
     </div>
-    <button class="tbtn" onclick="openM('m-mvt')" title="F3">➕ <span class="tlabel">Mouvement</span></button>
-    <button class="tbtn" onclick="openM('m-vente')" title="F2">🛒 <span class="tlabel">Vente</span></button>
-    <button class="tbtn primary" onclick="openNewProduit()" title="F4">🆕 <span class="tlabel">Produit</span></button>
     <button class="tbtn" onclick="openPOS()" title="Mode caisse" style="background:var(--orange);border-color:var(--orange);color:#fff">⚡ <span class="tlabel">POS</span></button>
+    <button class="tbtn" id="ai-open-btn" onclick="toggleAI()" title="Assistant IA" style="background:linear-gradient(135deg,var(--purple),var(--blue));border-color:var(--purple);color:#fff;box-shadow:0 0 12px var(--purple-glow)">🤖 <span class="tlabel">IA</span></button>
   </div>
   <div class="content">
 
@@ -1326,8 +1324,8 @@ select option{background:var(--bg2);}
 // ═══════════════════════════════
 //  CONFIG & AUTH — Cloud / Local
 // ═══════════════════════════════
-let SB_URL=localStorage.getItem('sb_url')||'';
-let SB_KEY=localStorage.getItem('sb_key')||'';
+let SB_URL=localStorage.getItem('sb_url')||'https://auvwcratqtoswihhtgpu.supabase.co';
+let SB_KEY=localStorage.getItem('sb_key')||'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1dndjcmF0cXRvc3dpaGh0Z3B1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDIxOTgsImV4cCI6MjA5NjA3ODE5OH0.H6ZJ0CrPdE9NUj-K5rRIoj180q_LMHapRnYroR9rI5U';
 let sb=null, CU=null;
 // MODE: 'local' | 'cloud'
 let ACCESS_MODE=localStorage.getItem('access_mode')||'local';
@@ -2605,7 +2603,9 @@ function xPDF(){
 // ═══════════════════════════════
 //  DÉPENSES
 // ═══════════════════════════════
-const DP_CAT_LBL={achat_stock:'📦 Achat stock',salaires:'👷 Salaires',loyer:'🏠 Loyer',transport:'🚛 Transport',charges:'⚡ Charges',maintenance:'🔧 Maintenance',autre:'📋 Autre'};
+const DP_CAT_LBL={achat_stock:'Achat stock',salaires:'Salaires',loyer:'Loyer',transport:'Transport',charges:'Charges',maintenance:'Maintenance',autre:'Autre'};
+// Labels avec emojis pour l'UI uniquement
+const DP_CAT_UI={achat_stock:'📦 Achat stock',salaires:'👷 Salaires',loyer:'🏠 Loyer',transport:'🚛 Transport',charges:'⚡ Charges',maintenance:'🔧 Maintenance',autre:'📋 Autre'};
 const PGD={d:1};
 function rdDepenses(){
   const dt=document.getElementById('sd-date')?.value||'',cat=document.getElementById('sd-cat')?.value||'';
@@ -2614,7 +2614,7 @@ function rdDepenses(){
   document.getElementById('tb-dep').innerHTML=page.length?page.map(d=>`<tr>
     <td style="font-size:11px;color:var(--text3)">${d.date||'—'}</td>
     <td><b style="color:var(--text)">${d.libelle}</b></td>
-    <td><span class="tag autre">${DP_CAT_LBL[d.categorie]||d.categorie}</span></td>
+    <td><span class="tag autre">${DP_CAT_UI[d.categorie]||d.categorie}</span></td>
     <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--red)">${gnf(d.montant)}</td>
     <td style="font-size:11px">${d.paiement||'—'}</td>
     <td><code>${d.ref||'—'}</code></td>
@@ -2643,7 +2643,7 @@ function rdDepenses(){
   mc.innerHTML=page.length?page.map(d=>`<div class="mcard" style="--mc:var(--red)">
     <div class="mcard-top"><div><div class="mcard-title">${d.libelle}</div><div class="mcard-sub">${d.date}</div></div>
     <span class="tag rupture" style="font-size:13px">${gnf(d.montant)}</span></div>
-    <div class="mcard-row"><span class="mcard-lbl">Catégorie</span><span>${DP_CAT_LBL[d.categorie]||d.categorie}</span></div>
+    <div class="mcard-row"><span class="mcard-lbl">Catégorie</span><span>${DP_CAT_UI[d.categorie]||d.categorie}</span></div>
     <div class="mcard-row"><span class="mcard-lbl">Paiement</span><span class="mcard-val">${d.paiement||'—'}</span></div>
     <div class="mcard-actions">
       <button class="btn btn-outline" onclick="editDepense(${d.id})">✏️ Modifier</button>
@@ -2872,7 +2872,7 @@ function printFacture(id){
   doc.setFont('helvetica','bold');doc.setFontSize(9);doc.text('Mode de paiement: ',120,56);
   doc.setFont('helvetica','normal');doc.text(v.paiement,165,56);
   doc.text('Statut: ',120,62);
-  doc.setTextColor(16,185,129);doc.text('✓ Finalisée',140,62);doc.setTextColor(30,40,60);
+  doc.setTextColor(16,185,129);doc.text('OK Finalisee',140,62);doc.setTextColor(30,40,60);
   y=82;
   // Tableau articles
   const colW=[70,25,40,45];const cols=[15,90,118,163];
@@ -3396,7 +3396,7 @@ function xPDFJournalier(){
   // VENTES DU JOUR
   const vj=D.ventes.filter(v=>(v.date||'').startsWith(todayISO));
   const caJ=vj.reduce((s,v)=>s+v.montant,0);
-  sec('📊 VENTES DU JOUR');
+  sec('>> VENTES DU JOUR');
   row('Nombre de transactions :',String(vj.length));
   row('CA total du jour :',gnf(caJ),[16,185,129]);
   const byPay={};vj.forEach(v=>{byPay[v.paiement]=(byPay[v.paiement]||0)+v.montant;});
@@ -3405,7 +3405,7 @@ function xPDFJournalier(){
   // DÉPENSES DU JOUR
   const dj=D.depenses.filter(d=>d.date===todayISO);
   const depJ=dj.reduce((s,d)=>s+d.montant,0);
-  sec('💸 DÉPENSES DU JOUR',[239,68,68]);
+  sec('>> DEPENSES DU JOUR',[239,68,68]);
   row('Nombre de dépenses :',String(dj.length));
   row('Total dépenses du jour :',gnf(depJ),[239,68,68]);
   const byDCat={};dj.forEach(d=>{byDCat[d.categorie]=(byDCat[d.categorie]||0)+d.montant;});
@@ -3413,7 +3413,7 @@ function xPDFJournalier(){
   y+=3;doc.setDrawColor(220,225,235);doc.line(14,y,196,y);y+=6;
   // BÉNÉFICE NET
   const ben=caJ-depJ;
-  sec('📈 RÉSULTAT NET DU JOUR',[16,185,129]);
+  sec('>> RESULTAT NET DU JOUR',[16,185,129]);
   row('CA du jour :',gnf(caJ),[16,185,129]);
   row('Dépenses du jour :','-'+gnf(depJ),[239,68,68]);
   doc.setFillColor(ben>=0?16:239,ben>=0?185:68,ben>=0?129:68);doc.rect(14,y-4,182,9,'F');
@@ -3424,13 +3424,13 @@ function xPDFJournalier(){
   // ALERTES STOCK
   if(y>240){doc.addPage();y=20;}
   const alP=D.produits.filter(p=>p.etat==='rupture'||p.etat==='critique');
-  sec('🔔 ALERTES STOCK ('+alP.length+')',[245,158,11]);
+  sec('[!] ALERTES STOCK ('+alP.length+')',[245,158,11]);
   alP.forEach(p=>{if(y>270){doc.addPage();y=20;}row(p.etat.toUpperCase()+' — '+p.designation,'Stk: '+p.stock+'/'+p.min,p.etat==='rupture'?[239,68,68]:[245,158,11]);});
-  if(!alP.length)row('Aucune alerte','✓',[16,185,129]);
+  if(!alP.length)row('Aucune alerte','OK',[16,185,129]);
   y+=3;doc.setDrawColor(220,225,235);doc.line(14,y,196,y);y+=6;
   // MARGES PRODUITS
   if(y>240){doc.addPage();y=20;}
-  sec('💹 MARGES PAR PRODUIT',[59,130,246]);
+  sec('>> MARGES PAR PRODUIT',[59,130,246]);
   doc.setFont('helvetica','bold');doc.setFontSize(8);
   doc.text('Produit',20,y);doc.text('Px Achat',90,y);doc.text('Px Vente',125,y);doc.text('Marge GNF',158,y);doc.text('%',188,y);
   y+=4;doc.setLineWidth(0.3);doc.line(14,y,196,y);y+=4;
@@ -4184,5 +4184,474 @@ document.addEventListener('DOMContentLoaded',()=>{
   #timeout-warn{bottom:72px;}
 }
 </style>
+
+<!-- ══════════════════════════════════════════════ -->
+<!--  ASSISTANT IA — MANFRA-SHOP (HABATECH)        -->
+<!-- ══════════════════════════════════════════════ -->
+<style>
+/* Panneau flottant */
+#ai-panel{
+  position:fixed;right:0;bottom:0;top:0;width:380px;max-width:100vw;
+  background:var(--bg2);border-left:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:500;
+  transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
+  box-shadow:-8px 0 40px rgba(0,0,0,.4);
+}
+#ai-panel.open{transform:translateX(0);}
+#ai-header{
+  padding:14px 16px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:10px;flex-shrink:0;
+  background:linear-gradient(135deg,rgba(139,92,246,.15),rgba(59,130,246,.1));
+}
+#ai-avatar{
+  width:36px;height:36px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--purple),var(--blue));
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  box-shadow:0 0 16px var(--purple-glow);
+}
+#ai-header-info{flex:1;}
+#ai-header-title{font-size:13px;font-weight:700;color:var(--text);}
+#ai-header-sub{font-size:10px;color:var(--text3);margin-top:1px;}
+#ai-mode-row{display:flex;gap:6px;align-items:center;margin-top:2px;}
+.ai-mode-badge{
+  font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;cursor:pointer;
+  border:1px solid transparent;transition:.18s;font-family:"DM Mono",monospace;
+}
+.ai-mode-badge.local{background:rgba(16,185,129,.15);color:var(--green);border-color:rgba(16,185,129,.3);}
+.ai-mode-badge.cloud{background:rgba(59,130,246,.15);color:var(--blue);border-color:rgba(59,130,246,.3);}
+.ai-mode-badge.active{box-shadow:0 0 8px var(--purple-glow);transform:scale(1.05);}
+#ai-close{
+  width:28px;height:28px;border-radius:50%;border:1px solid var(--border);
+  background:var(--bg3);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:14px;color:var(--text2);transition:.18s;flex-shrink:0;
+}
+#ai-close:hover{background:var(--red-glow);color:var(--red);}
+#ai-messages{
+  flex:1;overflow-y:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:10px;
+}
+#ai-messages::-webkit-scrollbar{width:3px;}
+#ai-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
+.ai-msg{display:flex;gap:8px;animation:aiMsgIn .22s ease;}
+@keyframes aiMsgIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.ai-msg.user{flex-direction:row-reverse;}
+.ai-bubble{
+  max-width:80%;padding:9px 12px;border-radius:12px;font-size:12.5px;line-height:1.55;
+  word-break:break-word;
+}
+.ai-msg.user .ai-bubble{
+  background:linear-gradient(135deg,var(--purple),var(--blue));
+  color:#fff;border-bottom-right-radius:3px;
+}
+.ai-msg.bot .ai-bubble{
+  background:var(--bg3);border:1px solid var(--border);
+  color:var(--text);border-bottom-left-radius:3px;
+}
+.ai-msg .ai-ico{
+  width:26px;height:26px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:12px;
+  background:var(--bg3);border:1px solid var(--border);margin-top:2px;
+}
+.ai-msg.bot .ai-ico{background:linear-gradient(135deg,var(--purple),var(--blue));border:none;color:#fff;}
+.ai-typing{display:flex;gap:4px;align-items:center;padding:10px 14px;}
+.ai-typing span{
+  width:6px;height:6px;border-radius:50%;background:var(--purple);
+  animation:aiDot 1.2s infinite;opacity:.4;
+}
+.ai-typing span:nth-child(2){animation-delay:.2s;}
+.ai-typing span:nth-child(3){animation-delay:.4s;}
+@keyframes aiDot{0%,100%{opacity:.4;transform:scale(1);}50%{opacity:1;transform:scale(1.3);}}
+#ai-suggestions{
+  padding:8px 14px;display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0;
+}
+.ai-chip{
+  font-size:11px;padding:5px 10px;border-radius:20px;cursor:pointer;
+  background:var(--bg3);border:1px solid var(--border);color:var(--text2);
+  transition:.18s;font-family:"DM Sans",sans-serif;white-space:nowrap;
+}
+.ai-chip:hover{background:rgba(139,92,246,.2);border-color:var(--purple);color:var(--purple);}
+#ai-footer{
+  padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0;
+}
+#ai-input-row{display:flex;gap:8px;align-items:flex-end;}
+#ai-input{
+  flex:1;padding:9px 12px;border-radius:var(--r-sm);border:1px solid var(--border);
+  background:var(--bg3);color:var(--text);font-size:12.5px;font-family:"DM Sans",sans-serif;
+  resize:none;min-height:38px;max-height:100px;line-height:1.5;
+  transition:.2s;outline:none;
+}
+#ai-input:focus{border-color:var(--purple);box-shadow:0 0 0 2px var(--purple-glow);}
+#ai-send{
+  width:36px;height:36px;border-radius:var(--r-sm);
+  background:linear-gradient(135deg,var(--purple),var(--blue));
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:15px;flex-shrink:0;transition:.18s;color:#fff;
+  box-shadow:0 0 12px var(--purple-glow);
+}
+#ai-send:hover{transform:scale(1.08);}
+#ai-send:disabled{opacity:.4;cursor:not-allowed;transform:none;}
+#ai-key-row{
+  display:none;margin-top:8px;gap:8px;
+}
+#ai-key-row.visible{display:flex;}
+#ai-api-key{
+  flex:1;padding:6px 10px;border-radius:var(--r-sm);border:1px solid var(--border);
+  background:var(--bg3);color:var(--text);font-size:11px;font-family:"DM Mono",monospace;
+}
+#ai-key-save{
+  padding:6px 12px;border-radius:var(--r-sm);background:var(--purple);border:none;
+  color:#fff;font-size:11px;font-weight:700;cursor:pointer;transition:.18s;
+}
+#ai-key-save:hover{background:var(--blue);}
+#ai-status-bar{
+  font-size:10px;color:var(--text3);margin-top:6px;display:flex;align-items:center;gap:6px;
+}
+#ai-status-dot{width:5px;height:5px;border-radius:50%;background:var(--text3);}
+#ai-status-dot.ok{background:var(--green);}
+#ai-status-dot.err{background:var(--red);}
+
+/* Bouton flottant mobile */
+#ai-fab{
+  display:none;position:fixed;right:16px;bottom:76px;
+  width:50px;height:50px;border-radius:50%;
+  background:linear-gradient(135deg,var(--purple),var(--blue));
+  border:none;cursor:pointer;z-index:300;
+  box-shadow:0 4px 20px var(--purple-glow);
+  font-size:22px;align-items:center;justify-content:center;
+  transition:.18s;color:#fff;
+}
+#ai-fab:active{transform:scale(.92);}
+@media(max-width:768px){
+  #ai-panel{width:100vw;border-left:none;}
+  #ai-fab{display:flex;}
+  #ai-open-btn{display:none;}
+}
+</style>
+
+<!-- Panneau IA -->
+<div id="ai-panel">
+  <div id="ai-header">
+    <div id="ai-avatar">🤖</div>
+    <div id="ai-header-info">
+      <div id="ai-header-title">Assistant MANFRA-SHOP</div>
+      <div id="ai-mode-row">
+        <span class="ai-mode-badge local active" id="ai-badge-local" onclick="setAIMode('local')">🟢 Local</span>
+        <span class="ai-mode-badge cloud" id="ai-badge-cloud" onclick="setAIMode('cloud')">☁️ Cloud (Claude)</span>
+      </div>
+      <div id="ai-header-sub">Posez vos questions sur la boutique</div>
+    </div>
+    <div id="ai-close" onclick="toggleAI()">✕</div>
+  </div>
+
+  <div id="ai-messages">
+    <!-- messages injectés par JS -->
+  </div>
+
+  <div id="ai-suggestions">
+    <span class="ai-chip" onclick="aiAsk('Quel est le stock critique ?')">📦 Stock critique</span>
+    <span class="ai-chip" onclick="aiAsk('Ventes du jour ?')">💰 Ventes du jour</span>
+    <span class="ai-chip" onclick="aiAsk('Produits les plus vendus ?')">🏆 Top produits</span>
+    <span class="ai-chip" onclick="aiAsk('Résumé du tableau de bord')">📊 Résumé dashboard</span>
+    <span class="ai-chip" onclick="aiAsk('Dépenses ce mois ?')">💸 Dépenses</span>
+    <span class="ai-chip" onclick="aiAsk('Clients avec dettes ?')">👤 Clients dettes</span>
+  </div>
+
+  <div id="ai-footer">
+    <div id="ai-input-row">
+      <textarea id="ai-input" placeholder="Posez une question sur votre boutique…" rows="1"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();aiSend();}"
+        oninput="this.style.height='auto';this.style.height=Math.min(this.scrollHeight,100)+'px'"></textarea>
+      <button id="ai-send" onclick="aiSend()">➤</button>
+    </div>
+    <div id="ai-key-row">
+      <input type="password" id="ai-api-key" placeholder="Clé API Anthropic : sk-ant-…">
+      <button id="ai-key-save" onclick="aiSaveKey()">💾 Sauver</button>
+    </div>
+    <div id="ai-status-bar">
+      <div id="ai-status-dot"></div>
+      <span id="ai-status-txt">Mode local actif</span>
+    </div>
+  </div>
+</div>
+
+<!-- FAB mobile -->
+<button id="ai-fab" onclick="toggleAI()">🤖</button>
+
+<script>
+// ══════════════════════════════════════════
+//  ASSISTANT IA — HABATECH MANFRA-SHOP
+// ══════════════════════════════════════════
+let AI_MODE = localStorage.getItem('ai_mode') || 'local'; // 'local' | 'cloud'
+let AI_KEY  = localStorage.getItem('ai_api_key') || '';
+let AI_OPEN = false;
+let AI_BUSY = false;
+let aiHistory = []; // historique conversation
+
+function toggleAI(){
+  AI_OPEN = !AI_OPEN;
+  document.getElementById('ai-panel').classList.toggle('open', AI_OPEN);
+  if(AI_OPEN && document.getElementById('ai-messages').children.length === 0){
+    aiWelcome();
+  }
+}
+
+function setAIMode(mode){
+  AI_MODE = mode;
+  localStorage.setItem('ai_mode', mode);
+  document.getElementById('ai-badge-local').classList.toggle('active', mode==='local');
+  document.getElementById('ai-badge-cloud').classList.toggle('active', mode==='cloud');
+  const keyRow = document.getElementById('ai-key-row');
+  const dot = document.getElementById('ai-status-dot');
+  const txt = document.getElementById('ai-status-txt');
+  if(mode === 'cloud'){
+    keyRow.classList.toggle('visible', !AI_KEY);
+    if(AI_KEY){
+      dot.className=''; dot.classList.add('ok');
+      txt.textContent = 'Claude AI connecté (cloud)';
+    } else {
+      dot.className=''; dot.classList.add('err');
+      txt.textContent = 'Clé API requise pour le mode cloud';
+    }
+  } else {
+    keyRow.classList.remove('visible');
+    dot.className=''; dot.classList.add('ok');
+    txt.textContent = 'Mode local actif — analyse des données boutique';
+  }
+  aiHistory = [];
+  document.getElementById('ai-messages').innerHTML = '';
+  aiWelcome();
+}
+
+function aiSaveKey(){
+  const k = document.getElementById('ai-api-key').value.trim();
+  if(!k.startsWith('sk-ant-') && !k.startsWith('sk-')){
+    aiAddMsg('bot','⚠️ Clé invalide. Elle doit commencer par <code>sk-ant-…</code>');
+    return;
+  }
+  AI_KEY = k;
+  localStorage.setItem('ai_api_key', k);
+  document.getElementById('ai-key-row').classList.remove('visible');
+  document.getElementById('ai-status-dot').className='ok';
+  document.getElementById('ai-status-txt').textContent = 'Claude AI connecté (cloud)';
+  aiAddMsg('bot','✅ Clé sauvegardée ! Le mode Cloud est maintenant actif.');
+}
+
+function aiWelcome(){
+  const greetings = {
+    local: `👋 Bonjour ! Je suis votre assistant **local** intégré à MANFRA-SHOP.\n\nJ'analyse vos données en temps réel (stock, ventes, dépenses, clients) sans connexion internet. Posez-moi n'importe quelle question sur votre boutique !`,
+    cloud: AI_KEY
+      ? `☁️ Assistant **Claude AI** activé !\n\nJe peux analyser vos données boutique ET répondre à des questions complexes grâce à l'intelligence artificielle avancée. Comment puis-je vous aider ?`
+      : `☁️ Mode **Cloud** sélectionné.\n\nPour utiliser Claude AI, veuillez entrer votre clé API Anthropic ci-dessous. Vous pouvez l'obtenir sur [console.anthropic.com](https://console.anthropic.com).`
+  };
+  aiAddMsg('bot', greetings[AI_MODE]);
+}
+
+function aiAddMsg(role, text){
+  const wrap = document.getElementById('ai-messages');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${role}`;
+  const ico = document.createElement('div');
+  ico.className = 'ai-ico';
+  ico.textContent = role === 'bot' ? '🤖' : '👤';
+  const bubble = document.createElement('div');
+  bubble.className = 'ai-bubble';
+  // Markdown basique
+  bubble.innerHTML = text
+    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g,'<em>$1</em>')
+    .replace(/`(.*?)`/g,'<code style="background:rgba(255,255,255,.1);padding:1px 4px;border-radius:3px;font-family:\'DM Mono\',monospace;font-size:11px">$1</code>')
+    .replace(/\n/g,'<br>');
+  div.appendChild(ico);
+  div.appendChild(bubble);
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+  if(role === 'user') aiHistory.push({role:'user', content: text});
+  if(role === 'bot')  aiHistory.push({role:'assistant', content: text});
+}
+
+function aiShowTyping(){
+  const wrap = document.getElementById('ai-messages');
+  const d = document.createElement('div');
+  d.id = 'ai-typing-ind';
+  d.className = 'ai-msg bot';
+  d.innerHTML = `<div class="ai-ico">🤖</div><div class="ai-bubble ai-typing"><span></span><span></span><span></span></div>`;
+  wrap.appendChild(d);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+function aiRemoveTyping(){
+  const t = document.getElementById('ai-typing-ind');
+  if(t) t.remove();
+}
+
+function aiAsk(q){
+  document.getElementById('ai-input').value = q;
+  aiSend();
+}
+
+async function aiSend(){
+  if(AI_BUSY) return;
+  const inp = document.getElementById('ai-input');
+  const q = inp.value.trim();
+  if(!q) return;
+  inp.value = ''; inp.style.height = 'auto';
+  aiAddMsg('user', q);
+  AI_BUSY = true;
+  document.getElementById('ai-send').disabled = true;
+  aiShowTyping();
+
+  try{
+    if(AI_MODE === 'local'){
+      const reply = await aiLocalAnswer(q);
+      aiRemoveTyping();
+      aiAddMsg('bot', reply);
+    } else {
+      if(!AI_KEY){ aiRemoveTyping(); aiAddMsg('bot','⚠️ Veuillez d\'abord sauvegarder votre clé API.'); AI_BUSY=false; document.getElementById('ai-send').disabled=false; return; }
+      const reply = await aiCloudAnswer(q);
+      aiRemoveTyping();
+      aiAddMsg('bot', reply);
+    }
+  } catch(e){
+    aiRemoveTyping();
+    aiAddMsg('bot', `❌ Erreur : ${e.message}`);
+  }
+  AI_BUSY = false;
+  document.getElementById('ai-send').disabled = false;
+}
+
+// ── MODE LOCAL : analyse des données boutique ──
+async function aiLocalAnswer(q){
+  await new Promise(r => setTimeout(r, 600 + Math.random()*400));
+  const ql = q.toLowerCase();
+
+  // Récupérer données depuis le contexte de l'app
+  const prods  = (typeof PRODS  !== 'undefined') ? PRODS  : [];
+  const ventes = (typeof VENTES !== 'undefined') ? VENTES : [];
+  const clients= (typeof CLIENTS!== 'undefined') ? CLIENTS: [];
+  const depenses=(typeof DEPENSES!=='undefined')? DEPENSES:[];
+
+  // — Stock & produits —
+  if(ql.includes('stock') || ql.includes('rupture') || ql.includes('critique')){
+    const crit = prods.filter(p => p.etat === 'rupture' || p.stock <= 0);
+    const low  = prods.filter(p => p.etat === 'critique' || (p.stock > 0 && p.stock <= p.min));
+    let r = `📦 **Analyse du stock (${prods.length} produits)**\n\n`;
+    r += `• En rupture : **${crit.length}** produit${crit.length>1?'s':''}\n`;
+    r += `• Stock critique : **${low.length}** produit${low.length>1?'s':''}\n`;
+    if(crit.length > 0) r += `\n🔴 Ruptures : ${crit.slice(0,5).map(p=>`*${p.designation}*`).join(', ')}${crit.length>5?' …':''}`;
+    if(low.length > 0)  r += `\n🟠 Critiques : ${low.slice(0,5).map(p=>`*${p.designation}* (${p.stock} ${p.unite||''})`).join(', ')}${low.length>5?' …':''}`;
+    return r;
+  }
+
+  // — Ventes —
+  if(ql.includes('vente') || ql.includes('ca') || ql.includes('chiffre') || ql.includes('recette')){
+    const today = new Date().toISOString().slice(0,10);
+    const vJ = ventes.filter(v => v.date === today);
+    const totJ = vJ.reduce((s,v)=>s+(+v.montant||0), 0);
+    const totM = ventes.reduce((s,v)=>s+(+v.montant||0), 0);
+    return `💰 **Ventes**\n\n• Aujourd'hui : **${vJ.length}** vente${vJ.length>1?'s':''} — **${totJ.toLocaleString('fr')} GNF**\n• Total enregistré : **${ventes.length}** ventes — **${totM.toLocaleString('fr')} GNF**`;
+  }
+
+  // — Produits les plus vendus —
+  if(ql.includes('top') || ql.includes('plus vendu') || ql.includes('populaire')){
+    const cnt = {};
+    ventes.forEach(v => {
+      const lignes = Array.isArray(v.lignes) ? v.lignes : (v.lignes ? JSON.parse(v.lignes) : []);
+      lignes.forEach(l => { cnt[l.nom || l.designation || l.code] = (cnt[l.nom || l.designation || l.code]||0)+(+l.qte||1); });
+    });
+    const sorted = Object.entries(cnt).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    if(!sorted.length) return '🏆 Pas encore de données de vente suffisantes.';
+    return `🏆 **Top 5 produits vendus**\n\n` + sorted.map((e,i)=>`${['🥇','🥈','🥉','4️⃣','5️⃣'][i]} ${e[0]} — **${e[1]}** unités`).join('\n');
+  }
+
+  // — Clients / dettes —
+  if(ql.includes('client') || ql.includes('dette') || ql.includes('crédit')){
+    const detteurs = clients.filter(c => (+c.dette||0) > 0).sort((a,b)=>(+b.dette)-(+a.dette));
+    const totDette = detteurs.reduce((s,c)=>s+(+c.dette||0), 0);
+    let r = `👤 **Clients (${clients.length} total)**\n\n• Avec dettes : **${detteurs.length}**\n• Encours total : **${totDette.toLocaleString('fr')} GNF**`;
+    if(detteurs.length) r += `\n\n🔴 Top débiteurs :\n` + detteurs.slice(0,3).map(c=>`• ${c.nom} — **${(+c.dette).toLocaleString('fr')} GNF**`).join('\n');
+    return r;
+  }
+
+  // — Dépenses —
+  if(ql.includes('dépense') || ql.includes('charge') || ql.includes('dépenses')){
+    const today = new Date().toISOString().slice(0,10);
+    const depJ = depenses.filter(d => d.date === today);
+    const totJ = depJ.reduce((s,d)=>s+(+d.montant||0),0);
+    const totAll = depenses.reduce((s,d)=>s+(+d.montant||0),0);
+    return `💸 **Dépenses**\n\n• Aujourd'hui : **${depJ.length}** dépense${depJ.length>1?'s':''} — **${totJ.toLocaleString('fr')} GNF**\n• Total enregistré : **${totAll.toLocaleString('fr')} GNF**`;
+  }
+
+  // — Dashboard / résumé —
+  if(ql.includes('résumé') || ql.includes('tableau') || ql.includes('dashboard') || ql.includes('bilan')){
+    const today = new Date().toISOString().slice(0,10);
+    const vJ = ventes.filter(v => v.date === today);
+    const totJ = vJ.reduce((s,v)=>s+(+v.montant||0), 0);
+    const crit = prods.filter(p => p.etat==='rupture'||p.etat==='critique'||p.stock<=(p.min||5));
+    const detteurs = clients.filter(c => (+c.dette||0) > 0);
+    return `📊 **Résumé MANFRA-SHOP**\n\n💰 Ventes du jour : **${totJ.toLocaleString('fr')} GNF** (${vJ.length} ticket${vJ.length>1?'s':''})\n📦 Produits : **${prods.length}** dont **${crit.length}** en alerte stock\n👤 Clients : **${clients.length}** dont **${detteurs.length}** avec dettes\n💸 Total dépenses enregistrées : **${depenses.length}** opération${depenses.length>1?'s':''}`;
+  }
+
+  // — Aide —
+  if(ql.includes('aide') || ql.includes('help') || ql.includes('que peux')){
+    return `🤖 **Ce que je peux faire en mode local :**\n\n• 📦 Analyser le stock et alertes\n• 💰 Résumé des ventes du jour\n• 🏆 Top produits vendus\n• 👤 Clients et encours dettes\n• 💸 Suivi des dépenses\n• 📊 Bilan global du dashboard\n\n💡 Passez en mode **Cloud** pour des analyses plus avancées avec Claude AI !`;
+  }
+
+  // — Réponse générique —
+  return `🤔 Je n'ai pas trouvé de correspondance précise pour : *"${q}"*\n\nEssayez des questions comme :\n• "Quel est le stock critique ?"\n• "Ventes du jour"\n• "Résumé du dashboard"\n• "Clients avec dettes"\n\nOu activez le mode **Cloud** pour des questions en langage naturel avancé !`;
+}
+
+// ── MODE CLOUD : Claude AI via Anthropic API ──
+async function aiCloudAnswer(q){
+  // Contexte données boutique pour enrichir la réponse Claude
+  const prods   = (typeof PRODS   !== 'undefined') ? PRODS   : [];
+  const ventes  = (typeof VENTES  !== 'undefined') ? VENTES  : [];
+  const clients = (typeof CLIENTS !== 'undefined') ? CLIENTS : [];
+  const depenses= (typeof DEPENSES!== 'undefined') ? DEPENSES: [];
+
+  const today = new Date().toISOString().slice(0,10);
+  const vJ = ventes.filter(v => v.date === today);
+  const totJ = vJ.reduce((s,v)=>s+(+v.montant||0), 0);
+  const crit = prods.filter(p => p.etat==='rupture'||p.etat==='critique'||p.stock<=(p.min||5));
+
+  const systemPrompt = `Tu es l'assistant IA intégré à MANFRA-SHOP, une application de gestion de boutique développée par HABATECH pour la Guinée.
+Tu réponds en français de façon concise, professionnelle et utile. Tu utilises des emojis contextuels.
+
+DONNÉES TEMPS RÉEL DE LA BOUTIQUE (${today}) :
+- Produits total : ${prods.length} | En alerte : ${crit.length}
+- Ventes aujourd'hui : ${vJ.length} tickets | CA : ${totJ.toLocaleString('fr')} GNF
+- Clients : ${clients.length} | Avec dettes : ${clients.filter(c=>(+c.dette||0)>0).length}
+- Dépenses enregistrées : ${depenses.length}
+
+TOP 5 PRODUITS (stock) : ${prods.slice(0,5).map(p=>`${p.designation} (stock: ${p.stock})`).join(', ')||'aucun'}
+
+Réponds en moins de 200 mots sauf si une analyse détaillée est demandée.`;
+
+  // Construire historique pour contexte multi-tour (max 6 derniers)
+  const msgs = aiHistory.slice(-6).map(m => ({role: m.role, content: m.content}));
+  msgs.push({role: 'user', content: q});
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json', 'x-api-key': AI_KEY, 'anthropic-version': '2023-06-01'},
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 600,
+      system: systemPrompt,
+      messages: msgs
+    })
+  });
+
+  if(!res.ok){
+    const err = await res.json().catch(()=>({}));
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  return data.content?.[0]?.text || 'Pas de réponse.';
+}
+
+// Initialisation au chargement
+document.addEventListener('DOMContentLoaded', ()=>{
+  setAIMode(AI_MODE);
+  if(AI_KEY) document.getElementById('ai-api-key').value = AI_KEY;
+});
+</script>
 </body>
 </html>
