@@ -243,9 +243,9 @@ select option{background:var(--bg2);}
 .pos-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:12px;cursor:pointer;transition:.2s;text-align:center;}
 .pos-card:hover{border-color:var(--blue);transform:translateY(-2px);box-shadow:0 4px 16px rgba(59,130,246,.2);}
 .pos-card.rupture{opacity:.45;cursor:not-allowed;pointer-events:none;}
-.pos-card-name{font-size:12px;font-weight:600;margin-bottom:4px;line-height:1.3;}
-.pos-card-price{font-size:14px;font-weight:800;color:var(--green);font-family:"DM Mono",monospace;}
-.pos-card-stock{font-size:10px;color:var(--text3);margin-top:3px;}
+.pos-card-name{font-size:12px;font-weight:700;margin-bottom:4px;line-height:1.3;color:#F1F5F9;}
+.pos-card-price{font-size:14px;font-weight:800;color:#34EFA8;font-family:"DM Mono",monospace;letter-spacing:.5px;}
+.pos-card-stock{font-size:10.5px;font-weight:600;color:#7DD3FC;margin-top:3px;}
 /* GS */
 .gs-item{padding:9px 14px;cursor:pointer;display:flex;align-items:center;gap:10px;font-size:12.5px;border-bottom:1px solid var(--border);}
 .gs-item:last-child{border-bottom:none;}
@@ -505,8 +505,6 @@ select option{background:var(--bg2);}
       <div><div class="user-name" id="u-nm">—</div><div class="user-role" id="u-rl">—</div></div>
     </div>
     <button class="logout-btn" onclick="doLogout()">⬅️ Déconnexion</button>
-    <button class="logout-btn" style="margin-top:6px;background:var(--orange-glow);color:var(--orange);border-color:rgba(245,158,11,.3)" onclick="doReset()">🔄 Réinitialiser données</button>
-    <button class="logout-btn" id="btn-prod" style="margin-top:6px;background:rgba(16,185,129,.12);color:var(--green);border-color:rgba(16,185,129,.35)" onclick="openModalProd()">🚀 Passer en Production</button>
   </div>
 </aside>
 
@@ -589,19 +587,14 @@ select option{background:var(--bg2);}
   <section class="section" id="s-produits">
     <div class="search-bar">
       <input type="text" placeholder="🔍 Rechercher…" id="sp-q" oninput="rdProduits()">
-      <select id="sp-cat" onchange="rdProduits()">
-        <option value="">Toutes catégories</option>
-        <option value="alimentaire">🥫 Alimentaire</option>
-        <option value="electromenager">⚡ Électroménager</option>
-        <option value="accessoire">🔧 Accessoires</option>
-        <option value="autre">📦 Autres</option>
-      </select>
+      <select id="sp-cat" onchange="rdProduits()"><option value="">Toutes catégories</option></select>
       <select id="sp-etat" onchange="rdProduits()">
         <option value="">Tous états</option>
         <option value="normal">Normal</option><option value="critique">Critique</option>
         <option value="rupture">Rupture</option><option value="surstock">Surstock</option>
       </select>
       <button class="btn btn-outline" onclick="xExcel('produits')">📥 Excel</button>
+      <button class="btn btn-outline" onclick="openMCats()" title="Gérer les catégories">🏷️ Catégories</button>
       <button class="btn btn-primary" onclick="openNewProduit()">➕ Nouveau</button>
     </div>
     <div class="card mob-table">
@@ -893,6 +886,44 @@ select option{background:var(--bg2);}
         <div class="card-head"><h3>🛠️ SQL Setup Supabase</h3><button class="btn btn-outline btn-sm" onclick="cpSQL()">📋 Copier</button></div>
         <div class="card-body"><textarea id="sql-out" rows="10" style="font-family:'DM Mono',monospace;font-size:10px;resize:vertical" readonly></textarea></div>
       </div>
+
+      <!-- ZONE DANGER -->
+      <div class="card" style="grid-column:1/-1;border-color:rgba(239,68,68,.25);">
+        <div class="card-head" style="border-bottom-color:rgba(239,68,68,.2);">
+          <h3 style="color:var(--red)">⚠️ Zone de danger</h3>
+          <span style="font-size:11px;color:var(--text3)">Actions irréversibles — Admin uniquement</span>
+        </div>
+        <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+
+          <!-- Réinitialiser données démo -->
+          <div style="background:var(--orange-glow);border:1px solid rgba(245,158,11,.25);border-radius:var(--r-sm);padding:16px">
+            <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+              <span style="font-size:20px">🔄</span>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--orange)">Réinitialiser les données</div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px">Recharge les données démo par défaut</div>
+              </div>
+            </div>
+            <p style="font-size:11.5px;color:var(--text2);line-height:1.5;margin-bottom:12px">Efface toutes les ventes, produits, mouvements, clients et dépenses, puis restaure les données d'exemple du mode démo.</p>
+            <button class="btn btn-sm" style="background:var(--orange);color:#fff;border-color:var(--orange);width:100%;justify-content:center" onclick="doReset()">🔄 Réinitialiser les données démo</button>
+          </div>
+
+          <!-- Passer en production -->
+          <div style="background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.25);border-radius:var(--r-sm);padding:16px">
+            <div style="display:flex;align-items:center;gap:9px;margin-bottom:8px">
+              <span style="font-size:20px">🚀</span>
+              <div>
+                <div style="font-size:13px;font-weight:700;color:var(--green)">Passer en Production</div>
+                <div style="font-size:11px;color:var(--text3);margin-top:2px">Démarrer avec une base vierge réelle</div>
+              </div>
+            </div>
+            <p style="font-size:11.5px;color:var(--text2);line-height:1.5;margin-bottom:12px">Supprime toutes les données démo, efface la config Supabase existante et repart d'une base propre prête pour la production.</p>
+            <button class="btn btn-sm" id="btn-prod" style="background:var(--green);color:#fff;border-color:var(--green);width:100%;justify-content:center" onclick="openModalProd()">🚀 Lancer le passage en production</button>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </section>
 
@@ -990,7 +1021,7 @@ select option{background:var(--bg2);}
     <input type="hidden" id="p-id">
     <div class="fg">
       <div class="ff"><label>Désignation *</label><input id="p-des" placeholder="Ex: Riz Parfumé 25kg"></div>
-      <div><label>Catégorie *</label><select id="p-cat" onchange="togPerish()"><option value="alimentaire">🥫 Alimentaire</option><option value="electromenager">⚡ Électroménager</option><option value="accessoire">🔧 Accessoires</option><option value="autre">📦 Autres</option></select></div>
+      <div><label>Catégorie *</label><select id="p-cat" onchange="togPerish()"></select></div>
       <div><label>Unité</label><input id="p-unit" placeholder="kg, unité, carton…"></div>
       <div><label>Prix achat (GNF)</label><input type="number" id="p-achat" placeholder="0"></div>
       <div><label>Prix vente (GNF)</label><input type="number" id="p-vente" placeholder="0"></div>
@@ -1401,9 +1432,6 @@ function afterLogin(){
   document.getElementById('u-rl').textContent=CU.role;
   document.getElementById('u-av').textContent=CU.nom.charAt(0).toUpperCase();
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=CU.role==='admin'?'':'none');
-  // Bouton production : admin uniquement
-  const bp=document.getElementById('btn-prod');
-  if(bp)bp.style.display=CU.role==='admin'?'flex':'none';
   logAction('LOGIN','Connexion: '+CU.nom+' ('+CU.role+')');
   resetTimeout();
   reqNotifPerm();
@@ -1413,7 +1441,7 @@ function doLogout(){logAction('LOGOUT','Déconnexion: '+(CU?.nom||'?'));if(sb)sb
 
 function doReset(){
   if(!confirm('⚠️ Réinitialiser toutes les données ?\n\nCeci effacera ventes, produits, mouvements, dépenses, clients et retours. Les données démo seront restaurées.\n\nCette action est irréversible.'))return;
-  ['db_p','db_m','db_v','db_c','db_f','db_u','db_cl','db_dp','db_rt','db_j'].forEach(k=>localStorage.removeItem(k));
+  ['db_p','db_m','db_v','db_c','db_f','db_u','db_cl','db_dp','db_rt','db_j','db_cats'].forEach(k=>localStorage.removeItem(k));
   // Recharger la page pour réinitialiser D avec les données démo
   logAction('UPDATE','Réinitialisation complète des données');
   toast('✅ Données réinitialisées — rechargement…','success');
@@ -1459,7 +1487,7 @@ function doProdReset(){
   const newKey=(document.getElementById('prod-sb-key')?.value||'').trim();
 
   // 1. Supprimer toutes les données démo + config
-  const allKeys=['db_p','db_m','db_v','db_c','db_f','db_u','db_cl','db_dp','db_rt','db_j','sb_url','sb_key','access_mode'];
+  const allKeys=['db_p','db_m','db_v','db_c','db_f','db_u','db_cl','db_dp','db_rt','db_j','db_cats','sb_url','sb_key','access_mode'];
   allKeys.forEach(k=>localStorage.removeItem(k));
 
   // 2. Sauvegarder les nouvelles creds si fournies
@@ -1534,6 +1562,12 @@ let D={
     {id:2,nom:'Agent Caisse',email:'caissier@habatech.com',role:'caissier',statut:'actif'},
     {id:3,nom:'Magasinier 1',email:'stock@habatech.com',role:'magasinier',statut:'actif'},
   ],
+  categories:JSON.parse(localStorage.getItem('db_cats')||'null')||[
+    {id:1,slug:'alimentaire',   nom:'Alimentaire',    emoji:'🥫', couleur:'#10B981', perishable:true },
+    {id:2,slug:'electromenager',nom:'Électroménager', emoji:'⚡', couleur:'#3B82F6', perishable:false},
+    {id:3,slug:'accessoire',   nom:'Accessoires',    emoji:'🔧', couleur:'#8B5CF6', perishable:false},
+    {id:4,slug:'autre',        nom:'Autres',          emoji:'📦', couleur:'#64748B', perishable:false},
+  ],
 };
 function nid(t){return D[t].length?Math.max(...D[t].map(x=>x.id))+1:1;}
 
@@ -1549,7 +1583,7 @@ async function loadAll(){
   if(fEl)fEl.value=todayR.slice(0,7)+'-01';
   if(tEl)tEl.value=todayR;
 }
-function rdAll(){rdProduits();rdMvt();rdVentes();rdCmds();rdInv();rdAlerts();rdFourn();rdUsers();rdClients();rdJournal();rdDepenses();rdRetours();fillSelects();}
+function rdAll(){rdProduits();rdMvt();rdVentes();rdCmds();rdInv();rdAlerts();rdFourn();rdUsers();rdClients();rdJournal();rdDepenses();rdRetours();fillSelects();rdCategories();}
 
 // ═══════════════════════════════
 //  NAVIGATION
@@ -1593,8 +1627,19 @@ function goPg(t,p){const a=gf(t);PG[t]=Math.max(1,Math.min(p,Math.ceil(a.length/
 // ═══════════════════════════════
 //  RENDER HELPERS
 // ═══════════════════════════════
-const ctag=c=>c==='alimentaire'?'alim':c==='electromenager'?'elec':c==='accessoire'?'acc':'autre';
-const clbl=c=>c==='alimentaire'?'🥫 Alim.':c==='electromenager'?'⚡ Élec.':c==='accessoire'?'🔧 Acc.':'📦 Autre';
+// ── Helpers catégories dynamiques ──
+function getCat(slug){return D.categories.find(c=>c.slug===slug)||{slug,nom:slug,emoji:'📦',couleur:'#64748B',perishable:false};}
+function ctag(slug){
+  const hex=getCat(slug).couleur;
+  return 'dyn-cat-'+slug;
+}
+function clbl(slug){const c=getCat(slug);return c.emoji+' '+c.nom;}
+function catStyle(slug){
+  const c=getCat(slug);
+  return `background:${c.couleur}22;color:${c.couleur};border:1px solid ${c.couleur}55`;
+}
+// Génère le HTML d'un tag catégorie dynamique
+function catTag(slug){const c=getCat(slug);return `<span class="tag" style="${catStyle(slug)}">${c.emoji} ${c.nom}</span>`;}
 const gnf=n=>(n||0).toLocaleString('fr-FR')+' GNF';
 const fdt=d=>d?String(d).slice(0,16):'—';
 
@@ -1607,7 +1652,7 @@ function rdProduits(){
     return`<tr>
       <td><code>${p.code}</code></td>
       <td><b style="color:var(--text)">${p.designation}</b><br><span style="font-size:10.5px;color:var(--text3)">${p.unite||''}</span></td>
-      <td><span class="tag ${ctag(p.categorie)}">${clbl(p.categorie)}</span></td>
+      <td>${catTag(p.categorie)}</td>
       <td><b style="font-size:14px;font-family:'DM Mono',monospace">${p.stock}</b></td>
       <td style="min-width:76px"><div style="font-size:10px;color:var(--text3)">${pc}%</div><div class="sbar"><div class="sbar-fill" style="width:${pc}%;background:${bc}"></div></div></td>
       <td style="color:var(--text3);font-size:11px">${p.min}/${p.max}</td>
@@ -1640,7 +1685,7 @@ function rdProduits(){
       </div>
       <div class="mcard-row">
         <span class="mcard-lbl">Catégorie</span>
-        <span class="tag ${ctag(p.categorie)}">${clbl(p.categorie)}</span>
+        ${catTag(p.categorie)}
       </div>
       <div class="mcard-row">
         <span class="mcard-lbl">Stock actuel</span>
@@ -1969,7 +2014,7 @@ async function saveProduit(){
     logAction('UPDATE','Produit modifié: '+des);
     toast('Produit mis à jour','success');
   }else{
-    const code=data.categorie.substring(0,3).toUpperCase()+'-'+Date.now().toString(36).toUpperCase().slice(-4);
+    const catSlug=data.categorie||'aut';const code=catSlug.substring(0,3).toUpperCase()+'-'+Date.now().toString(36).toUpperCase().slice(-4);
     D.produits.unshift({id:nid('produits'),code,...data,etat:'rupture'});
     if(sb)await sb.from('produits').insert(D.produits[0]);
     logAction('CREATE','Produit créé: '+des);
@@ -1983,7 +2028,7 @@ async function delProd(id){
   if(sb)await sb.from('produits').delete().eq('id',id);
   sv('db_p','produits');rdProduits();updateKPIs();computeAlerts();logAction('DELETE','Produit supprimé id:'+id);toast('Produit supprimé','warning');
 }
-function togPerish(){const c=document.getElementById('p-cat').value;document.getElementById('pf').style.display=c==='alimentaire'?'grid':'none';}
+function togPerish(){const slug=document.getElementById('p-cat').value;const cat=getCat(slug);document.getElementById('pf').style.display=cat.perishable?'grid':'none';}
 
 // ═══════════════════════════════
 //  MOUVEMENTS
@@ -2835,10 +2880,10 @@ function posSearch(q){
 function posRenderGrid(prods){
   document.getElementById('pos-grid').innerHTML=prods.map(p=>`
     <div class="pos-card ${p.stock<=0?'rupture':''}" onclick="posAdd(${p.id})">
-      <div style="font-size:24px;margin-bottom:6px">${p.categorie==='alimentaire'?'🥫':p.categorie==='electromenager'?'⚡':p.categorie==='accessoire'?'🔧':'📦'}</div>
+      <div style="font-size:26px;margin-bottom:6px;filter:drop-shadow(0 0 6px rgba(255,255,255,.25))">${getCat(p.categorie).emoji}</div>
       <div class="pos-card-name">${p.designation}</div>
       <div class="pos-card-price">${gnf(p.vente)}</div>
-      <div class="pos-card-stock">${p.stock<=0?'❌ Rupture':'Stock: '+p.stock+' '+( p.unite||'u.')}</div>
+      <div class="pos-card-stock">${p.stock<=0?'<span style="color:#F87171;font-weight:700">❌ Rupture</span>':'Stock: '+p.stock+' '+(p.unite||'u.')}</div>
     </div>`).join('');
 }
 function posAdd(pid){
@@ -3040,13 +3085,121 @@ function printTicket(id){
 // ═══════════════════════════════
 //  SELECTS
 // ═══════════════════════════════
+// ═══════════════════════════════
+//  CRUD CATÉGORIES
+// ═══════════════════════════════
+function rdCategories(){
+  const list=document.getElementById('cat-list');
+  if(!list)return;
+  const CHART_COLORS=['#10B981','#3B82F6','#8B5CF6','#F59E0B','#EF4444','#38BDF8','#F472B6','#A3E635','#FB923C','#A78BFA'];
+  list.innerHTML=D.categories.map((c,i)=>{
+    const nb=D.produits.filter(p=>p.categorie===c.slug).length;
+    return`<div style="display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:10px 14px">
+      <span style="font-size:22px;width:30px;text-align:center">${c.emoji}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13px;color:var(--text)">${c.nom}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:1px"><code style="font-size:10px">${c.slug}</code> &nbsp;·&nbsp; ${nb} produit${nb!==1?'s':''} &nbsp;·&nbsp; ${c.perishable?'<span style="color:var(--green)">périssable</span>':'non périssable'}</div>
+      </div>
+      <div style="width:14px;height:14px;border-radius:50%;background:${c.couleur};flex-shrink:0"></div>
+      <button class="btn btn-outline btn-sm" onclick="editCat(${c.id})">✏️</button>
+      <button class="btn btn-danger btn-sm" onclick="delCat(${c.id})" ${nb>0?'title="Impossible : des produits utilisent cette catégorie" style="opacity:.4;pointer-events:none"':''}}>🗑️</button>
+    </div>`;
+  }).join('')||'<div class="empty"><div class="ico">🏷️</div><p>Aucune catégorie</p></div>';
+}
+
+function openMCats(){
+  resetCatForm();
+  rdCategories();
+  openM('m-categories');
+}
+
+function resetCatForm(){
+  document.getElementById('cat-edit-id').value='';
+  document.getElementById('cat-emoji').value='';
+  document.getElementById('cat-nom').value='';
+  document.getElementById('cat-slug').value='';
+  document.getElementById('cat-color').value='#3B82F6';
+  document.getElementById('cat-perishable').checked=false;
+  document.getElementById('cat-form-title').textContent='➕ Nouvelle catégorie';
+  document.getElementById('cat-cancel-btn').style.display='none';
+}
+
+function editCat(id){
+  const c=D.categories.find(x=>x.id===id);if(!c)return;
+  document.getElementById('cat-edit-id').value=id;
+  document.getElementById('cat-emoji').value=c.emoji;
+  document.getElementById('cat-nom').value=c.nom;
+  document.getElementById('cat-slug').value=c.slug;
+  document.getElementById('cat-color').value=c.couleur||'#3B82F6';
+  document.getElementById('cat-perishable').checked=!!c.perishable;
+  document.getElementById('cat-form-title').textContent='✏️ Modifier : '+c.nom;
+  document.getElementById('cat-cancel-btn').style.display='';
+}
+
+function saveCat(){
+  const nom=(document.getElementById('cat-nom').value||'').trim();
+  let slug=(document.getElementById('cat-slug').value||'').trim().toLowerCase().replace(/[^a-z0-9_]/g,'');
+  const emoji=document.getElementById('cat-emoji').value.trim()||'📦';
+  const couleur=document.getElementById('cat-color').value||'#3B82F6';
+  const perishable=document.getElementById('cat-perishable').checked;
+  const editId=+document.getElementById('cat-edit-id').value||0;
+
+  if(!nom){toast('Nom de catégorie requis','error');return;}
+  if(!slug)slug=nom.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_');
+
+  // Vérifier unicité du slug
+  const dupSlug=D.categories.find(c=>c.slug===slug&&c.id!==editId);
+  if(dupSlug){toast('Ce slug existe déjà : '+slug,'error');return;}
+
+  if(editId){
+    const i=D.categories.findIndex(c=>c.id===editId);
+    if(i>=0)D.categories[i]={...D.categories[i],nom,slug,emoji,couleur,perishable};
+    toast('Catégorie "'+nom+'" modifiée','success');
+    logAction('UPDATE','Catégorie modifiée: '+nom);
+  } else {
+    D.categories.push({id:nid('categories'),nom,slug,emoji,couleur,perishable});
+    toast('Catégorie "'+nom+'" créée','success');
+    logAction('CREATE','Catégorie créée: '+nom);
+  }
+  localStorage.setItem('db_cats',JSON.stringify(D.categories));
+  resetCatForm();
+  rdCategories();
+  fillCatSelects();
+  initDashCharts();
+}
+
+function delCat(id){
+  const c=D.categories.find(x=>x.id===id);if(!c)return;
+  const nb=D.produits.filter(p=>p.categorie===c.slug).length;
+  if(nb>0){toast('Impossible : '+nb+' produit(s) utilisent cette catégorie','error');return;}
+  if(!confirm('Supprimer la catégorie "'+c.nom+'" ?'))return;
+  D.categories=D.categories.filter(x=>x.id!==id);
+  localStorage.setItem('db_cats',JSON.stringify(D.categories));
+  rdCategories();
+  fillCatSelects();
+  initDashCharts();
+  toast('Catégorie supprimée','warning');
+  logAction('DELETE','Catégorie supprimée: '+c.nom);
+}
+
 function fillSelects(){
   fillClientSelects();
+  fillCatSelects();
   const opts=D.produits.map(p=>`<option value="${p.id}">${p.designation}</option>`).join('');
   document.getElementById('mv-prod').innerHTML=opts;
   document.getElementById('vl-prod').innerHTML=D.produits.map(p=>`<option value="${p.id}">${p.designation} — ${gnf(p.vente)}</option>`).join('');
   document.getElementById('p-fourn').innerHTML='<option value="">— Sélectionner —</option>'+D.fournisseurs.map(f=>`<option value="${f.nom}">${f.nom}</option>`).join('');
   document.getElementById('c-fourn').innerHTML=D.fournisseurs.map(f=>`<option value="${f.nom}">${f.nom}</option>`).join('');
+}
+function fillCatSelects(){
+  const opts=D.categories.map(c=>`<option value="${c.slug}">${c.emoji} ${c.nom}</option>`).join('');
+  const allOpt='<option value="">Toutes catégories</option>'+opts;
+  // Filtre produits
+  const spCat=document.getElementById('sp-cat');
+  if(spCat)spCat.innerHTML=allOpt;
+  // Formulaire produit
+  const pCat=document.getElementById('p-cat');
+  if(pCat){const prev=pCat.value;pCat.innerHTML=opts;if(prev)pCat.value=prev;}
 }
 
 // ═══════════════════════════════
@@ -3071,10 +3224,11 @@ function initDashCharts(){
   }
   const c2=document.getElementById('ch-cat');
   if(c2){
-    const cats=['alimentaire','electromenager','accessoire','autre'];
-    const vals=cats.map(c=>D.produits.filter(p=>p.categorie===c).reduce((s,p)=>s+p.stock*p.achat,0));
-    DC.cat=new Chart(c2,{type:'doughnut',data:{labels:['Alimentaire','Électroménager','Accessoires','Autres'],
-      datasets:[{data:vals.some(d=>d>0)?vals:[58,21,15,6],backgroundColor:['#10B981','#3B82F6','#8B5CF6','#64748B'],borderWidth:0,hoverOffset:5}]},
+    const cats=D.categories;
+    const vals=cats.map(c=>D.produits.filter(p=>p.categorie===c.slug).reduce((s,p)=>s+p.stock*p.achat,0));
+    const hasData=vals.some(v=>v>0);
+    DC.cat=new Chart(c2,{type:'doughnut',data:{labels:cats.map(c=>c.emoji+' '+c.nom),
+      datasets:[{data:hasData?vals:cats.map(()=>Math.random()*30+10),backgroundColor:cats.map(c=>c.couleur),borderWidth:0,hoverOffset:5}]},
       options:{...go,plugins:{legend:{position:'bottom',labels:{color:'#94A3B8',font:{size:11}}}}}});
   }
 }
@@ -3226,11 +3380,10 @@ function initRptCharts(vP,dP,mP){
   // 1. Valorisation catégories (réelle)
   const c1=document.getElementById('ch-val');
   if(c1){
-    const cats=['alimentaire','electromenager','accessoire','autre'];
-    const labs=['Alimentaire','Élec.','Access.','Autres'];
-    const vals=cats.map(c=>Math.round(D.produits.filter(p=>p.categorie===c).reduce((s,p)=>s+p.stock*p.achat,0)));
-    RC.val=new Chart(c1,{type:'bar',data:{labels:labs,
-      datasets:[{label:'Valeur stock (GNF)',data:vals,backgroundColor:['rgba(16,185,129,.7)','rgba(59,130,246,.7)','rgba(139,92,246,.7)','rgba(100,116,139,.7)'],borderRadius:6}]},
+    const cats=D.categories;
+    const vals=cats.map(c=>Math.round(D.produits.filter(p=>p.categorie===c.slug).reduce((s,p)=>s+p.stock*p.achat,0)));
+    RC.val=new Chart(c1,{type:'bar',data:{labels:cats.map(c=>c.emoji+' '+c.nom),
+      datasets:[{label:'Valeur stock (GNF)',data:vals,backgroundColor:cats.map(c=>c.couleur+'BB'),borderRadius:6}]},
       options:{...go,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748B'},grid:{color:'rgba(255,255,255,.04)'}},y:{beginAtZero:true,ticks:{color:'#64748B',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v},grid:{color:'rgba(255,255,255,.04)'}}}}});
   }
 
@@ -3435,6 +3588,59 @@ document.addEventListener('DOMContentLoaded',()=>{
     <button class="btn btn-primary" onclick="saveRetour()">✅ Valider le retour</button>
   </div>
 </div></div>
+
+<!-- CATÉGORIES -->
+<div class="overlay" id="m-categories" onclick="closeOnBg(event,'m-categories')">
+<div class="modal modal-lg">
+  <div class="modal-head">
+    <h3>🏷️ Gestion des Catégories</h3>
+    <span class="modal-close" onclick="closeM('m-categories')">×</span>
+  </div>
+  <div class="modal-body" style="padding:20px">
+
+    <!-- Formulaire ajout / édition -->
+    <div id="cat-form-wrap" style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);padding:14px;margin-bottom:18px">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px" id="cat-form-title">➕ Nouvelle catégorie</div>
+      <input type="hidden" id="cat-edit-id">
+      <div style="display:grid;grid-template-columns:56px 1fr 1fr 44px auto;gap:10px;align-items:end;flex-wrap:wrap">
+        <div>
+          <label>Emoji</label>
+          <input id="cat-emoji" placeholder="🏷️" maxlength="4" style="text-align:center;font-size:18px;padding:7px 4px">
+        </div>
+        <div>
+          <label>Nom *</label>
+          <input id="cat-nom" placeholder="Ex: Téléphonie">
+        </div>
+        <div>
+          <label>Slug (identifiant)</label>
+          <input id="cat-slug" placeholder="Ex: telephonie" oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
+        </div>
+        <div>
+          <label>Couleur</label>
+          <input type="color" id="cat-color" value="#3B82F6" style="padding:3px 4px;height:38px;width:44px;cursor:pointer">
+        </div>
+        <div style="display:flex;gap:6px;padding-bottom:1px">
+          <button class="btn btn-primary" onclick="saveCat()">💾</button>
+          <button class="btn btn-outline" onclick="resetCatForm()" id="cat-cancel-btn" style="display:none">✕</button>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;align-items:center;gap:8px">
+        <label style="margin:0;font-size:12px;color:var(--text2);cursor:pointer;display:flex;align-items:center;gap:6px">
+          <input type="checkbox" id="cat-perishable" style="width:auto;margin:0;padding:0;accent-color:var(--green)">
+          Produits périssables (affiche champs DLC / température)
+        </label>
+      </div>
+    </div>
+
+    <!-- Liste des catégories -->
+    <div id="cat-list" style="display:flex;flex-direction:column;gap:8px"></div>
+
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-outline" onclick="closeM('m-categories')">Fermer</button>
+  </div>
+</div>
+</div>
 
 <!-- BARCODE / QR -->
 <div class="overlay" id="m-barcode" onclick="closeOnBg(event,'m-barcode')">
