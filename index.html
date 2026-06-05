@@ -439,9 +439,28 @@ select option{background:var(--bg2);}
 <div id="login-screen">
 <div class="login-card">
   <div class="login-logo">
-    <div class="ico"><svg width="32" height="32" viewBox="0 0 32 32"><text x="50%" y="72%" text-anchor="middle" font-family="DM Sans,sans-serif" font-weight="800" font-size="15" fill="white">MS</text></svg></div>
-    <h2>MANFRA-SHOP</h2>
-    <p>HABATECH &copy; 2026</p>
+    <div class="ico" style="background:none;box-shadow:none;border-radius:0"><svg width="52" height="52" viewBox="0 0 52 52" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ig2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB"/><stop offset="100%" stop-color="#1E40AF"/>
+    </linearGradient>
+    <linearGradient id="gg2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#FBBF24"/>
+    </linearGradient>
+    <filter id="glow2"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="52" height="52" rx="13" fill="url(#ig2)" filter="url(#glow2)"/>
+  <rect x="0" y="0" width="52" height="52" rx="13" fill="none" stroke="#3B82F6" stroke-width="1.2" opacity="0.6"/>
+  <rect x="0" y="10" width="3.5" height="32" rx="1.75" fill="url(#gg2)" opacity="0.9"/>
+  <path d="M11 40 L11 15 L26 28 L41 15 L41 40" fill="none" stroke="#F1F5F9" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="11" y1="44.5" x2="41" y2="44.5" stroke="url(#gg2)" stroke-width="2.5" stroke-linecap="round"/>
+  <circle cx="10" cy="10" r="2" fill="#FBBF24" opacity="0.7"/>
+  <circle cx="42" cy="10" r="2" fill="#FBBF24" opacity="0.7"/>
+  <circle cx="42" cy="42" r="2" fill="#FBBF24" opacity="0.5"/>
+  <circle cx="10" cy="42" r="2" fill="#FBBF24" opacity="0.5"/>
+</svg></div>
+    <h2 style="letter-spacing:2px">MANFRA-SHOP</h2>
+    <p style="color:#F59E0B;font-weight:600;letter-spacing:3px;font-size:11px">HABATECH &copy; 2026</p>
   </div>
   <!-- MODE SELECTOR -->
   <div class="mode-select-bar">
@@ -478,8 +497,24 @@ select option{background:var(--bg2);}
 <aside id="sidebar">
   <button id="sb-close" onclick="closeSB()">✕</button>
   <div class="brand">
-    <div class="brand-logo"><svg width="22" height="22" viewBox="0 0 22 22"><text x="50%" y="74%" text-anchor="middle" font-family="DM Sans,sans-serif" font-weight="800" font-size="11" fill="white">MS</text></svg></div>
-    <div><div class="brand-text">MANFRA-SHOP</div><div class="brand-sub">HABATECH v2.0</div></div>
+    <div class="brand-logo"><svg width="22" height="22" viewBox="0 0 44 44" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ig" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2563EB"/><stop offset="100%" stop-color="#1E40AF"/>
+    </linearGradient>
+    <linearGradient id="gg" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F59E0B"/><stop offset="100%" stop-color="#FBBF24"/>
+    </linearGradient>
+  </defs>
+  <rect width="44" height="44" rx="10" fill="url(#ig)"/>
+  <rect x="0" y="0" width="44" height="44" rx="10" fill="none" stroke="#3B82F6" stroke-width="1" opacity="0.5"/>
+  <rect x="0" y="8" width="3" height="28" rx="1.5" fill="url(#gg)" opacity="0.9"/>
+  <path d="M9 34 L9 13 L22 24 L35 13 L35 34" fill="none" stroke="#F1F5F9" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <line x1="9" y1="37" x2="35" y2="37" stroke="url(#gg)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="8" cy="8" r="1.5" fill="#FBBF24" opacity="0.7"/>
+  <circle cx="36" cy="8" r="1.5" fill="#FBBF24" opacity="0.7"/>
+</svg></div>
+    <div><div class="brand-text">MANFRA-SHOP</div><div class="brand-sub" style="color:#F59E0B;font-weight:700;letter-spacing:.5px">HABATECH</div></div>
   </div>
   <nav>
     <div class="nav-section">Principal</div>
