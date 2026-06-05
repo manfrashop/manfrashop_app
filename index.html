@@ -1458,7 +1458,7 @@ let SB_URL=localStorage.getItem('sb_url')||'https://auvwcratqtoswihhtgpu.supabas
 let SB_KEY=localStorage.getItem('sb_key')||'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImF1dndjcmF0cXRvc3dpaGh0Z3B1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1MDIxOTgsImV4cCI6MjA5NjA3ODE5OH0.H6ZJ0CrPdE9NUj-K5rRIoj180q_LMHapRnYroR9rI5U';
 let sb=null, CU=null;
 // MODE: 'local' | 'cloud'
-let ACCESS_MODE=localStorage.getItem('access_mode')||'local';
+let ACCESS_MODE=localStorage.getItem('access_mode')||'cloud';
 
 const DEMOS=[
   {email:'admin@habatech.com',pass:'admin123',nom:'Honoris HABA',role:'admin'},
@@ -1475,7 +1475,10 @@ function initSB(){
   if(SB_URL){const u=document.getElementById('lcfg-url');if(u)u.value=SB_URL;}
   if(SB_KEY){const k=document.getElementById('lcfg-key');if(k)k.value=SB_KEY;}
   // Appliquer le mode sauvegardé
-  setLoginMode(ACCESS_MODE, false);
+  // Forcer Cloud au démarrage
+  ACCESS_MODE="cloud";
+  localStorage.setItem("access_mode","cloud");
+  setLoginMode("cloud", false);
   // Mettre à jour indicateur statut
   updateLoginSBStatus();
   // Si mode cloud et URL/KEY dispos → instancier SB silencieusement
@@ -1652,7 +1655,7 @@ function hideSync(){document.getElementById('sync-overlay').classList.remove('op
 async function syncFromCloud(){
   if(!sb)return;
   const ts=['produits','mouvements','ventes','commandes','fournisseurs','utilisateurs','clients','depenses','retours'];
-  const rs=await Promise.all(ts.map(t=>sb.from(t).select('*').catch(()=>({data:null,error:true}))));
+  const rs=await Promise.all(ts.map(async t=>{try{return await sb.from(t).select('*');}catch(e){return {data:null,error:true};}}));
   const keyMap={produits:'db_p',mouvements:'db_m',ventes:'db_v',commandes:'db_c',fournisseurs:'db_f',utilisateurs:'db_u',clients:'db_cl',depenses:'db_dp',retours:'db_rt'};
   ts.forEach((t,i)=>{if(!rs[i].error&&rs[i].data&&rs[i].data.length){D[t]=rs[i].data;localStorage.setItem(keyMap[t],JSON.stringify(D[t]));}});
   recalcEtats();rdAll();computeAlerts();updateKPIs();initDashCharts();
@@ -1722,11 +1725,11 @@ function saveLoginCloud(){
 }
 
 // ── sv() : sauvegarde selon mode ──
-function sv(k,t){
+async function sv(k,t){
   localStorage.setItem(k,JSON.stringify(D[t]));
   // Si mode cloud → upsert async silencieux
   if(sb&&ACCESS_MODE==='cloud'){
-    sb.from(t).upsert(D[t],{onConflict:'id'}).catch(()=>{});
+    try{await sb.from(t).upsert(D[t],{onConflict:'id'});}catch(e){}
   }
 }
 
@@ -1845,55 +1848,17 @@ function doProdReset(){
 //  DATA
 // ═══════════════════════════════
 let D={
-  produits:JSON.parse(localStorage.getItem('db_p')||'null')||[
-    {id:1,code:'RIZ-25K',designation:'Riz Parfumé 25kg',categorie:'alimentaire',unite:'sac',stock:12,min:10,max:80,achat:95000,vente:120000,etat:'critique',fournisseur:'SOGUIDIS Conakry',description:''},
-    {id:2,code:'HUI-5L',designation:'Huile Végétale 5L',categorie:'alimentaire',unite:'bidon',stock:0,min:8,max:50,achat:38000,vente:45000,etat:'rupture',fournisseur:'SOGUIDIS Conakry',description:''},
-    {id:3,code:'SUC-1K',designation:'Sucre Cristal 1kg',categorie:'alimentaire',unite:'kg',stock:45,min:20,max:200,achat:14000,vente:18000,etat:'normal',fournisseur:'CFAO Distribution',description:''},
-    {id:4,code:'VEN-3P',designation:'Ventilateur 3 pales',categorie:'electromenager',unite:'unité',stock:7,min:5,max:30,achat:120000,vente:165000,etat:'normal',fournisseur:'CFAO Distribution',description:''},
-    {id:5,code:'SAV-400',designation:'Savon Bloc 400g',categorie:'accessoire',unite:'bloc',stock:320,min:50,max:300,achat:8000,vente:12000,etat:'surstock',fournisseur:'Fournisseur Local',description:''},
-    {id:6,code:'FAR-1K',designation:'Farine de Blé 1kg',categorie:'alimentaire',unite:'kg',stock:28,min:15,max:100,achat:12000,vente:16000,etat:'normal',fournisseur:'SOGUIDIS Conakry',description:''},
-    {id:7,code:'REF-250',designation:'Réfrigérateur 250L',categorie:'electromenager',unite:'unité',stock:3,min:2,max:10,achat:1800000,vente:2400000,etat:'normal',fournisseur:'CFAO Distribution',description:''},
-    {id:8,code:'PIL-AA',designation:'Piles AA (pack 4)',categorie:'accessoire',unite:'pack',stock:95,min:20,max:150,achat:15000,vente:22000,etat:'normal',fournisseur:'Fournisseur Local',description:''},
-  ],
-  mouvements:JSON.parse(localStorage.getItem('db_m')||'null')||[
-    {id:1,date:'2026-06-04 14:32',type:'sortie',produit_id:1,produit:'Riz Parfumé 25kg',qte:5,ref:'VTE-001',user:'Caissier'},
-    {id:2,date:'2026-06-04 13:10',type:'entree',produit_id:3,produit:'Sucre Cristal 1kg',qte:50,ref:'BON-2026-042',user:'Magasinier'},
-    {id:3,date:'2026-06-04 11:45',type:'perte',produit_id:3,produit:'Sucre Cristal 1kg',qte:2,ref:'PERTE-006',user:'Gestionnaire'},
-    {id:4,date:'2026-06-04 09:20',type:'sortie',produit_id:2,produit:'Huile Végétale 5L',qte:8,ref:'VTE-002',user:'Caissier'},
-    {id:5,date:'2026-06-03 17:00',type:'transfert',produit_id:5,produit:'Savon Bloc 400g',qte:100,ref:'TRF-012',user:'Magasinier'},
-  ],
-  ventes:JSON.parse(localStorage.getItem('db_v')||'null')||[
-    {id:1,num:'VTE-2026-018',date:'2026-06-05 14:32',articles:3,montant:245000,paiement:'Espèces',statut:'finalisee',lignes:[{produit:'Riz Parfumé 25kg',qte:2,prix:120000}]},
-    {id:2,num:'VTE-2026-017',date:'2026-06-05 13:15',articles:1,montant:120000,paiement:'Orange Money',statut:'finalisee',lignes:[]},
-    {id:3,num:'VTE-2026-016',date:'2026-06-05 11:50',articles:5,montant:380000,paiement:'MTN Money',statut:'finalisee',lignes:[]},
-    {id:4,num:'VTE-2026-015',date:'2026-06-04 09:30',articles:2,montant:90000,paiement:'Espèces',statut:'finalisee',lignes:[]},
-  ],
-  commandes:JSON.parse(localStorage.getItem('db_c')||'null')||[
-    {id:1,num:'CMD-2026-008',fourn:'SOGUIDIS Conakry',date:'2026-06-01',prevue:'2026-06-05',montant:1850000,statut:'confirmee'},
-    {id:2,num:'CMD-2026-007',fourn:'CFAO Distribution',date:'2026-05-28',prevue:'2026-06-02',montant:960000,statut:'livree'},
-  ],
-  fournisseurs:JSON.parse(localStorage.getItem('db_f')||'null')||[
-    {id:1,nom:'SOGUIDIS Conakry',pays:'Guinée',delai:3,tel:'+224 622 000 001'},
-    {id:2,nom:'CFAO Distribution',pays:'Guinée',delai:5,tel:'+224 622 000 002'},
-    {id:3,nom:'Fournisseur Local',pays:'Siguiri',delai:1,tel:'+224 622 000 003'},
-  ],
-  clients:JSON.parse(localStorage.getItem('db_cl')||'null')||[
-    {id:1,nom:'Mamadou Diallo',tel:'+224 622 111 001',adresse:'Siguiri Centre',dette:85000,created_at:'2026-05-10'},
-    {id:2,nom:'Fatoumata Camara',tel:'+224 622 111 002',adresse:'Quartier Gbèdè',dette:0,created_at:'2026-05-20'},
-  ],
-  depenses:JSON.parse(localStorage.getItem('db_dp')||'null')||[
-    {id:1,date:'2026-06-05',libelle:'Achat riz SOGUIDIS',categorie:'achat_stock',montant:570000,paiement:'Espèces',ref:'FAC-2026-089',notes:'',user:'Honoris HABA'},
-    {id:2,date:'2026-06-05',libelle:'Carburant livraison',categorie:'transport',montant:85000,paiement:'Espèces',ref:'',notes:'',user:'Honoris HABA'},
-    {id:3,date:'2026-06-04',libelle:'Salaire journalier magasinier',categorie:'salaires',montant:120000,paiement:'Orange Money',ref:'',notes:'',user:'Honoris HABA'},
-  ],
+  produits:JSON.parse(localStorage.getItem('db_p')||'null')||[],
+  mouvements:JSON.parse(localStorage.getItem('db_m')||'null')||[],
+  ventes:JSON.parse(localStorage.getItem('db_v')||'null')||[],
+  commandes:JSON.parse(localStorage.getItem('db_c')||'null')||[],
+  fournisseurs:JSON.parse(localStorage.getItem('db_f')||'null')||[],
+  clients:JSON.parse(localStorage.getItem('db_cl')||'null')||[],
+  depenses:JSON.parse(localStorage.getItem('db_dp')||'null')||[],
   retours:JSON.parse(localStorage.getItem('db_rt')||'null')||[],
-  journal:JSON.parse(localStorage.getItem('db_j')||'null')||[
-    {id:1,date:'2026-06-05 08:00',action:'LOGIN',detail:'Connexion admin',user:'Honoris HABA',ip:'192.168.1.1'},
-  ],
+  journal:JSON.parse(localStorage.getItem('db_j')||'null')||[],
   utilisateurs:JSON.parse(localStorage.getItem('db_u')||'null')||[
     {id:1,nom:'Honoris HABA',email:'admin@habatech.com',role:'admin',statut:'actif'},
-    {id:2,nom:'Agent Caisse',email:'caissier@habatech.com',role:'caissier',statut:'actif'},
-    {id:3,nom:'Magasinier 1',email:'stock@habatech.com',role:'magasinier',statut:'actif'},
   ],
   categories:JSON.parse(localStorage.getItem('db_cats')||'null')||[
     {id:1,slug:'alimentaire',   nom:'Alimentaire',    emoji:'🥫', couleur:'#10B981', perishable:true },
@@ -2833,7 +2798,7 @@ function toggleUserStatut(id){
   const u=D.utilisateurs.find(x=>x.id===id);if(!u)return;
   if(CU&&CU.email===u.email){toast('Impossible de modifier votre propre statut','error');return;}
   u.statut=u.statut==='inactif'?'actif':'inactif';
-  if(ACCESS_MODE==='cloud'&&sb)sb.from('utilisateurs').update({statut:u.statut}).eq('id',id).catch(()=>{});
+  if(ACCESS_MODE==='cloud'&&sb)sb.from('utilisateurs').update({statut:u.statut}).eq('id',id).then(()=>{}).catch(()=>{});
   sv('db_u','utilisateurs');rdUsers();
   logAction('UPDATE','Statut utilisateur: '+u.nom+' → '+u.statut);
   toast(u.nom+' — '+u.statut,'success');
@@ -2843,7 +2808,7 @@ function delUser(id){
   if(CU&&CU.email===u.email){toast('Impossible de supprimer votre propre compte','error');return;}
   if(!confirm('Supprimer '+u.nom+' ? Cette action est irréversible.'))return;
   D.utilisateurs=D.utilisateurs.filter(x=>x.id!==id);
-  if(ACCESS_MODE==='cloud'&&sb)sb.from('utilisateurs').delete().eq('id',id).catch(()=>{});
+  if(ACCESS_MODE==='cloud'&&sb)sb.from('utilisateurs').delete().eq('id',id).then(()=>{}).catch(()=>{});
   sv('db_u','utilisateurs');rdUsers();
   logAction('DELETE','Utilisateur supprimé: '+u.nom);
   toast('Utilisateur supprimé','success');
@@ -2998,7 +2963,7 @@ async function saveDepense(){
   if(id){const i=D.depenses.findIndex(x=>x.id==id);if(i>=0)D.depenses[i]={...D.depenses[i],...data};logAction('UPDATE','Dépense modifiée: '+lib);}
   else{D.depenses.unshift({id:nid('depenses'),...data});logAction('CREATE','Dépense: '+lib+' '+gnf(mnt));}
   localStorage.setItem('db_dp',JSON.stringify(D.depenses));
-  if(sb&&ACCESS_MODE==='cloud')sb.from('depenses').upsert(D.depenses,{onConflict:'id'}).catch(()=>{});
+  if(sb&&ACCESS_MODE==='cloud')sb.from('depenses').upsert(D.depenses,{onConflict:'id'}).then(()=>{}).catch(()=>{});
   closeM('m-depense');rdDepenses();toast('Dépense enregistrée','success');
 }
 function delDepense(id){
@@ -3115,7 +3080,7 @@ async function saveRetour(){
     notes:document.getElementById('ret-note').value,statut:'en_attente',user:CU?.nom||'Admin'};
   D.retours.unshift(nr);
   localStorage.setItem('db_rt',JSON.stringify(D.retours));
-  if(sb&&ACCESS_MODE==='cloud')sb.from('retours').insert(nr).catch(()=>{});
+  if(sb&&ACCESS_MODE==='cloud')sb.from('retours').insert(nr).then(()=>{}).catch(()=>{});
   logAction('CREATE','Retour '+nr.num+' — '+prodNom+' × '+qte);
   closeM('m-retour');rdRetours();toast('Retour enregistré — En attente de traitement','success');
 }
@@ -3138,7 +3103,7 @@ async function traiterRetour(id){
   }
   r.statut='traite';r.date_traitement=new Date().toISOString().slice(0,10);
   localStorage.setItem('db_rt',JSON.stringify(D.retours));
-  if(sb&&ACCESS_MODE==='cloud')sb.from('retours').update({statut:'traite'}).eq('id',id).catch(()=>{});
+  if(sb&&ACCESS_MODE==='cloud')sb.from('retours').update({statut:'traite'}).eq('id',id).then(()=>{}).catch(()=>{});
   logAction('UPDATE','Retour traité: '+r.num+(r.stock==='oui'?' + stock réintégré':''));
   rdRetours();rdProduits();updateKPIs();computeAlerts();
   toast(`Retour ${r.num} traité — ${r.stock==='oui'?'Stock réintégré':''}`,'success');
