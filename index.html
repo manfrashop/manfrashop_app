@@ -23,6 +23,55 @@
   --purple:#8B5CF6;--purple-glow:rgba(139,92,246,.2);
   --accent:#38BDF8;
   --r:12px;--r-sm:8px;--r-lg:16px;
+  --theme-transition:background .25s,color .25s,border-color .25s,box-shadow .25s;
+}
+/* ── THÈME CLAIR ── */
+body.light-mode{
+  --bg:#F1F5F9;--bg2:#FFFFFF;--bg3:#F8FAFC;--border:#E2E8F0;--border2:#CBD5E1;
+  --text:#0F172A;--text2:#475569;--text3:#94A3B8;
+  --blue:#2563EB;--blue2:#1D4ED8;--blue-glow:rgba(37,99,235,.15);
+  --green:#059669;--green-glow:rgba(5,150,105,.15);
+  --red:#DC2626;--red-glow:rgba(220,38,38,.15);
+  --orange:#D97706;--orange-glow:rgba(217,119,6,.15);
+  --purple:#7C3AED;--purple-glow:rgba(124,58,237,.15);
+  --accent:#0284C7;
+}
+body.light-mode #login-screen{background:var(--bg);}
+body.light-mode .login-card{box-shadow:0 8px 40px rgba(15,23,42,.12);}
+body.light-mode .modal{box-shadow:0 24px 64px rgba(15,23,42,.18);}
+body.light-mode .kpi:hover{box-shadow:0 6px 24px rgba(15,23,42,.12);}
+body.light-mode select option{background:#fff;color:#0F172A;}
+body.light-mode ::-webkit-scrollbar-track{background:var(--bg3);}
+body.light-mode ::-webkit-scrollbar-thumb{background:var(--border2);}
+body.light-mode .toast{box-shadow:0 6px 24px rgba(15,23,42,.12);}
+body.light-mode #pos-screen{background:var(--bg);}
+body.light-mode .pos-card-name{color:#0F172A;}
+body.light-mode .pos-card-price{color:#059669;}
+body.light-mode .pos-card-stock{color:#2563EB;}
+
+/* Bouton thème */
+#theme-toggle-btn{
+  width:34px;height:34px;
+  border-radius:50%;
+  border:1px solid var(--border);
+  background:var(--bg3);
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+  transition:var(--theme-transition),transform .2s;
+  flex-shrink:0;
+  position:relative;overflow:hidden;
+}
+#theme-toggle-btn:hover{background:var(--border);transform:rotate(20deg) scale(1.1);}
+#theme-toggle-btn .ico-dark{display:block;}
+#theme-toggle-btn .ico-light{display:none;}
+body.light-mode #theme-toggle-btn .ico-dark{display:none;}
+body.light-mode #theme-toggle-btn .ico-light{display:block;}
+
+/* Transition globale fluide */
+body,#sidebar,.topbar,.card,.modal,.kpi,.toast,.login-card,.overlay,
+input,select,textarea,.btn,.tbtn,.nav-item,.mcard,.hpanel{
+  transition:var(--theme-transition);
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
@@ -461,6 +510,14 @@ select option{background:var(--bg2);}
 </svg></div>
     <h2 style="letter-spacing:2px">MANFRA-SHOP</h2>
     <p style="color:#F59E0B;font-weight:600;letter-spacing:3px;font-size:11px">HABATECH &copy; 2026</p>
+    <button onclick="toggleTheme()" title="Changer le thème"
+      style="margin-top:10px;background:var(--bg3);border:1px solid var(--border);
+             border-radius:20px;padding:4px 14px;cursor:pointer;font-size:13px;
+             color:var(--text2);display:inline-flex;align-items:center;gap:6px;
+             transition:.2s;font-family:'DM Sans',sans-serif;">
+      <span class="ico-dark">🌙 Sombre</span>
+      <span class="ico-light" style="display:none">☀️ Clair</span>
+    </button>
   </div>
   <!-- MODE SELECTOR -->
   <div class="mode-select-bar">
@@ -564,6 +621,10 @@ select option{background:var(--bg2);}
       <div id="gs-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);z-index:200;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)"></div>
     </div>
     <div class="sse-dot"></div><span class="sse-label" id="sse-lbl">Local</span>
+    <button id="theme-toggle-btn" onclick="toggleTheme()" title="Basculer thème clair/sombre">
+      <span class="ico-dark">🌙</span>
+      <span class="ico-light">☀️</span>
+    </button>
     <div id="mode-pill" class="local">💾 Local</div>
     <div class="mode-toggle">
       <button class="mode-btn active-local" id="tb-mode-local" onclick="switchMode('local')" title="Mode Local (hors ligne)">💾 Local</button>
@@ -1098,7 +1159,7 @@ select option{background:var(--bg2);}
       <div><label>Produit *</label><select id="mv-prod"></select></div>
       <div><label>Quantité *</label><input type="number" id="mv-qte" min="0.001" step="0.001" placeholder="0"></div>
       <div><label>Prix unitaire (GNF)</label><input type="number" id="mv-prix" placeholder="0"></div>
-      <div class="ff"><label>Référence document</label><input id="mv-ref" placeholder="Ex: BON-2026-001"></div>
+      <div class="ff"><label>Référence document</label><input id="mv-ref" placeholder="Auto si vide (ex: ENT-20260605-001)"></div>
       <div class="ff"><label>Motif / Notes</label><textarea id="mv-note" rows="2" placeholder="Raison du mouvement..."></textarea></div>
     </div>
   </div>
@@ -1511,10 +1572,6 @@ function syncCfgFromLogin(){
   const k=document.getElementById('lcfg-key')?.value.trim()||'';
   SB_URL=u;SB_KEY=k;
 }
-// Alias de compatibilité (anciens appels depuis login-cloud-cfg)
-function testLoginCloud(){testQuickCloud();}
-function saveLoginCloud(){saveQuickCloud();}
-
 async function testLoginCloud(){
   syncCfgFromLogin();
   if(!SB_URL||!SB_KEY){document.getElementById('lcfg-st').innerHTML='<span style="color:var(--red)">⚠️ Remplissez URL et clé</span>';return;}
@@ -1715,6 +1772,12 @@ let D={
   ],
 };
 function nid(t){return D[t].length?Math.max(...D[t].map(x=>x.id))+1:1;}
+// ── Génération automatique de référence ──
+function autoRef(prefix,table){
+  const d=new Date().toISOString().slice(0,10).replace(/-/g,'');
+  const n=String(nid(table)).padStart(3,'0');
+  return prefix+'-'+d+'-'+n;
+}
 
 async function loadAll(){
   if(ACCESS_MODE==='cloud'&&sb){
@@ -1729,6 +1792,37 @@ async function loadAll(){
   if(tEl)tEl.value=todayR;
 }
 function rdAll(){rdProduits();rdMvt();rdVentes();rdCmds();rdInv();rdAlerts();rdFourn();rdUsers();rdClients();rdJournal();rdDepenses();rdRetours();fillSelects();rdCategories();}
+
+// ═══════════════════════════════
+//  THÈME CLAIR / SOMBRE
+// ═══════════════════════════════
+function toggleTheme(){
+  const isLight=document.body.classList.toggle('light-mode');
+  localStorage.setItem('theme',isLight?'light':'dark');
+  // Mise à jour des graphiques Chart.js si existants
+  try{
+    const gridColor=isLight?'rgba(15,23,42,.08)':'rgba(255,255,255,.06)';
+    const tickColor=isLight?'#94A3B8':'#64748B';
+    Object.values(Chart.instances||{}).forEach(ch=>{
+      if(ch.options?.scales){
+        ['x','y'].forEach(ax=>{
+          if(ch.options.scales[ax]){
+            ch.options.scales[ax].grid={color:gridColor};
+            ch.options.scales[ax].ticks={color:tickColor};
+          }
+        });
+      }
+      ch.update('none');
+    });
+  }catch(e){}
+  toast(isLight?'☀️ Thème clair activé':'🌙 Thème sombre activé','info');
+}
+function initTheme(){
+  const saved=localStorage.getItem('theme');
+  if(saved==='light')document.body.classList.add('light-mode');
+}
+// Appel immédiat pour éviter le flash
+initTheme();
 
 // ═══════════════════════════════
 //  NAVIGATION
@@ -1953,7 +2047,8 @@ function rdCmds(){
     <td style="font-size:11px">${c.date}</td><td style="font-size:11px">${c.prevue}</td>
     <td style="font-family:'DM Mono',monospace;font-weight:600">${gnf(c.montant)}</td>
     <td><span class="tag ${col[c.statut]||'autre'}">${c.statut}</span></td>
-    <td>
+    <td style="display:flex;gap:4px;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="printBonCommande(${c.id})" title="Imprimer bon de commande">📄 BC</button>
       <button class="btn btn-success btn-sm" onclick="updCmd(${c.id},'livree')">✅</button>
       <button class="btn btn-danger btn-sm" onclick="delCmd(${c.id})">🗑️</button>
     </td>
@@ -2184,7 +2279,7 @@ async function saveMvt(){
   const sel=document.getElementById('mv-prod'),pid=+sel.value,pnm=sel.selectedOptions[0].text;
   const now=new Date().toISOString().slice(0,16).replace('T',' ');
   const nm={id:nid('mouvements'),date:now,type,produit_id:pid,produit:pnm,qte,
-    prix:+document.getElementById('mv-prix').value||0,ref:document.getElementById('mv-ref').value||'MANUEL',
+    prix:+document.getElementById('mv-prix').value||0,ref:document.getElementById('mv-ref').value.trim()||autoRef(({entree:'ENT',sortie:'SOR',perte:'PRT',transfert:'TRF',ajustement:'AJT'}[type]||'MVT'),'mouvements'),
     user:CU?.nom||'Admin',notes:document.getElementById('mv-note').value};
   D.mouvements.unshift(nm);
   const p=D.produits.find(x=>x.id===pid);
@@ -2269,6 +2364,178 @@ async function saveCmd(){
 }
 function updCmd(id,st){const c=D.commandes.find(x=>x.id===id);if(c){c.statut=st;sv('db_c','commandes');rdCmds();toast('Commande mise à jour','success');}}
 function delCmd(id){if(!confirm('Supprimer ?'))return;D.commandes=D.commandes.filter(c=>c.id!==id);sv('db_c','commandes');rdCmds();toast('Commande supprimée','warning');}
+
+// ═══════════════════════════════
+//  BON DE COMMANDE PDF
+// ═══════════════════════════════
+function printBonCommande(id){
+  const cmd=D.commandes.find(x=>x.id===id);if(!cmd){toast('Commande introuvable','error');return;}
+  const fourn=D.fournisseurs.find(f=>f.nom===cmd.fourn||f.id===cmd.fourn)||{nom:cmd.fourn||'—',pays:'Guinée',tel:'—'};
+  const {jsPDF}=window.jspdf,doc=new jsPDF();
+  const TEAL=[0,174,199],DARK=[15,23,42],GREY=[100,116,139],LIGHT=[248,250,252],WHITE=[255,255,255],BLACK=[30,40,60];
+  const dateStr=cmd.date?new Date(cmd.date).toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'}):new Date().toLocaleDateString('fr-FR',{day:'2-digit',month:'long',year:'numeric'});
+  const W=210,H=297;
+
+  // ── TITRE ──
+  doc.setFillColor(...WHITE);doc.rect(0,0,W,H,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(26);doc.setTextColor(...TEAL);
+  doc.text('Bon de commande',14,22);
+  // Logo placeholder (cercle orange)
+  doc.setFillColor(245,158,11);doc.circle(190,18,11,'F');
+  doc.setFillColor(...WHITE);doc.setFont('helvetica','bold');doc.setFontSize(7);doc.setTextColor(...WHITE);
+  doc.text('MANFRA',190,15.5,{align:'center'});doc.text('SHOP',190,19,{align:'center'});
+  // Ligne teal sous le titre
+  doc.setDrawColor(...TEAL);doc.setLineWidth(1.5);doc.line(14,28,196,28);
+
+  // ── INFOS ÉMETTEUR ──
+  let y=38;
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...BLACK);
+  doc.text('MANFRA-SHOP — HABATECH',14,y);y+=5;
+  doc.setFont('helvetica','normal');doc.setFontSize(9);doc.setTextColor(...GREY);
+  doc.text('Conakry, Guinée',14,y);y+=4.5;
+  doc.text('Tél : +224 6xx xxx xxx',14,y);y+=4.5;
+  doc.text('habatech@gmail.com',14,y);
+
+  // ── TABLEAU INFOS COMMANDE (gauche) ──
+  y=60;
+  const infoRows=[
+    ['Date :', dateStr],
+    ['Bon de commande N° :', cmd.num||'—'],
+    ['Fournisseur :', fourn.nom],
+    ['Livraison prévue :', cmd.prevue||'—'],
+    ['Mode paiement :', '30 jours'],
+    ['Émis par :', CU?.nom||'Admin'],
+    ['Tél. fournisseur :', fourn.tel||'—'],
+  ];
+  doc.setDrawColor(220,225,235);doc.setLineWidth(0.3);
+  doc.setFillColor(245,248,252);doc.roundedRect(13,y-5,88,infoRows.length*7+4,2,2,'F');
+  doc.rect(13,y-5,88,infoRows.length*7+4,'S');
+  infoRows.forEach(([lbl,val])=>{
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(...GREY);
+    doc.text(lbl,16,y);
+    doc.setFont('helvetica','bold');doc.setTextColor(...BLACK);
+    doc.text(String(val),62,y);
+    y+=7;
+  });
+
+  // ── DESTINATAIRE (droite) ──
+  const dY=60;
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(...BLACK);
+  doc.text('Destinataire',112,dY);
+  doc.setFont('helvetica','bold');doc.setFontSize(9.5);doc.setTextColor(...BLACK);
+  doc.text(fourn.nom,112,dY+7);
+  doc.setFont('helvetica','italic');doc.setFontSize(8.5);doc.setTextColor(...GREY);
+  doc.text(fourn.pays||'Guinée',112,dY+13);
+  if(fourn.tel&&fourn.tel!=='—'){doc.text('Tél : '+fourn.tel,112,dY+18);}
+  doc.text('Délai livraison : '+(fourn.delai||3)+' jours',112,dY+24);
+
+  // ── NOTES ──
+  let ny=y+8;
+  if(cmd.notes){
+    doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(...BLACK);
+    doc.text('Informations additionnelles',14,ny);ny+=5;
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(...GREY);
+    const lines=doc.splitTextToSize(cmd.notes,180);
+    lines.forEach(l=>{doc.text(l,14,ny);ny+=4.5;});
+    ny+=3;
+  } else { ny+=4; }
+
+  // ── TABLEAU ARTICLES ──
+  // Construire les lignes depuis les notes ou une ligne générique
+  const lignesCmd=[];
+  if(cmd.notes){
+    // Parser si les notes contiennent des produits listés
+    const m=cmd.notes.match(/Réapprovisionnement (.+?) \((.+?)\).*À commander: ([\d.]+)/);
+    if(m){
+      const qte=parseFloat(m[3])||1;
+      const prod=D.produits.find(p=>p.designation===m[1]||p.code===m[2]);
+      const pu=prod?.achat||0;
+      lignesCmd.push({ref:m[2],desc:m[1],qte,unite:prod?.unite||'u.',pu,tva:0,totalTva:0,totalTTC:qte*pu});
+    }
+  }
+  // Si pas de ligne parsée, ligne générique
+  if(!lignesCmd.length){
+    lignesCmd.push({ref:'—',desc:cmd.notes||'Commande fournisseur',qte:1,unite:'u.',pu:cmd.montant,tva:0,totalTva:0,totalTTC:cmd.montant});
+  }
+
+  const COL={ref:14,desc:40,qte:98,unit:113,pu:125,tva:147,tvaTot:162,ttc:177};
+  const colW=196-14;
+  // En-tête tableau
+  doc.setFillColor(...DARK);doc.roundedRect(13,ny-5,colW,10,1,1,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...WHITE);
+  doc.text('Réf. produit',COL.ref+1,ny);
+  doc.text('Description',COL.desc,ny);
+  doc.text('Qté',COL.qte,ny);
+  doc.text('Unité',COL.unit,ny);
+  doc.text('Prix unit. HT',COL.pu,ny);
+  doc.text('% TVA',COL.tva,ny);
+  doc.text('Total TVA',COL.tvaTot,ny);
+  doc.text('Total TTC',COL.ttc,ny);
+  ny+=9;
+
+  // Lignes articles
+  let totalHT=0,totalTVA=0,totalTTC=0;
+  lignesCmd.forEach((l,i)=>{
+    if(i%2===0){doc.setFillColor(...LIGHT);doc.rect(13,ny-4,colW,8.5,'F');}
+    doc.setDrawColor(220,225,235);doc.setLineWidth(0.2);doc.line(13,ny+4.5,196,ny+4.5);
+    doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(...BLACK);
+    doc.text(String(l.ref),COL.ref+1,ny);
+    doc.text(l.desc.substring(0,28),COL.desc,ny);
+    doc.text(String(l.qte),COL.qte+2,ny);
+    doc.text(l.unite,COL.unit,ny);
+    doc.text(l.pu.toLocaleString('fr-FR')+' GNF',COL.pu,ny);
+    doc.text(l.tva+'%',COL.tva+1,ny);
+    doc.text(l.totalTva.toLocaleString('fr-FR'),COL.tvaTot,ny);
+    doc.text(l.totalTTC.toLocaleString('fr-FR')+' GNF',COL.ttc,ny);
+    totalHT+=l.pu*l.qte;totalTVA+=l.totalTva;totalTTC+=l.totalTTC;
+    ny+=9;
+  });
+  ny+=4;
+
+  // ── TOTAUX ──
+  doc.setDrawColor(...TEAL);doc.setLineWidth(0.5);doc.line(120,ny,196,ny);ny+=5;
+  const totRows=[
+    ['Total HT',totalHT.toLocaleString('fr-FR')+' GNF',false],
+    ['Total TVA',totalTVA.toLocaleString('fr-FR')+' GNF',false],
+    ['Frais de livraison','0 GNF',false],
+    ['Total TTC',cmd.montant.toLocaleString('fr-FR')+' GNF',true],
+  ];
+  totRows.forEach(([lbl,val,bold])=>{
+    doc.setFont('helvetica',bold?'bold':'normal');doc.setFontSize(bold?9.5:8.5);
+    doc.setTextColor(...(bold?TEAL:GREY));
+    doc.text(lbl,133,ny,{align:'right'});
+    doc.setTextColor(...(bold?TEAL:BLACK));
+    doc.text(val,196,ny,{align:'right'});
+    if(bold){doc.setDrawColor(...TEAL);doc.setLineWidth(0.5);doc.line(120,ny+2,196,ny+2);}
+    ny+=6;
+  });
+
+  // ── SIGNATURE ──
+  ny+=6;
+  doc.setFont('helvetica','normal');doc.setFontSize(8.5);doc.setTextColor(...GREY);
+  doc.text('Signature :',14,ny);
+  doc.setDrawColor(180,190,200);doc.setLineWidth(0.3);doc.line(35,ny,100,ny);
+
+  // ── PIED DE PAGE (3 colonnes) ──
+  const footY=H-28;
+  doc.setDrawColor(220,225,235);doc.setLineWidth(0.5);doc.line(14,footY-4,196,footY-4);
+  const foot=[
+    {title:'Siège social',lines:['MANFRA-SHOP — HABATECH','Conakry, Guinée','N° Siren : HABATECH-2026']},
+    {title:'Coordonnées',lines:['Admin : '+( CU?.nom||'Admin'),'Tél : +224 6xx xxx xxx','E-mail : habatech@gmail.com','www.habatech.com']},
+    {title:'Informations commande',lines:['N° : '+cmd.num,'Statut : '+cmd.statut,'Livraison : '+(cmd.prevue||'—')]},
+  ];
+  foot.forEach((col,ci)=>{
+    const fx=14+ci*61;
+    doc.setFont('helvetica','bold');doc.setFontSize(8);doc.setTextColor(...BLACK);
+    doc.text(col.title,fx,footY+1);
+    doc.setFont('helvetica','normal');doc.setFontSize(7.5);doc.setTextColor(...GREY);
+    col.lines.forEach((ln,li)=>doc.text(ln,fx,footY+6+li*4));
+  });
+
+  doc.save('BonCommande_'+cmd.num+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+  toast('📄 Bon de commande téléchargé','success');
+  logAction('CREATE','Bon de commande PDF : '+cmd.num);
+}
 
 // ═══════════════════════════════
 //  FOURNISSEURS & USERS
@@ -2412,7 +2679,7 @@ async function saveDepense(){
   const id=document.getElementById('dep-id').value;
   const data={libelle:lib,categorie:document.getElementById('dep-cat').value,montant:mnt,
     date:document.getElementById('dep-date').value,paiement:document.getElementById('dep-pay').value,
-    ref:document.getElementById('dep-ref').value,notes:document.getElementById('dep-note').value,user:CU?.nom||'Admin'};
+    ref:document.getElementById('dep-ref').value.trim()||autoRef('DEP','depenses'),notes:document.getElementById('dep-note').value,user:CU?.nom||'Admin'};
   if(id){const i=D.depenses.findIndex(x=>x.id==id);if(i>=0)D.depenses[i]={...D.depenses[i],...data};logAction('UPDATE','Dépense modifiée: '+lib);}
   else{D.depenses.unshift({id:nid('depenses'),...data});logAction('CREATE','Dépense: '+lib+' '+gnf(mnt));}
   localStorage.setItem('db_dp',JSON.stringify(D.depenses));
@@ -3683,7 +3950,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       <div><label>Payé par</label><select id="dep-pay">
         <option>Espèces</option><option>Orange Money</option><option>MTN Money</option><option>Virement</option><option>Chèque</option>
       </select></div>
-      <div><label>Référence document</label><input id="dep-ref" placeholder="N° facture, reçu…"></div>
+      <div><label>Référence document</label><input id="dep-ref" placeholder="Auto si vide (ex: DEP-20260605-001)"></div>
       <div class="ff"><label>Notes</label><textarea id="dep-note" rows="2" placeholder="Informations complémentaires…"></textarea></div>
     </div>
   </div>
