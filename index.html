@@ -751,17 +751,38 @@ select option{background:var(--bg2);}
   <!-- DASHBOARD -->
   <section class="section active" id="s-dashboard">
     <div class="kpi-grid">
-      <div class="kpi" style="--kc:var(--blue);--kb:var(--blue-glow)">
-        <div class="kpi-icon">📦</div><div><div class="kpi-val" id="k-prod">—</div><div class="kpi-label">Produits actifs</div><div class="kpi-delta delta-up" id="k-prod-delta">—</div></div>
+      <div class="kpi" style="--kc:var(--green);--kb:var(--green-glow)" onclick="goPage('ventes',document.querySelector('[onclick*=ventes]'))" style="cursor:pointer">
+        <div class="kpi-icon">💰</div><div><div class="kpi-val" id="k-ca-jour">—</div><div class="kpi-label">CA Aujourd'hui</div><div class="kpi-delta" id="k-ca-jour-nb">0 vente(s)</div></div>
       </div>
-      <div class="kpi" style="--kc:var(--green);--kb:var(--green-glow)">
-        <div class="kpi-icon">💰</div><div><div class="kpi-val" id="k-val">—</div><div class="kpi-label">Valeur stock (GNF)</div><div class="kpi-delta delta-ne">calculé</div></div>
+      <div class="kpi" style="--kc:var(--blue);--kb:var(--blue-glow)">
+        <div class="kpi-icon">📅</div><div><div class="kpi-val" id="k-ca-mois">—</div><div class="kpi-label">CA Ce mois</div><div class="kpi-delta" id="k-ca-mois-nb">0 vente(s)</div></div>
+      </div>
+      <div class="kpi" style="--kc:var(--purple);--kb:var(--purple-glow)">
+        <div class="kpi-icon">📈</div><div><div class="kpi-val" id="k-benef">—</div><div class="kpi-label">Bénéfice net mois</div><div class="kpi-delta" id="k-marge-pct">marge: —</div></div>
       </div>
       <div class="kpi" style="--kc:var(--orange);--kb:var(--orange-glow)">
-        <div class="kpi-icon">⚠️</div><div><div class="kpi-val" id="k-al">—</div><div class="kpi-label">Alertes actives</div><div class="kpi-delta delta-dn">voir alertes</div></div>
+        <div class="kpi-icon">📦</div><div><div class="kpi-val" id="k-val">—</div><div class="kpi-label">Valeur stock</div><div class="kpi-delta delta-up" id="k-prod-delta">—</div></div>
       </div>
       <div class="kpi" style="--kc:var(--red);--kb:var(--red-glow)">
-        <div class="kpi-icon">📅</div><div><div class="kpi-val" id="k-rup">—</div><div class="kpi-label">Ruptures de stock</div><div class="kpi-delta delta-dn">⚡ Action requise</div></div>
+        <div class="kpi-icon">⚠️</div><div><div class="kpi-val" id="k-al">—</div><div class="kpi-label">Alertes / Ruptures</div><div class="kpi-delta delta-dn" id="k-rup-lbl">voir alertes</div></div>
+      </div>
+      <div class="kpi" style="--kc:var(--blue);--kb:var(--blue-glow)">
+        <div class="kpi-icon">👥</div><div><div class="kpi-val" id="k-dettes">—</div><div class="kpi-label">Dettes clients</div><div class="kpi-delta delta-dn" id="k-dettes-nb">—</div></div>
+      </div>
+    </div>
+    <!-- KPIs ligne 2 -->
+    <div class="kpi-grid" style="margin-top:0">
+      <div class="kpi" style="--kc:var(--green);--kb:var(--green-glow)">
+        <div class="kpi-icon">🛒</div><div><div class="kpi-val" id="k-ticket-moy">—</div><div class="kpi-label">Ticket moyen</div><div class="kpi-delta">ce mois</div></div>
+      </div>
+      <div class="kpi" style="--kc:var(--orange);--kb:var(--orange-glow)">
+        <div class="kpi-icon">💸</div><div><div class="kpi-val" id="k-dep-mois">—</div><div class="kpi-label">Dépenses mois</div><div class="kpi-delta delta-dn">charges totales</div></div>
+      </div>
+      <div class="kpi" style="--kc:var(--blue);--kb:var(--blue-glow)">
+        <div class="kpi-icon">📦</div><div><div class="kpi-val" id="k-prod">—</div><div class="kpi-label">Produits actifs</div><div class="kpi-delta delta-up" id="k-prod-nb">—</div></div>
+      </div>
+      <div class="kpi" style="--kc:var(--purple);--kb:var(--purple-glow)">
+        <div class="kpi-icon">🔄</div><div><div class="kpi-val" id="k-mvt-jour">—</div><div class="kpi-label">Mouvements auj.</div><div class="kpi-delta">entrées + sorties</div></div>
       </div>
     </div>
     <div class="g2">
@@ -784,12 +805,22 @@ select option{background:var(--bg2);}
     </div>
     <div class="g2">
       <div class="card">
+        <div class="card-head"><h3>💰 CA — 30 derniers jours</h3><span style="font-size:11px;color:var(--text3)">Chiffre d'affaires journalier</span></div>
+        <div class="card-body"><div class="chart-wrap"><canvas id="ch-ca30"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h3>🏆 Top 5 — Produits vendus</h3></div>
+        <div class="card-body" id="top5"><div class="empty"><div class="ico">📊</div><p>Aucune donnée</p></div></div>
+      </div>
+    </div>
+    <div class="g2">
+      <div class="card">
         <div class="card-head"><h3>📦 Répartition par catégorie</h3></div>
         <div class="card-body"><div class="chart-wrap"><canvas id="ch-cat"></canvas></div></div>
       </div>
       <div class="card">
-        <div class="card-head"><h3>🏆 Top 5 — Sorties du mois</h3></div>
-        <div class="card-body" id="top5"><div class="empty"><div class="ico">📊</div><p>Aucune donnée</p></div></div>
+        <div class="card-head"><h3>👥 Top clients (CA total)</h3></div>
+        <div class="card-body" id="dash-top-clients"><div class="empty"><div class="ico">👥</div><p>Aucune donnée</p></div></div>
       </div>
     </div>
   </section>
@@ -909,10 +940,18 @@ select option{background:var(--bg2);}
     </div>
     <div class="card">
       <div class="tw"><table><thead><tr>
-        <th>Client</th><th>Téléphone</th><th>Dette totale</th><th>Dernière vente</th><th>Statut</th><th>Actions</th>
+        <th>Client</th><th>Téléphone</th><th>CA Total</th><th>Dette</th><th>Points 🎁</th><th>Dernière vente</th><th>Statut</th><th>Actions</th>
       </tr></thead><tbody id="tb-clients"></tbody></table></div>
     </div>
   </section>
+
+  <!-- FICHE CLIENT (modal) -->
+  <div class="modal" id="m-fiche-client">
+    <div class="modal-box" style="max-width:600px">
+      <div class="modal-head"><h3 id="fiche-client-titre">Fiche Client</h3><button onclick="closeM('m-fiche-client')">✕</button></div>
+      <div class="modal-body" id="fiche-client-body"></div>
+    </div>
+  </div>
 
   <!-- DÉPENSES -->
   <section class="section" id="s-depenses">
@@ -2159,7 +2198,7 @@ function rdVentes(){
     <td>${v.paiement}</td>
     <td><span class="tag normal">${v.statut}</span></td>
     <td><button class="btn btn-outline btn-sm" onclick="printFacture(${v.id})" title="Facture PDF">🧾</button>
-        <button class="btn btn-outline btn-sm" onclick="printTicket(${v.id})" title="Reçu thermique">🖨️</button>
+        <button class="btn btn-outline btn-sm" onclick="printTicket(${v.id})" title="Reçu thermique">🖨️</button><button class="btn btn-outline btn-sm" onclick="genFacturePDF(${v.id})" title="Facture PDF">📄</button>
         <button class="btn btn-outline btn-sm" onclick="openNewRetourFromVente(${v.id})" title="Retour">🔁</button></td>
   </tr>`).join(''):`<tr><td colspan="7"><div class="empty"><div class="ico">🛒</div><p>Aucune vente</p></div></td></tr>`;
   rdPag('pg-ventes','v',fil.length);
@@ -2188,7 +2227,7 @@ function rdVentes(){
       </div>
       <div class="mcard-actions">
         <button class="btn btn-outline" onclick="printFacture(${v.id})">🧾 Facture</button>
-        <button class="btn btn-outline" onclick="printTicket(${v.id})">🖨️ Reçu</button>
+        <button class="btn btn-outline" onclick="printTicket(${v.id})">🖨️ Reçu</button><button class="btn btn-outline" onclick="genFacturePDF(${v.id})">📄 Facture PDF</button>
         <button class="btn btn-outline" onclick="openNewRetourFromVente(${v.id})">🔁</button>
       </div>
     </div>`).join(''):`<div class="empty"><div class="ico">🛒</div><p>Aucune vente</p></div>`;
@@ -2308,29 +2347,75 @@ function computeAlerts(){
   return al;
 }
 function updateKPIs(){
+  const today=new Date().toISOString().slice(0,10);
+  const curMonth=new Date().toISOString().slice(0,7);
+
+  // Stock
   const val=D.produits.reduce((s,p)=>s+p.stock*p.achat,0);
   const rup=D.produits.filter(p=>p.etat==='rupture').length;
+  const crit=D.produits.filter(p=>p.etat==='critique').length;
   const al=computeAlerts();
-  document.getElementById('k-prod').textContent=D.produits.length;
-  // Delta produits actifs : normal vs critique/rupture
   const nbOk=D.produits.filter(p=>p.etat==='normal'||p.etat==='surstock').length;
   const nbKo=D.produits.filter(p=>p.etat==='critique'||p.etat==='rupture').length;
-  const deltaEl=document.getElementById('k-prod-delta');
-  if(deltaEl){
-    if(nbKo===0){deltaEl.textContent='✅ Tous en stock';deltaEl.className='kpi-delta delta-up';}
-    else{deltaEl.textContent=nbKo+' en alerte, '+nbOk+' OK';deltaEl.className='kpi-delta delta-dn';}
-  }
-  document.getElementById('k-val').textContent=(val/1000000).toFixed(1)+' M';
-  document.getElementById('k-al').textContent=al.length;
-  document.getElementById('k-rup').textContent=rup;
-  document.getElementById('r-val').textContent=(val/1000000).toFixed(1)+' M GNF';
-  const curMonth=new Date().toISOString().slice(0,7);
-  const ca=D.ventes.filter(v=>(v.date||'').startsWith(curMonth)).reduce((s,v)=>s+v.montant,0);
-  document.getElementById('r-vnt').textContent=(ca/1000000).toFixed(2)+' M GNF';
-  // Marge brute dynamique dans ventes
+
+  // Ventes
+  const ventesJour=D.ventes.filter(v=>(v.date||'').startsWith(today));
+  const ventesMois=D.ventes.filter(v=>(v.date||'').startsWith(curMonth));
+  const caJour=ventesJour.reduce((s,v)=>s+v.montant,0);
+  const caMois=ventesMois.reduce((s,v)=>s+v.montant,0);
+  const ticketMoy=ventesMois.length?Math.round(caMois/ventesMois.length):0;
+
+  // Marge
+  let coutMois=0;
+  ventesMois.forEach(v=>(v.lignes||[]).forEach(l=>{
+    const p=D.produits.find(x=>x.id===l.produit_id);
+    if(p)coutMois+=l.qte*p.achat;
+  }));
+  const benefMois=caMois-coutMois;
+  const margePct=caMois>0?Math.round(benefMois/caMois*100):0;
+
+  // Dépenses
+  const depMois=D.depenses.filter(d=>(d.date||'').startsWith(curMonth)).reduce((s,d)=>s+d.montant,0);
+  const benefNet=caMois-depMois;
+
+  // Dettes clients
+  const detteTotal=D.clients.reduce((s,c)=>s+(c.dette||0),0);
+  const nbDetteurs=D.clients.filter(c=>(c.dette||0)>0).length;
+
+  // Mouvements jour
+  const mvtJour=D.mouvements.filter(m=>(m.date||'').startsWith(today)).length;
+
+  // Mise à jour UI
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('k-ca-jour',gnf(caJour));
+  set('k-ca-jour-nb',ventesJour.length+' vente(s)');
+  set('k-ca-mois',gnf(caMois));
+  set('k-ca-mois-nb',ventesMois.length+' vente(s)');
+  set('k-benef',gnf(benefNet));
+  const kmp=document.getElementById('k-marge-pct');
+  if(kmp){kmp.textContent='marge: '+margePct+'%';kmp.className='kpi-delta '+(margePct>20?'delta-up':margePct>0?'delta-ne':'delta-dn');}
+  set('k-val',(val/1000000).toFixed(1)+' M');
+  set('k-prod-delta',nbKo>0?nbKo+' alertes':nbOk+' OK');
+  set('k-al',al.length+(rup>0?' ('+rup+' rupt.)':''));
+  set('k-rup',rup);
+  const krl=document.getElementById('k-rup-lbl');
+  if(krl){krl.textContent=rup+' rupture(s), '+crit+' critique(s)';krl.className='kpi-delta '+(rup>0?'delta-dn':'delta-up');}
+  set('k-dettes',gnf(detteTotal));
+  set('k-dettes-nb',nbDetteurs+' débiteur(s)');
+  set('k-ticket-moy',gnf(ticketMoy));
+  set('k-dep-mois',gnf(depMois));
+  set('k-prod',D.produits.length);
+  set('k-prod-nb',nbOk+' OK, '+nbKo+' alertes');
+  set('k-mvt-jour',mvtJour);
+
+  // Rapports
+  set('r-val',(val/1000000).toFixed(1)+' M GNF');
+  set('r-vnt',(caMois/1000000).toFixed(2)+' M GNF');
+
+  // Marge ventes
   const mgEl=document.getElementById('vk-mg');
   if(mgEl){
-    const vj=D.ventes.filter(v=>(v.date||'').startsWith(new Date().toISOString().slice(0,10)));
+    const vj=D.ventes.filter(v=>(v.date||'').startsWith(today));
     let caVJ=0,coutVJ=0;
     vj.forEach(v=>(v.lignes||[]).forEach(l=>{
       caVJ+=l.qte*l.prix;
@@ -2339,8 +2424,8 @@ function updateKPIs(){
     }));
     mgEl.textContent=caVJ>0?Math.round((caVJ-coutVJ)/caVJ*100)+'%':'0%';
   }
-  updTop5();
-  updAppro();
+
+  updTop5();updAppro();updTopClients();updCA30();
 }
 function updTop5(){
   const s={};D.mouvements.filter(m=>m.type==='sortie').forEach(m=>{const k=m.produit||m.produit_id;s[k]=(s[k]||0)+m.qte;});
@@ -3574,30 +3659,58 @@ function clearJournal(){if(!confirm('Vider tout le journal ?'))return;D.journal=
 function rdClients(){
   const q=(document.getElementById('sc-q')?.value||'').toLowerCase();
   const sol=document.getElementById('sc-sol')?.value||'';
-  const fil=D.clients.filter(c=>{
-    const mq=!q||c.nom.toLowerCase().includes(q)||c.tel.includes(q);
-    const ms=!sol||(sol==='debiteur'&&c.dette>0)||(sol==='solde'&&c.dette<=0);
+  let fil=D.clients.filter(c=>{
+    const mq=!q||c.nom.toLowerCase().includes(q)||(c.tel||'').includes(q);
+    const ms=!sol||(sol==='debiteur'&&(c.dette||0)>0)||(sol==='solde'&&!(c.dette||0));
     return mq&&ms;
   });
-  document.getElementById('tb-clients').innerHTML=fil.length?fil.map(c=>`<tr>
-    <td><b>${c.nom}</b><br><span style="font-size:10.5px;color:var(--text3)">${c.adresse||'—'}</span></td>
-    <td style="font-family:'DM Mono',monospace;font-size:12px">${c.tel||'—'}</td>
-    <td style="font-family:'DM Mono',monospace;font-weight:700;color:${c.dette>0?'var(--red)':'var(--green)'};">${gnf(c.dette||0)}</td>
-    <td style="font-size:11px;color:var(--text3)">${c.last_vente||'—'}</td>
-    <td><span class="tag ${c.dette>0?'rupture':'normal'}">${c.dette>0?'Débiteur':'Soldé'}</span></td>
-    <td style="white-space:nowrap">
-      ${c.dette>0?`<button class="btn btn-success btn-sm" onclick="openRemb(${c.id})">💵 Rembourser</button>`:''}
-      <button class="btn btn-outline btn-sm" onclick="editClient(${c.id})">✏️</button>
-      <button class="btn btn-danger btn-sm" onclick="delClient(${c.id})">🗑️</button>
-    </td>
-  </tr>`).join(''):`<tr><td colspan="6"><div class="empty"><div class="ico">👥</div><p>Aucun client</p></div></td></tr>`;
+
   // KPIs
-  const total=D.clients.length,dette=D.clients.reduce((s,c)=>s+((c.dette||0)),0),deb=D.clients.filter(c=>c.dette>0).length;
-  document.getElementById('cl-nb').textContent=total;
-  document.getElementById('cl-dette').textContent=(dette/1000).toFixed(0)+' K';
-  document.getElementById('cl-nb-deb').textContent=deb;
-  document.getElementById('cl-soldé').textContent=D.clients.filter(c=>c.dette<=0).length;
+  const totDette=D.clients.reduce((s,c)=>s+(c.dette||0),0);
+  const nbDeb=D.clients.filter(c=>(c.dette||0)>0).length;
+  const curMonth=new Date().toISOString().slice(0,7);
+  const soldeMois=D.clients.filter(c=>{
+    const vM=D.ventes.filter(v=>v.client_id===c.id&&(v.date||'').startsWith(curMonth));
+    return vM.length>0;
+  }).length;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('cl-nb',D.clients.length);
+  set('cl-dette',gnf(totDette));
+  set('cl-nb-deb',nbDeb);
+  set('cl-soldé',soldeMois+' actifs');
+
+  // Calcul CA par client
+  const caMap={};
+  D.ventes.forEach(v=>{if(v.client_id){caMap[v.client_id]=(caMap[v.client_id]||0)+v.montant;}});
+
+  const tb=document.getElementById('tb-clients');
+  if(!tb)return;
+  const dernVente=cid=>{
+    const vs=D.ventes.filter(v=>v.client_id===cid).sort((a,b)=>b.date>a.date?1:-1);
+    return vs.length?vs[0].date.slice(0,10):'—';
+  };
+  tb.innerHTML=fil.length?fil.map(c=>{
+    const ca=caMap[c.id]||0;
+    const points=Math.floor(ca/10000);
+    const dette=c.dette||0;
+    return`<tr>
+      <td><b style="color:var(--text)">${c.nom}</b><br><span style="font-size:11px;color:var(--text3)">${c.adresse||'—'}</span></td>
+      <td>${c.tel||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--green);font-size:12px">${gnf(ca)}</td>
+      <td><span class="tag ${dette>0?'rupture':'normal'}" style="font-size:12px">${gnf(dette)}</span></td>
+      <td><span style="color:var(--purple);font-weight:600">${points>0?'🎁 '+points:'—'}</span></td>
+      <td style="font-size:12px;color:var(--text3)">${dernVente(c.id)}</td>
+      <td><span class="tag ${dette>0?'critique':'normal'}">${dette>0?'Débiteur':'Soldé'}</span></td>
+      <td style="display:flex;gap:4px;flex-wrap:wrap">
+        <button class="btn btn-sm btn-primary" onclick="ouvrirFicheClient(${c.id})" title="Fiche détaillée">👤</button>
+        <button class="btn btn-sm btn-outline" onclick="openEditClient(${c.id})" title="Modifier">✏️</button>
+        <button class="btn btn-sm btn-outline" onclick="openReglement(${c.id})" title="Règlement dette">💳</button>
+        <button class="btn btn-sm" style="background:var(--red-glow);color:var(--red);border:1px solid rgba(239,68,68,.3)" onclick="delClient(${c.id})">🗑️</button>
+      </td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="8"><div class="empty"><div class="ico">👥</div><p>Aucun client trouvé</p></div></td></tr>`;
 }
+
 function openNewClient(){
   const el=document.getElementById('cl-id');if(el)el.value='';
   const t=document.getElementById('m-client-title');if(t)t.textContent='👤 Nouveau Client';
@@ -3839,6 +3952,177 @@ function xPDFJournalier(){
 // ═══════════════════════════════
 //  REÇU DE VENTE PDF amélioré
 // ══════════════════════════════
+
+// ═══════════════════════════════
+//  DASHBOARD — Graphique CA 30 jours
+// ═══════════════════════════════
+let chCA30=null;
+function updCA30(){
+  const canvas=document.getElementById('ch-ca30');if(!canvas)return;
+  const days=[];const vals=[];
+  for(let i=29;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const ds=d.toISOString().slice(0,10);
+    days.push(ds.slice(5));
+    vals.push(D.ventes.filter(v=>(v.date||'').startsWith(ds)).reduce((s,v)=>s+v.montant,0));
+  }
+  if(chCA30)chCA30.destroy();
+  chCA30=new Chart(canvas,{
+    type:'bar',
+    data:{
+      labels:days,
+      datasets:[{
+        label:'CA (GNF)',data:vals,
+        backgroundColor:'rgba(16,185,129,0.5)',
+        borderColor:'rgba(16,185,129,1)',
+        borderWidth:1,borderRadius:3
+      }]
+    },
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{y:{ticks:{callback:v=>v>=1000000?(v/1000000).toFixed(1)+'M':v>=1000?(v/1000).toFixed(0)+'k':v,color:'#94A3B8'},grid:{color:'rgba(148,163,184,0.1)'}},
+        x:{ticks:{maxRotation:45,color:'#94A3B8',font:{size:9}},grid:{display:false}}}
+    }
+  });
+}
+
+// ── Top Clients dashboard ──
+function updTopClients(){
+  const el=document.getElementById('dash-top-clients');if(!el)return;
+  const stats={};
+  D.ventes.forEach(v=>{
+    if(!v.client_id)return;
+    const c=D.clients.find(x=>x.id===v.client_id);
+    if(!c)return;
+    if(!stats[c.id])stats[c.id]={nom:c.nom,ca:0,nb:0};
+    stats[c.id].ca+=v.montant;stats[c.id].nb++;
+  });
+  const top=Object.values(stats).sort((a,b)=>b.ca-a.ca).slice(0,5);
+  if(!top.length){el.innerHTML='<div class="empty"><div class="ico">👥</div><p>Aucun client avec achat</p></div>';return;}
+  el.innerHTML=`<table><thead><tr><th>#</th><th>Client</th><th>CA Total</th><th>Achats</th></tr></thead><tbody>
+  ${top.map((c,i)=>`<tr><td><b style="color:var(--${['orange','text2','text3'][Math.min(i,2)]})">${['🥇','🥈','🥉','4','5'][i]}</b></td>
+  <td><b>${c.nom}</b></td><td style="font-family:'DM Mono',monospace;color:var(--green)">${gnf(c.ca)}</td><td>${c.nb}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+// ── Fiche client détaillée ──
+function ouvrirFicheClient(id){
+  const c=D.clients.find(x=>x.id===id);if(!c)return;
+  const ventes=D.ventes.filter(v=>v.client_id===id).sort((a,b)=>b.date>a.date?1:-1);
+  const caTotal=ventes.reduce((s,v)=>s+v.montant,0);
+  const points=Math.floor(caTotal/10000);
+  const titre=document.getElementById('fiche-client-titre');
+  const body=document.getElementById('fiche-client-body');
+  if(titre)titre.textContent='👤 '+c.nom;
+  if(body)body.innerHTML=`
+    <div class="kpi-grid" style="margin-bottom:16px">
+      <div class="kpi" style="--kc:var(--green);--kb:var(--green-glow)"><div class="kpi-icon">💰</div><div><div class="kpi-val">${gnf(caTotal)}</div><div class="kpi-label">CA Total</div></div></div>
+      <div class="kpi" style="--kc:var(--red);--kb:var(--red-glow)"><div class="kpi-icon">💸</div><div><div class="kpi-val">${gnf(c.dette||0)}</div><div class="kpi-label">Dette</div></div></div>
+      <div class="kpi" style="--kc:var(--purple);--kb:var(--purple-glow)"><div class="kpi-icon">🎁</div><div><div class="kpi-val">${points}</div><div class="kpi-label">Points fidélité</div></div></div>
+      <div class="kpi" style="--kc:var(--blue);--kb:var(--blue-glow)"><div class="kpi-icon">🛒</div><div><div class="kpi-val">${ventes.length}</div><div class="kpi-label">Achats</div></div></div>
+    </div>
+    <div style="margin-bottom:12px;font-size:13px;color:var(--text2)">
+      📱 ${c.tel||'—'} &nbsp;|&nbsp; 📍 ${c.adresse||'—'} &nbsp;|&nbsp; 📅 Client depuis ${c.created_at||'—'}
+    </div>
+    <h4 style="margin:0 0 8px;color:var(--text)">📋 Historique des achats</h4>
+    ${ventes.length?`<div class="tw"><table><thead><tr><th>N°</th><th>Date</th><th>Montant</th><th>Paiement</th><th>Actions</th></tr></thead><tbody>
+    ${ventes.slice(0,20).map(v=>`<tr>
+      <td><code>${v.num}</code></td>
+      <td>${v.date}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--green)">${gnf(v.montant)}</td>
+      <td>${v.paiement}</td>
+      <td><button class="btn btn-sm btn-outline" onclick="printTicket(${v.id})">🖨️</button>
+          <button class="btn btn-sm btn-outline" onclick="genFacturePDF(${v.id})">📄 Facture</button></td>
+    </tr>`).join('')}
+    </tbody></table></div>`:'<div class="empty"><div class="ico">🛒</div><p>Aucun achat enregistré</p></div>'}
+    ${points>=10?`<div style="margin-top:12px;padding:10px 14px;background:var(--purple-glow);border:1px solid var(--purple);border-radius:var(--r-sm);color:var(--purple)">
+      🎁 <b>${c.nom}</b> a <b>${points} points</b> de fidélité — Éligible à une remise !
+    </div>`:''}
+  `;
+  openM('m-fiche-client');
+}
+
+// ── Facture PDF professionnelle ──
+function genFacturePDF(id){
+  const v=D.ventes.find(x=>x.id===id);if(!v)return;
+  const c=v.client_id?D.clients.find(x=>x.id===v.client_id):null;
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const W=210,M=15;
+  let y=20;
+
+  // En-tête
+  doc.setFillColor(15,23,42);doc.rect(0,0,W,35,'F');
+  doc.setTextColor(245,158,11);doc.setFontSize(22);doc.setFont('helvetica','bold');
+  doc.text('MANFRA-SHOP',M,16);
+  doc.setTextColor(148,163,184);doc.setFontSize(9);doc.setFont('helvetica','normal');
+  doc.text('HABATECH © 2026 — Siguiri, Guinée',M,22);
+  doc.text('Tel: +224 | Email: contact@habatech.com',M,28);
+
+  // Badge FACTURE
+  doc.setFillColor(16,185,129);doc.roundedRect(W-60,8,50,18,3,3,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(14);doc.setFont('helvetica','bold');
+  doc.text('FACTURE',W-35,20,{align:'center'});
+
+  y=45;
+  // Infos facture
+  doc.setTextColor(30,40,60);doc.setFontSize(10);doc.setFont('helvetica','bold');
+  doc.text('N° : '+v.num,M,y);
+  doc.setFont('helvetica','normal');doc.setFontSize(9);
+  doc.text('Date : '+v.date,M,y+6);
+  doc.text('Paiement : '+v.paiement,M,y+12);
+
+  // Infos client
+  if(c){
+    doc.setFont('helvetica','bold');doc.setFontSize(10);
+    doc.text('FACTURÉ À :',W-80,y);
+    doc.setFont('helvetica','normal');doc.setFontSize(9);
+    doc.text(c.nom,W-80,y+6);
+    if(c.tel)doc.text(c.tel,W-80,y+12);
+    if(c.adresse)doc.text(c.adresse,W-80,y+18);
+  }
+
+  y=75;
+  // Ligne séparatrice
+  doc.setDrawColor(16,185,129);doc.setLineWidth(0.5);doc.line(M,y,W-M,y);y+=8;
+
+  // En-tête tableau
+  doc.setFillColor(30,41,59);doc.rect(M,y,W-2*M,8,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(9);doc.setFont('helvetica','bold');
+  doc.text('Désignation',M+3,y+5.5);
+  doc.text('Qté',M+95,y+5.5,{align:'center'});
+  doc.text('P.U.',M+120,y+5.5,{align:'right'});
+  doc.text('Total',W-M-3,y+5.5,{align:'right'});
+  y+=10;
+
+  // Lignes articles
+  doc.setTextColor(30,40,60);doc.setFont('helvetica','normal');
+  (v.lignes||[]).forEach((l,i)=>{
+    if(i%2===0){doc.setFillColor(248,250,252);doc.rect(M,y-1,W-2*M,7,'F');}
+    doc.setFontSize(9);
+    doc.text(l.produit||'—',M+3,y+4.5);
+    doc.text(String(l.qte),M+95,y+4.5,{align:'center'});
+    doc.text(gnf(l.prix),M+120,y+4.5,{align:'right'});
+    doc.text(gnf(l.qte*l.prix),W-M-3,y+4.5,{align:'right'});
+    y+=7;
+  });
+
+  y+=4;
+  // Total
+  doc.setDrawColor(16,185,129);doc.line(M,y,W-M,y);y+=6;
+  doc.setFillColor(15,23,42);doc.roundedRect(W-75,y,60,12,2,2,'F');
+  doc.setTextColor(245,158,11);doc.setFontSize(12);doc.setFont('helvetica','bold');
+  doc.text('TOTAL : '+gnf(v.montant),W-M-3,y+8,{align:'right'});
+
+  y+=20;
+  // Pied de page
+  doc.setTextColor(148,163,184);doc.setFontSize(8);doc.setFont('helvetica','italic');
+  doc.text('Merci pour votre confiance ! — MANFRA-SHOP, HABATECH © 2026',W/2,y,{align:'center'});
+
+  doc.save('Facture-'+v.num+'.pdf');
+  toast('📄 Facture PDF générée','success');
+  logAction('VENTE','Facture PDF générée: '+v.num);
+}
+
 function printTicket(id){
   const v=D.ventes.find(x=>x.id===id);if(!v)return;
   const c=v.client_id?D.clients.find(x=>x.id===v.client_id):null;
