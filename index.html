@@ -1135,7 +1135,7 @@ select option{background:var(--bg2);}
               </div>
             </div>
             <p style="font-size:11.5px;color:var(--text2);line-height:1.5;margin-bottom:12px">Efface toutes les ventes, produits, mouvements, clients et dépenses, puis restaure les données d'exemple du mode démo.</p>
-            <button class="btn btn-sm" style="background:var(--orange);color:#fff;border-color:var(--orange);width:100%;justify-content:center" onclick="doReset()">🔄 Réinitialiser les données démo</button>
+            <button class="btn btn-sm" style="background:var(--orange);color:#fff;border-color:var(--orange);width:100%;justify-content:center" onclick="doReset()">🗑️ Réinitialiser toutes les données</button>
           </div>
 
           <!-- Passer en production -->
@@ -1783,9 +1783,13 @@ function afterLogin(){
 function doLogout(){logAction('LOGOUT','Déconnexion: '+(CU?.nom||'?'));if(sb)sb.auth.signOut();CU=null;document.getElementById('login-screen').style.display='flex';document.getElementById('l-pass').value='';}
 
 function doReset(){
-  if(!confirm('⚠️ Réinitialiser toutes les données ?\n\nCeci effacera ventes, produits, mouvements, dépenses, clients et retours. Les données démo seront restaurées.\n\nCette action est irréversible.'))return;
-  ['db_p','db_m','db_v','db_c','db_f','db_u','db_cl','db_dp','db_rt','db_j','db_cats'].forEach(k=>localStorage.removeItem(k));
-  // Recharger la page pour réinitialiser D avec les données démo
+  if(!confirm('⚠️ Réinitialiser toutes les données ?\n\nCeci effacera définitivement : ventes, produits, mouvements, dépenses, clients, commandes et retours.\n\nCette action est IRRÉVERSIBLE.'))return;
+  // Vider toutes les données
+  ['db_p','db_m','db_v','db_c','db_f','db_cl','db_dp','db_rt','db_j'].forEach(k=>localStorage.removeItem(k));
+  // Réinitialiser D en mémoire
+  D.produits=[];D.mouvements=[];D.ventes=[];D.commandes=[];D.fournisseurs=[];
+  D.clients=[];D.depenses=[];D.retours=[];D.journal=[];
+  // Garder utilisateurs et catégories
   logAction('UPDATE','Réinitialisation complète des données');
   toast('✅ Données réinitialisées — rechargement…','success');
   setTimeout(()=>location.reload(),1200);
