@@ -2,6 +2,12 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MANFRA-SHOP">
+<meta name="description" content="Gestion de boutique HABATECH">
+<link rel="manifest" id="pwa-manifest">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0F172A">
 <title>MANFRA-SHOP — HABATECH</title>
@@ -729,6 +735,7 @@ select option{background:var(--bg2);}
       <button class="mode-btn active-local" id="tb-mode-local" onclick="switchMode('local')" title="Mode Local (hors ligne)">💾 Local</button>
       <button class="mode-btn" id="tb-mode-cloud" onclick="switchMode('cloud')" title="Mode Cloud (Supabase)">☁️ Cloud</button>
     </div>
+    <button id="pwa-install-btn" class="tbtn" onclick="installPWA()" title="Installer l'app" style="display:none;background:var(--green);border-color:var(--green);color:#fff">📲 <span class="tlabel">Installer</span></button>
     <button class="tbtn" onclick="openPOS()" title="Mode caisse" style="background:var(--orange);border-color:var(--orange);color:#fff">⚡ <span class="tlabel">POS</span></button>
     <button class="tbtn" id="ai-open-btn" onclick="toggleAI()" title="Assistant IA" style="background:linear-gradient(135deg,var(--purple),var(--blue));border-color:var(--purple);color:#fff;box-shadow:0 0 12px var(--purple-glow)">🤖 <span class="tlabel">IA</span></button>
   </div>
@@ -4184,12 +4191,78 @@ function toast(msg,type='info'){
 }
 
 // ═══════════════════════════════
-//  PWA
+//  PWA — Manifest + Service Worker
 // ═══════════════════════════════
+(function(){
+  const manifest={
+    name:'MANFRA-SHOP — HABATECH',
+    short_name:'MANFRA',
+    description:'Système de gestion de boutique',
+    start_url:window.location.href,
+    display:'standalone',
+    background_color:'#0F172A',
+    theme_color:'#0F172A',
+    orientation:'portrait-primary',
+    icons:[
+      {src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%231E3A5F'/%3E%3Ctext x='96' y='135' font-size='110' text-anchor='middle' fill='%23F59E0B' font-family='Arial'%3EM%3C/text%3E%3C/svg%3E",sizes:'192x192',type:'image/svg+xml'},
+      {src:"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%231E3A5F'/%3E%3Ctext x='256' y='360' font-size='300' text-anchor='middle' fill='%23F59E0B' font-family='Arial'%3EM%3C/text%3E%3C/svg%3E",sizes:'512x512',type:'image/svg+xml'}
+    ]
+  };
+  const mblob=new Blob([JSON.stringify(manifest)],{type:'application/json'});
+  const mel=document.getElementById('pwa-manifest');
+  if(mel)mel.href=URL.createObjectURL(mblob);
+})();
+
 if('serviceWorker' in navigator){
-  const sw=`self.addEventListener('install',e=>e.waitUntil(caches.open('hbv2').then(c=>c.addAll(['/']))));self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).catch(()=>caches.match(e.request))));`;
-  const blob=new Blob([sw],{type:'application/javascript'});
-  navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+  const CACHE_NAME='manfra-shop-v1';
+  const sw=`
+const CACHE='manfra-shop-v1';
+self.addEventListener('install',e=>{
+  e.waitUntil(caches.open(CACHE).then(c=>c.addAll([])).then(()=>self.skipWaiting()));
+});
+self.addEventListener('activate',e=>{
+  e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));
+});
+self.addEventListener('fetch',e=>{
+  const u=new URL(e.request.url);
+  if(u.hostname.includes('supabase.co')||u.hostname.includes('googleapis')||u.hostname.includes('jsdelivr')||u.hostname.includes('cdnjs')){
+    return;
+  }
+  e.respondWith(
+    fetch(e.request).then(res=>{
+      if(res&&res.status===200){
+        const clone=res.clone();
+        caches.open(CACHE).then(c=>c.put(e.request,clone));
+      }
+      return res;
+    }).catch(()=>caches.match(e.request).then(r=>r||new Response('<html><body style="font-family:sans-serif;text-align:center;padding:50px;background:#0F172A;color:white"><h1>📦 MANFRA-SHOP</h1><p>Mode hors ligne actif</p><button onclick="location.reload()" style="padding:10px 20px;background:#3B82F6;color:white;border:none;border-radius:8px;cursor:pointer">Réessayer</button></body></html>',{headers:{'Content-Type':'text/html'}})))
+  );
+});
+self.addEventListener('message',e=>{if(e.data==='skipWaiting')self.skipWaiting();});
+`;
+  const swblob=new Blob([sw],{type:'application/javascript'});
+  navigator.serviceWorker.register(URL.createObjectURL(swblob)).then(reg=>{
+    console.log('✅ SW installé');
+  }).catch(e=>console.warn('SW:',e));
+
+  let deferredPrompt=null;
+  window.addEventListener('beforeinstallprompt',e=>{
+    e.preventDefault();deferredPrompt=e;
+    const btn=document.getElementById('pwa-install-btn');
+    if(btn)btn.style.display='flex';
+  });
+  window.installPWA=function(){
+    if(!deferredPrompt)return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(()=>{
+      deferredPrompt=null;
+      const btn=document.getElementById('pwa-install-btn');
+      if(btn)btn.style.display='none';
+    });
+  };
+  window.addEventListener('appinstalled',()=>{
+    toast('✅ MANFRA-SHOP installé !','success');
+  });
 }
 
 // ═══════════════════════════════
