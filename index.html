@@ -1782,17 +1782,31 @@ function afterLogin(){
 }
 function doLogout(){logAction('LOGOUT','Déconnexion: '+(CU?.nom||'?'));if(sb)sb.auth.signOut();CU=null;document.getElementById('login-screen').style.display='flex';document.getElementById('l-pass').value='';}
 
-function doReset(){
+async function doReset(){
   if(!confirm('⚠️ Réinitialiser toutes les données ?\n\nCeci effacera définitivement : ventes, produits, mouvements, dépenses, clients, commandes et retours.\n\nCette action est IRRÉVERSIBLE.'))return;
-  // Vider toutes les données
+
+  toast('🔄 Suppression en cours…','info');
+
+  // 1. Vider localStorage
   ['db_p','db_m','db_v','db_c','db_f','db_cl','db_dp','db_rt','db_j'].forEach(k=>localStorage.removeItem(k));
-  // Réinitialiser D en mémoire
+
+  // 2. Vider Supabase si mode cloud
+  if(ACCESS_MODE==='cloud'&&sb){
+    const tables=['mouvements','ventes','commandes','fournisseurs','clients','depenses','retours','journal','produits'];
+    for(const t of tables){
+      try{
+        // Supprimer toutes les lignes (filtre id > 0 pour contourner la restriction delete sans filtre)
+        await sb.from(t).delete().gt('id',0);
+      }catch(e){console.warn('Reset',t,e);}
+    }
+  }
+
+  // 3. Réinitialiser D en mémoire
   D.produits=[];D.mouvements=[];D.ventes=[];D.commandes=[];D.fournisseurs=[];
   D.clients=[];D.depenses=[];D.retours=[];D.journal=[];
-  // Garder utilisateurs et catégories
-  logAction('UPDATE','Réinitialisation complète des données');
+
   toast('✅ Données réinitialisées — rechargement…','success');
-  setTimeout(()=>location.reload(),1200);
+  setTimeout(()=>location.reload(),1500);
 }
 
 // ── Passage en mode production ──
