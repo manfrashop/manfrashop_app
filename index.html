@@ -2537,7 +2537,77 @@ async function saveCmd(){
   D.commandes.unshift(nc);if(sb)await sb.from('commandes').insert(nc);
   sv('db_c','commandes');closeM('m-cmd');rdCmds();toast('Commande envoyée','success');
 }
-function updCmd(id,st){const c=D.commandes.find(x=>x.id===id);if(c){c.statut=st;sv('db_c','commandes');rdCmds();toast('Commande mise à jour','success');}}
+function updCmd(id,st){
+  const c=D.commandes.find(x=>x.id===id);if(!c)return;
+  if(st==='livree'){
+    // Ouvrir modal de réception de stock
+    openReception(id);return;
+  }
+  c.statut=st;sv('db_c','commandes');rdCmds();toast('Commande mise à jour','success');
+}
+
+function openReception(cmdId){
+  const c=D.commandes.find(x=>x.id===cmdId);if(!c)return;
+  const prods=D.produits.filter(p=>p.statut!=='inactif');
+  const opts=prods.map(p=>`<option value="${p.id}">${p.designation} (stock: ${p.stock} ${p.unite||''})</option>`).join('');
+  const html=`
+  <div style="padding:16px">
+    <h3 style="margin:0 0 12px;color:var(--text)">📥 Réception — ${c.num}</h3>
+    <p style="color:var(--text2);font-size:13px;margin:0 0 16px">Fournisseur: <b>${c.fourn}</b></p>
+    <div id="recep-lines" style="display:flex;flex-direction:column;gap:8px"></div>
+    <button onclick="addRecepLine('${opts}')" class="btn btn-secondary" style="margin-top:8px;width:100%">+ Ajouter un produit</button>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-primary" style="flex:1" onclick="confirmReception(${cmdId})">✅ Confirmer réception</button>
+      <button class="btn" style="flex:1" onclick="closeM('m-recep')">Annuler</button>
+    </div>
+  </div>`;
+  let m=document.getElementById('m-recep');
+  if(!m){m=document.createElement('div');m.id='m-recep';m.className='modal';document.body.appendChild(m);}
+  m.innerHTML=`<div class="modal-box" style="max-width:500px">${html}</div>`;
+  m.style.display='flex';
+  addRecepLine(opts);
+}
+
+function addRecepLine(opts){
+  const container=document.getElementById('recep-lines');if(!container)return;
+  const div=document.createElement('div');
+  div.style.cssText='display:flex;gap:8px;align-items:center';
+  div.innerHTML=`<select style="flex:2;padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text)">${opts}</select>
+  <input type="number" min="1" value="1" placeholder="Qté" style="flex:1;padding:8px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--r-sm);color:var(--text)">
+  <button onclick="this.parentElement.remove()" style="background:var(--red-glow);color:var(--red);border:none;border-radius:6px;padding:6px 10px;cursor:pointer">✕</button>`;
+  container.appendChild(div);
+}
+
+function confirmReception(cmdId){
+  const c=D.commandes.find(x=>x.id===cmdId);if(!c)return;
+  const lines=document.querySelectorAll('#recep-lines > div');
+  if(!lines.length){toast('Ajoutez au moins un produit','error');return;}
+  let count=0;
+  lines.forEach(div=>{
+    const sel=div.querySelector('select');
+    const inp=div.querySelector('input');
+    if(!sel||!inp)return;
+    const pid=+sel.value, qte=+inp.value;
+    if(!pid||!qte||qte<=0)return;
+    const p=D.produits.find(x=>x.id===pid);if(!p)return;
+    p.stock+=qte;count++;
+    D.mouvements.unshift({
+      id:nid('mouvements'),
+      date:new Date().toISOString().slice(0,16).replace('T',' '),
+      type:'entree',produit_id:pid,
+      produit:p.designation,qte,
+      ref:c.num,
+      user:CU?.nom||'Admin'
+    });
+  });
+  if(!count){toast('Aucun produit valide','error');return;}
+  c.statut='livree';
+  recalcEtats();
+  sv('db_p','produits');sv('db_m','mouvements');sv('db_c','commandes');
+  closeM('m-recep');rdCmds();rdProduits();rdMvt();updateKPIs();computeAlerts();
+  logAction('MOUVEMENT',`Réception ${c.num} — ${count} produit(s) approvisionné(s)`);
+  toast(`✅ Réception confirmée — ${count} produit(s) mis en stock`,'success');
+}
 function delCmd(id){if(!confirm('Supprimer ?'))return;D.commandes=D.commandes.filter(c=>c.id!==id);sv('db_c','commandes');rdCmds();toast('Commande supprimée','warning');}
 
 // ═══════════════════════════════
