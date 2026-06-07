@@ -586,8 +586,23 @@ select option{background:var(--bg2);}
 .mcard-sbar{height:6px;background:var(--bg3);border-radius:3px;margin-top:6px;overflow:hidden;}
 .mcard-sbar-fill{height:100%;border-radius:3px;transition:width .4s;}
 
+/* ── MULTI-PDV ── */
+#pdv-select{
+  background:transparent;border:none;
+  color:var(--text);font-size:12px;font-weight:600;
+  font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;
+  max-width:160px;
+}
+#pdv-select option{background:var(--bg2);color:var(--text);}
+.pdv-tag{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:10px;font-weight:700;padding:2px 8px;
+  border-radius:10px;background:var(--blue-glow);
+  color:var(--blue);border:1px solid rgba(59,130,246,.3);
+  white-space:nowrap;
+}
+
 </style>
-</head>
 <body>
 
 <!-- LOGIN -->
@@ -698,11 +713,13 @@ select option{background:var(--bg2);}
     <div class="nav-item" onclick="goPage('clients',this)"><span class="nav-icon">👥</span>Clients / Crédit</div>
     <div class="nav-item" onclick="goPage('inventaire',this)"><span class="nav-icon">🔍</span>Inventaire</div>
     <div class="nav-section">Gestion</div>
+    <div class="nav-item" onclick="goPage('caisse',this)"><span class="nav-icon">🏦</span>Caisse / Règlement</div>
     <div class="nav-item" onclick="goPage('depenses',this)"><span class="nav-icon">💸</span>Dépenses</div>
     <div class="nav-item" onclick="goPage('retours',this)"><span class="nav-icon">🔁</span>Retours</div>
     <div class="nav-item" onclick="goPage('alertes',this)"><span class="nav-icon">🔔</span>Alertes<span class="nav-badge" id="nbadge" style="display:none">0</span></div>
     <div class="nav-item" onclick="goPage('rapports',this)"><span class="nav-icon">📊</span>Rapports</div>
     <div class="nav-item admin-only" onclick="goPage('admin',this)"><span class="nav-icon">⚙️</span>Administration</div>
+    <div class="nav-item admin-only" onclick="goPage('points-vente',this)"><span class="nav-icon">🏪</span>Points de vente</div>
     <div class="nav-item admin-only" onclick="goPage('journal',this)"><span class="nav-icon">🗒️</span>Journal d'audit</div>
   </nav>
   <div class="sidebar-footer">
@@ -724,6 +741,11 @@ select option{background:var(--bg2);}
       <div id="gs-results" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-sm);z-index:200;max-height:280px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.5)"></div>
     </div>
     <div class="sse-dot"></div><span class="sse-label" id="sse-lbl">Local</span>
+    <!-- SÉLECTEUR POINT DE VENTE -->
+    <div style="display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:22px;padding:3px 10px;flex-shrink:0;max-width:220px">
+      <span style="font-size:13px">📍</span>
+      <select id="pdv-select" onchange="setPDV(this.value)" style="background:transparent;border:none;color:var(--text);font-size:12px;font-weight:600;font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;max-width:150px"></select>
+    </div>
     <div id="style-picker" title="Choisir le style visuel">
       <span class="sp-label">Style</span>
       <button class="sp-btn active" data-s="navy" onclick="setStyle('navy')" title="Dark Navy"></button>
@@ -878,6 +900,9 @@ select option{background:var(--bg2);}
         <option value="">Tous modes</option>
         <option>Espèces</option><option>Orange Money</option><option>MTN Money</option><option>Virement</option>
       </select>
+      <select id="sv-pdv" onchange="rdVentes()" style="max-width:180px">
+        <option value="">Tous PDV</option>
+      </select>
       <button class="btn btn-outline" onclick="xExcel('ventes')">📥 Excel</button>
       <button class="btn btn-primary" onclick="openM('m-vente')">🛒 Nouvelle vente</button>
     </div>
@@ -889,7 +914,7 @@ select option{background:var(--bg2);}
     </div>
     <div class="card mob-table">
       <div class="tw"><table><thead><tr>
-        <th>N° Vente</th><th>Date</th><th>Articles</th><th>Montant TTC</th><th>Paiement</th><th>Statut</th><th>Actions</th>
+        <th>N° Vente</th><th>Date</th><th>Articles</th><th>Montant TTC</th><th>Paiement</th><th>PDV</th><th>Statut</th><th>Actions</th>
       </tr></thead><tbody id="tb-ventes"></tbody></table></div>
       <div class="pagination" id="pg-ventes"></div>
     </div>
@@ -1197,6 +1222,63 @@ select option{background:var(--bg2);}
   </section>
 
 
+  <!-- POINTS DE VENTE -->
+  <section class="section admin-only" id="s-points-vente">
+    <div class="kpi-grid" style="margin-bottom:16px">
+      <div class="kpi" style="--kc:var(--blue);--kb:var(--blue-glow)"><div class="kpi-icon">🏪</div><div><div class="kpi-val" id="pdv-nb">—</div><div class="kpi-label">Points de vente</div><div class="kpi-delta delta-up" id="pdv-actifs">actifs</div></div></div>
+      <div class="kpi" style="--kc:var(--green);--kb:var(--green-glow)"><div class="kpi-icon">💰</div><div><div class="kpi-val" id="pdv-ca-total">—</div><div class="kpi-label">CA total (mois)</div><div class="kpi-delta">tous PDV</div></div></div>
+      <div class="kpi" style="--kc:var(--purple);--kb:var(--purple-glow)"><div class="kpi-icon">🛒</div><div><div class="kpi-val" id="pdv-ventes-total">—</div><div class="kpi-label">Ventes totales (mois)</div><div class="kpi-delta">tous PDV</div></div></div>
+      <div class="kpi" style="--kc:var(--orange);--kb:var(--orange-glow)"><div class="kpi-icon">📍</div><div><div class="kpi-val" id="pdv-actif-nom">—</div><div class="kpi-label">PDV actif (session)</div><div class="kpi-delta delta-up">en cours</div></div></div>
+    </div>
+    <div class="g2eq" style="margin-bottom:16px">
+      <!-- Formulaire ajout/édition PDV -->
+      <div class="card">
+        <div class="card-head">
+          <h3 id="pdv-form-title">➕ Nouveau Point de vente</h3>
+          <button class="btn btn-outline btn-sm" id="pdv-cancel-btn" onclick="resetPDVForm()" style="display:none">✕ Annuler</button>
+        </div>
+        <div class="card-body">
+          <input type="hidden" id="pdv-edit-id">
+          <div class="fg">
+            <div class="ff"><label>Nom du point de vente *</label><input id="pdv-nom" placeholder="Ex: Boutique Madina"></div>
+            <div><label>Code (référence)</label><input id="pdv-code" placeholder="PDV-002"></div>
+            <div><label>Couleur</label><input type="color" id="pdv-color" value="#3B82F6" style="height:38px;padding:4px 8px"></div>
+            <div class="ff"><label>Adresse</label><input id="pdv-adresse" placeholder="Quartier, ville…"></div>
+            <div class="ff"><label>Responsable</label><input id="pdv-resp" placeholder="Nom du responsable"></div>
+            <div><label>Téléphone</label><input id="pdv-tel" placeholder="+224 6xx xxx xxx"></div>
+            <div><label>Statut</label>
+              <select id="pdv-statut">
+                <option value="actif">✅ Actif</option>
+                <option value="inactif">⛔ Inactif</option>
+                <option value="ferme">🔒 Fermé</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:14px;display:flex;gap:8px">
+            <button class="btn btn-primary" onclick="savePDV()">💾 Enregistrer</button>
+          </div>
+        </div>
+      </div>
+      <!-- Comparatif CA inter-PDV -->
+      <div class="card">
+        <div class="card-head"><h3>📊 CA comparatif — Ce mois</h3></div>
+        <div class="card-body" id="pdv-chart-body">
+          <div class="chart-wrap" style="height:180px"><canvas id="ch-pdv-ca"></canvas></div>
+        </div>
+      </div>
+    </div>
+    <!-- Liste des PDV -->
+    <div class="card">
+      <div class="card-head">
+        <h3>🏪 Liste des Points de vente</h3>
+        <span style="font-size:11px;color:var(--text3)" id="pdv-count-lbl">0 PDV</span>
+      </div>
+      <div class="tw"><table><thead><tr>
+        <th>Code</th><th>Nom</th><th>Adresse</th><th>Responsable</th><th>Tél</th><th>CA mois</th><th>Ventes</th><th>Statut</th><th>Actions</th>
+      </tr></thead><tbody id="tb-pdv"></tbody></table></div>
+    </div>
+  </section>
+
   <!-- JOURNAL AUDIT -->
   <section class="section admin-only" id="s-journal">
     <div class="search-bar">
@@ -1219,6 +1301,87 @@ select option{background:var(--bg2);}
       </tr></thead><tbody id="tb-journal"></tbody></table></div>
       <div class="pagination" id="pg-journal"></div>
     </div>
+  </section>
+
+  <!-- CAISSE / RÈGLEMENT -->
+  <section class="section" id="s-caisse">
+    <!-- KPIs caisse -->
+    <div class="kpi-grid" style="margin-bottom:14px">
+      <div class="kpi" style="--kc:var(--green);--kb:var(--green-glow)">
+        <div class="kpi-icon">💵</div>
+        <div><div class="kpi-val" id="ck-solde">0 GNF</div><div class="kpi-label">Solde caisse actuel</div><div class="kpi-delta delta-up" id="ck-solde-delta">—</div></div>
+      </div>
+      <div class="kpi" style="--kc:var(--blue);--kb:var(--blue-glow)">
+        <div class="kpi-icon">📥</div>
+        <div><div class="kpi-val" id="ck-entrees">0 GNF</div><div class="kpi-label">Entrées aujourd'hui</div><div class="kpi-delta delta-up">encaissements</div></div>
+      </div>
+      <div class="kpi" style="--kc:var(--red);--kb:var(--red-glow)">
+        <div class="kpi-icon">📤</div>
+        <div><div class="kpi-val" id="ck-sorties">0 GNF</div><div class="kpi-label">Sorties aujourd'hui</div><div class="kpi-delta delta-dn">décaissements</div></div>
+      </div>
+      <div class="kpi" style="--kc:var(--orange);--kb:var(--orange-glow)">
+        <div class="kpi-icon">🧾</div>
+        <div><div class="kpi-val" id="ck-nb-mvt">0</div><div class="kpi-label">Mouvements auj.</div><div class="kpi-delta">opérations</div></div>
+      </div>
+    </div>
+    <!-- Barre de recherche + actions -->
+    <div class="search-bar">
+      <input type="date" id="sc-date" style="max-width:160px" onchange="rdCaisse()">
+      <select id="sc-type" onchange="rdCaisse()">
+        <option value="">Tous types</option>
+        <option value="entree">📥 Entrée</option>
+        <option value="sortie">📤 Sortie</option>
+        <option value="vente">🛒 Vente</option>
+        <option value="remboursement">🔁 Remboursement</option>
+        <option value="ouverture">🔓 Ouverture</option>
+        <option value="fermeture">🔒 Fermeture</option>
+      </select>
+      <select id="sc-pdv" onchange="rdCaisse()" style="max-width:180px">
+        <option value="">Tous PDV</option>
+      </select>
+      <button class="btn btn-outline" onclick="xExcelCaisse()">📥 Excel</button>
+      <button class="btn btn-success" onclick="openCaisseOuverture()" id="btn-caisse-ouv">🔓 Ouvrir caisse</button>
+      <button class="btn btn-primary" onclick="openM('m-caisse-mvt')">➕ Mouvement</button>
+    </div>
+    <!-- Résumé journée en cours -->
+    <div class="card" style="margin-bottom:14px" id="caisse-resume-card">
+      <div class="card-head">
+        <h3>📊 Résumé de la journée</h3>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span id="caisse-statut-badge" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;background:var(--green-glow);color:var(--green);border:1px solid rgba(16,185,129,.3)">🟢 Ouverte</span>
+          <button class="btn btn-danger btn-sm" onclick="fermerCaisse()" id="btn-caisse-ferm">🔒 Fermer caisse</button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px">
+          <div style="text-align:center;padding:12px;background:var(--bg3);border-radius:var(--r-sm)">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Fond ouverture</div>
+            <div style="font-size:16px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text)" id="cr-fond">—</div>
+          </div>
+          <div style="text-align:center;padding:12px;background:var(--bg3);border-radius:var(--r-sm)">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Total entrées</div>
+            <div style="font-size:16px;font-weight:700;font-family:'DM Mono',monospace;color:var(--green)" id="cr-entrees">—</div>
+          </div>
+          <div style="text-align:center;padding:12px;background:var(--bg3);border-radius:var(--r-sm)">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Total sorties</div>
+            <div style="font-size:16px;font-weight:700;font-family:'DM Mono',monospace;color:var(--red)" id="cr-sorties">—</div>
+          </div>
+          <div style="text-align:center;padding:12px;background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:var(--r-sm)">
+            <div style="font-size:10px;color:var(--text3);text-transform:uppercase;font-weight:700;margin-bottom:4px">Solde théorique</div>
+            <div style="font-size:16px;font-weight:700;font-family:'DM Mono',monospace;color:var(--blue)" id="cr-solde">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Tableau desktop -->
+    <div class="card mob-table">
+      <div class="tw"><table><thead><tr>
+        <th>Date / Heure</th><th>Type</th><th>Libellé</th><th>Référence</th><th>Entrée</th><th>Sortie</th><th>Solde</th><th>Opérateur</th><th>Actions</th>
+      </tr></thead><tbody id="tb-caisse"></tbody></table></div>
+      <div class="pagination" id="pg-caisse"></div>
+    </div>
+    <!-- Cartes mobile -->
+    <div class="mob-cards" id="mc-caisse"></div>
   </section>
 
   </div><!-- /content -->
@@ -1281,6 +1444,58 @@ select option{background:var(--bg2);}
 
 
 <!-- MODALS -->
+
+<!-- MOUVEMENT CAISSE -->
+<div class="overlay" id="m-caisse-mvt" onclick="closeOnBg(event,'m-caisse-mvt')">
+<div class="modal">
+  <div class="modal-head"><h3>🏦 Mouvement de Caisse</h3><span class="modal-close" onclick="closeM('m-caisse-mvt')">×</span></div>
+  <div class="modal-body">
+    <div class="fg">
+      <div><label>Type *</label>
+        <select id="cmvt-type" onchange="togCaisseRef()">
+          <option value="entree">📥 Entrée manuelle</option>
+          <option value="sortie">📤 Sortie / Décaissement</option>
+          <option value="remboursement">🔁 Remboursement client</option>
+        </select>
+      </div>
+      <div><label>Mode de règlement *</label>
+        <select id="cmvt-pay">
+          <option>Espèces</option>
+          <option>Orange Money</option>
+          <option>MTN Money</option>
+          <option>Virement bancaire</option>
+          <option>Chèque</option>
+        </select>
+      </div>
+      <div class="ff"><label>Libellé / Motif *</label><input id="cmvt-libelle" placeholder="Ex: Versement fournisseur, Recette complémentaire…"></div>
+      <div><label>Montant (GNF) *</label><input type="number" id="cmvt-montant" min="0" placeholder="0"></div>
+      <div><label>Référence document</label><input id="cmvt-ref" placeholder="Auto si vide"></div>
+      <div class="ff"><label>Notes</label><textarea id="cmvt-notes" rows="2" placeholder="Détails complémentaires…"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-outline" onclick="closeM('m-caisse-mvt')">Annuler</button>
+    <button class="btn btn-primary" onclick="saveCaisseMvt()">✅ Enregistrer</button>
+  </div>
+</div></div>
+
+<!-- OUVERTURE CAISSE -->
+<div class="overlay" id="m-caisse-ouv" onclick="closeOnBg(event,'m-caisse-ouv')">
+<div class="modal">
+  <div class="modal-head"><h3>🔓 Ouverture de Caisse</h3><span class="modal-close" onclick="closeM('m-caisse-ouv')">×</span></div>
+  <div class="modal-body">
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Saisissez le fond de caisse disponible au démarrage de la journée.</p>
+    <div class="fg">
+      <div class="ff"><label>Date d'ouverture</label><input type="date" id="couv-date"></div>
+      <div class="ff"><label>Fond de caisse initial (GNF) *</label><input type="number" id="couv-fond" min="0" placeholder="0" value="0"></div>
+      <div class="ff"><label>Notes</label><textarea id="couv-notes" rows="2" placeholder="Observations d'ouverture…"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-foot">
+    <button class="btn btn-outline" onclick="closeM('m-caisse-ouv')">Annuler</button>
+    <button class="btn btn-success" onclick="confirmerOuvertureCaisse()">🔓 Ouvrir la caisse</button>
+  </div>
+</div></div>
 
 <!-- PRODUIT -->
 <div class="overlay" id="m-prod" onclick="closeOnBg(event,'m-prod')">
@@ -1347,6 +1562,7 @@ select option{background:var(--bg2);}
       </div>
       <div class="ff"><label>Articles</label><div id="vl-list" class="hpanel" style="min-height:50px"><p style="color:var(--text3);font-size:12px;text-align:center;padding:8px">Aucun article</p></div></div>
       <div><label>Client (optionnel)</label><select id="v-client"><option value="">— Comptoir (anonyme) —</option></select></div>
+      <div><label>Point de vente</label><select id="v-pdv"></select></div>
       <div><label>Mode paiement</label><select id="v-pay" onchange="togCredit()"><option>Espèces</option><option>Orange Money</option><option>MTN Money</option><option>Virement</option><option value="credit">💳 À crédit</option></select></div>
       <div><label>Remise (GNF)</label><input type="number" id="v-rem" value="0" oninput="calcTotal()"></div>
       <div id="v-credit-row" style="display:none"><label>Acompte versé (GNF)</label><input type="number" id="v-acompte" value="0" oninput="calcTotal()" placeholder="0 = tout à crédit"></div>
@@ -1700,9 +1916,9 @@ function hideSync(){document.getElementById('sync-overlay').classList.remove('op
 // ── Chargement cloud ──
 async function syncFromCloud(){
   if(!sb)return;
-  const ts=['produits','mouvements','ventes','commandes','fournisseurs','utilisateurs','clients','depenses','retours'];
+  const ts=['produits','mouvements','ventes','commandes','fournisseurs','utilisateurs','clients','depenses','retours','caisses','points_vente'];
   const rs=await Promise.all(ts.map(async t=>{try{return await sb.from(t).select('*');}catch(e){return {data:null,error:true};}}));
-  const keyMap={produits:'db_p',mouvements:'db_m',ventes:'db_v',commandes:'db_c',fournisseurs:'db_f',utilisateurs:'db_u',clients:'db_cl',depenses:'db_dp',retours:'db_rt'};
+  const keyMap={produits:'db_p',mouvements:'db_m',ventes:'db_v',commandes:'db_c',fournisseurs:'db_f',utilisateurs:'db_u',clients:'db_cl',depenses:'db_dp',retours:'db_rt',caisses:'db_ca',points_vente:'db_pdv'};
   ts.forEach((t,i)=>{if(!rs[i].error&&rs[i].data&&rs[i].data.length){D[t]=rs[i].data;localStorage.setItem(keyMap[t],JSON.stringify(D[t]));}});
   recalcEtats();rdAll();computeAlerts();updateKPIs();initDashCharts();
 }
@@ -1721,6 +1937,8 @@ async function pushToCloud(){
       {name:'clients',key:'db_cl'},
       {name:'depenses',key:'db_dp'},
       {name:'retours',key:'db_rt'},
+      {name:'caisses',key:'db_ca'},
+      {name:'points_vente',key:'db_pdv'},
     ];
     for(const t of tables){
       if(D[t.name]&&D[t.name].length){
@@ -1816,6 +2034,11 @@ function afterLogin(){
   document.querySelectorAll('.admin-only').forEach(el=>el.style.display=CU.role==='admin'?'':'none');
   logAction('LOGIN','Connexion: '+CU.nom+' ('+CU.role+')');
   resetTimeout();
+  // Initialiser PDV actif
+  if(!CURRENT_PDV&&D.points_vente.length>0){
+    CURRENT_PDV=D.points_vente[0];
+    sessionStorage.setItem('current_pdv',JSON.stringify(CURRENT_PDV));
+  }
   reqNotifPerm();
   loadAll();
 }
@@ -1827,7 +2050,7 @@ async function doReset(){
   toast('🔄 Suppression en cours…','info');
 
   // 1. Vider localStorage
-  ['db_p','db_m','db_v','db_c','db_f','db_cl','db_dp','db_rt','db_j'].forEach(k=>localStorage.removeItem(k));
+  ['db_p','db_m','db_v','db_c','db_f','db_cl','db_dp','db_rt','db_j','db_ca','db_pdv'].forEach(k=>localStorage.removeItem(k));
 
   // 2. Vider Supabase si mode cloud
   if(ACCESS_MODE==='cloud'&&sb){
@@ -1842,7 +2065,7 @@ async function doReset(){
 
   // 3. Réinitialiser D en mémoire
   D.produits=[];D.mouvements=[];D.ventes=[];D.commandes=[];D.fournisseurs=[];
-  D.clients=[];D.depenses=[];D.retours=[];D.journal=[];
+  D.clients=[];D.depenses=[];D.retours=[];D.journal=[];D.caisses=[];D.points_vente=[];
 
   toast('✅ Données réinitialisées — rechargement…','success');
   setTimeout(()=>location.reload(),1500);
@@ -1887,7 +2110,7 @@ function doProdReset(){
   const newKey=(document.getElementById('prod-sb-key')?.value||'').trim();
 
   // 1. Supprimer toutes les données démo + config
-  const allKeys=['db_p','db_m','db_v','db_c','db_f','db_u','db_cl','db_dp','db_rt','db_j','db_cats','sb_url','sb_key','access_mode'];
+  const allKeys=['db_p','db_m','db_v','db_c','db_f','db_u','db_cl','db_dp','db_rt','db_j','db_cats','db_ca','sb_url','sb_key','access_mode'];
   allKeys.forEach(k=>localStorage.removeItem(k));
 
   // 2. Sauvegarder les nouvelles creds si fournies
@@ -1921,6 +2144,7 @@ let D={
   depenses:JSON.parse(localStorage.getItem('db_dp')||'null')||[],
   retours:JSON.parse(localStorage.getItem('db_rt')||'null')||[],
   journal:JSON.parse(localStorage.getItem('db_j')||'null')||[],
+  caisses:JSON.parse(localStorage.getItem('db_ca')||'null')||[],
   utilisateurs:JSON.parse(localStorage.getItem('db_u')||'null')||[
     {id:1,nom:'Honoris HABA',email:'admin@habatech.com',role:'admin',statut:'actif'},
   ],
@@ -1930,7 +2154,48 @@ let D={
     {id:3,slug:'accessoire',   nom:'Accessoires',    emoji:'🔧', couleur:'#8B5CF6', perishable:false},
     {id:4,slug:'autre',        nom:'Autres',          emoji:'📦', couleur:'#64748B', perishable:false},
   ],
+  points_vente:JSON.parse(localStorage.getItem('db_pdv')||'null')||[
+    {id:1,nom:'Boutique Principale',code:'PDV-001',adresse:'Conakry, Kaloum',responsable:'Honoris HABA',tel:'',statut:'actif',couleur:'#3B82F6'},
+  ],
 };
+
+// ── Point de vente actif (session) ──
+let CURRENT_PDV = JSON.parse(sessionStorage.getItem('current_pdv')||'null') || null;
+function getPDV(){return CURRENT_PDV || D.points_vente[0] || null;}
+function getPDVId(){return getPDV()?.id||null;}
+function setPDV(id){
+  const pdv=D.points_vente.find(p=>p.id===+id);
+  if(!pdv)return;
+  CURRENT_PDV=pdv;
+  sessionStorage.setItem('current_pdv',JSON.stringify(pdv));
+  updatePDVUI();
+  rdVentes();rdCaisse();rdDepenses();updateKPIs();initDashCharts();
+  toast('📍 PDV actif : '+pdv.nom,'info');
+  logAction('UPDATE','Changement PDV : '+pdv.nom);
+}
+function updatePDVUI(){
+  const pdv=getPDV();
+  // Sélecteur topbar
+  const sel=document.getElementById('pdv-select');
+  if(sel&&pdv)sel.value=pdv.id;
+  // Badge topbar
+  const badge=document.getElementById('pdv-badge');
+  if(badge&&pdv){badge.textContent='📍 '+pdv.nom;badge.style.borderColor=pdv.couleur||'var(--blue)';}
+  // Titre brand sidebar
+  const sub=document.querySelector('.brand-sub');
+  if(sub&&pdv){sub.textContent=pdv.nom;}
+}
+function fillPDVSelects(){
+  const opts=D.points_vente.filter(p=>p.statut!=='ferme').map(p=>`<option value="${p.id}">${p.nom}</option>`).join('');
+  const sel=document.getElementById('pdv-select');
+  if(sel){sel.innerHTML=opts;const pdv=getPDV();if(pdv)sel.value=pdv.id;}
+  // Select ventes filtre
+  const svPdv=document.getElementById('sv-pdv');
+  if(svPdv)svPdv.innerHTML='<option value="">Tous PDV</option>'+opts;
+  // Select caisse filtre
+  const scPdv=document.getElementById('sc-pdv');
+  if(scPdv)scPdv.innerHTML='<option value="">Tous PDV</option>'+opts;
+}
 function nid(t){return D[t].length?Math.max(...D[t].map(x=>x.id))+1:1;}
 // ── Génération automatique de référence ──
 function autoRef(prefix,table){
@@ -1951,7 +2216,7 @@ async function loadAll(){
   if(fEl)fEl.value=todayR.slice(0,7)+'-01';
   if(tEl)tEl.value=todayR;
 }
-function rdAll(){rdProduits();rdMvt();rdVentes();rdCmds();rdInv();rdAlerts();rdFourn();rdUsers();rdClients();rdJournal();rdDepenses();rdRetours();fillSelects();rdCategories();}
+function rdAll(){rdProduits();rdMvt();rdVentes();rdCmds();rdInv();rdAlerts();rdFourn();rdUsers();rdClients();rdJournal();rdDepenses();rdRetours();rdCaisse();fillSelects();rdCategories();rdPDV();fillPDVSelects();updatePDVUI();}
 
 // ═══════════════════════════════
 //  SYSTÈME 3 STYLES VISUELS
@@ -2023,7 +2288,7 @@ function goPage(pg,el){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   const s=document.getElementById('s-'+pg);if(s)s.classList.add('active');
   if(el)el.classList.add('active');
-  document.getElementById('page-title').textContent={dashboard:'Dashboard',produits:'Produits',mouvements:'Mouvements',ventes:'Ventes',commandes:'Commandes',inventaire:'Inventaire',alertes:'Alertes',rapports:'Rapports',admin:'Administration',clients:'Clients / Crédit',journal:'Journal d\'audit',depenses:'Dépenses',retours:'Retours / Remboursements'}[pg]||pg;
+  document.getElementById('page-title').textContent={dashboard:'Dashboard',produits:'Produits',mouvements:'Mouvements',ventes:'Ventes',commandes:'Commandes',inventaire:'Inventaire',alertes:'Alertes',rapports:'Rapports',admin:'Administration','points-vente':'Points de vente',clients:'Clients / Crédit',journal:'Journal d\'audit',depenses:'Dépenses',retours:'Retours / Remboursements',caisse:'Caisse / Règlement'}[pg]||pg;
   if(pg==='rapports')setTimeout(()=>refreshRapports(),100);
   if(pg==='admin'){const l=document.getElementById('admin-mode-label');if(l)l.textContent=ACCESS_MODE==='cloud'?'☁️ Cloud':'💾 Local';}
   if(window.innerWidth<=768)closeSB();
@@ -2043,7 +2308,7 @@ function gf(t){
     return D.produits.filter(p=>(!q||p.designation.toLowerCase().includes(q)||p.code.toLowerCase().includes(q))&&(!cat||p.categorie===cat)&&(!et||p.etat===et));
   }
   if(t==='m'){const tp=document.getElementById('sm-type').value,dt=document.getElementById('sm-date').value;return D.mouvements.filter(m=>(!tp||m.type===tp)&&(!dt||(m.date||'').startsWith(dt)));}
-  if(t==='v'){const dt=document.getElementById('sv-date').value,py=document.getElementById('sv-pay').value;return D.ventes.filter(v=>(!dt||(v.date||'').startsWith(dt))&&(!py||v.paiement===py));}
+  if(t==='v'){const dt=document.getElementById('sv-date').value,py=document.getElementById('sv-pay').value,pdvF=document.getElementById('sv-pdv')?.value||'';return D.ventes.filter(v=>(!dt||(v.date||'').startsWith(dt))&&(!py||v.paiement===py)&&(!pdvF||v.point_vente_id===+pdvF));}
   return[];
 }
 function rdPag(id,t,tot){
@@ -2190,17 +2455,20 @@ function rdMvt(){
 
 function rdVentes(){
   const fil=[...gf('v')].sort((a,b)=>(b.date||'').localeCompare(a.date||'')),page=pg(fil,PG.v);
-  document.getElementById('tb-ventes').innerHTML=page.length?page.map(v=>`<tr>
+  document.getElementById('tb-ventes').innerHTML=page.length?page.map(v=>{
+    const pdvNom=v.point_vente_nom||(v.point_vente_id?D.points_vente.find(p=>p.id===v.point_vente_id)?.nom:'')|| '';
+    return`<tr>
     <td><code>${v.num}</code></td>
     <td style="font-size:11px;color:var(--text3)">${fdt(v.date)}</td>
     <td>${v.articles} art.</td>
     <td style="font-family:'DM Mono',monospace;color:var(--green);font-weight:700">${gnf(v.montant)}</td>
     <td>${v.paiement}</td>
+    <td>${pdvNom?`<span style="font-size:10px;padding:2px 7px;border-radius:10px;background:var(--blue-glow);color:var(--blue);border:1px solid rgba(59,130,246,.3)">${pdvNom}</span>`:'<span style="color:var(--text3);font-size:10px">—</span>'}</td>
     <td><span class="tag normal">${v.statut}</span></td>
     <td><button class="btn btn-outline btn-sm" onclick="printFacture(${v.id})" title="Facture PDF">🧾</button>
         <button class="btn btn-outline btn-sm" onclick="printTicket(${v.id})" title="Reçu thermique">🖨️</button><button class="btn btn-outline btn-sm" onclick="genFacturePDF(${v.id})" title="Facture PDF">📄</button>
         <button class="btn btn-outline btn-sm" onclick="openNewRetourFromVente(${v.id})" title="Retour">🔁</button></td>
-  </tr>`).join(''):`<tr><td colspan="7"><div class="empty"><div class="ico">🛒</div><p>Aucune vente</p></div></td></tr>`;
+  </tr>`;}).join(''):`<tr><td colspan="8"><div class="empty"><div class="ico">🛒</div><p>Aucune vente</p></div></td></tr>`;
   rdPag('pg-ventes','v',fil.length);
   // Cartes mobile
   const mc=document.getElementById('mc-ventes');if(!mc)return;
@@ -2358,9 +2626,11 @@ function updateKPIs(){
   const nbOk=D.produits.filter(p=>p.etat==='normal'||p.etat==='surstock').length;
   const nbKo=D.produits.filter(p=>p.etat==='critique'||p.etat==='rupture').length;
 
-  // Ventes
-  const ventesJour=D.ventes.filter(v=>(v.date||'').startsWith(today));
-  const ventesMois=D.ventes.filter(v=>(v.date||'').startsWith(curMonth));
+  // Ventes — filtrer par PDV actif si plusieurs PDV existent
+  const pdvId=getPDVId();
+  const pdvFilter=D.points_vente.length>1&&pdvId;
+  const ventesJour=D.ventes.filter(v=>(v.date||'').startsWith(today)&&(!pdvFilter||v.point_vente_id===pdvId));
+  const ventesMois=D.ventes.filter(v=>(v.date||'').startsWith(curMonth)&&(!pdvFilter||v.point_vente_id===pdvId));
   const caJour=ventesJour.reduce((s,v)=>s+v.montant,0);
   const caMois=ventesMois.reduce((s,v)=>s+v.montant,0);
   const ticketMoy=ventesMois.length?Math.round(caMois/ventesMois.length):0;
@@ -2388,9 +2658,9 @@ function updateKPIs(){
   // Mise à jour UI
   const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
   set('k-ca-jour',gnf(caJour));
-  set('k-ca-jour-nb',ventesJour.length+' vente(s)');
+  set('k-ca-jour-nb',ventesJour.length+' vente(s)'+(pdvFilter?' · '+getPDV()?.nom:''));
   set('k-ca-mois',gnf(caMois));
-  set('k-ca-mois-nb',ventesMois.length+' vente(s)');
+  set('k-ca-mois-nb',ventesMois.length+' vente(s)'+(pdvFilter?' · '+getPDV()?.nom:''));
   set('k-benef',gnf(benefNet));
   const kmp=document.getElementById('k-marge-pct');
   if(kmp){kmp.textContent='marge: '+margePct+'%';kmp.className='kpi-delta '+(margePct>20?'delta-up':margePct>0?'delta-ne':'delta-dn');}
@@ -2609,8 +2879,11 @@ async function saveVente(){
   const now=new Date().toISOString().slice(0,16).replace('T',' ');
   const yr=new Date().getFullYear();
   const newId=nid('ventes');
+  const pdvSel=+document.getElementById('v-pdv')?.value||getPDVId();
+  const pdvObj=D.points_vente.find(p=>p.id===pdvSel)||getPDV();
   const nv={id:newId,num:'VTE-'+yr+'-'+String(newId).padStart(3,'0'),date:now,
-    articles:LV.length,montant:tot,paiement:document.getElementById('v-pay').value,statut:'finalisee',lignes:[...LV]};
+    articles:LV.length,montant:tot,paiement:document.getElementById('v-pay').value,statut:'finalisee',lignes:[...LV],
+    point_vente_id:pdvObj?.id||null,point_vente_nom:pdvObj?.nom||''};
   D.ventes.unshift(nv);
   for(const l of LV){
     const p=D.produits.find(x=>x.id===l.produit_id);if(p)p.stock=Math.max(0,p.stock-l.qte);
@@ -2618,6 +2891,18 @@ async function saveVente(){
   }
   recalcEtats();if(sb)await sb.from('ventes').insert(nv);
   sv('db_v','ventes');sv('db_m','mouvements');sv('db_p','produits');
+  // ── HOOK CAISSE : débiter automatiquement la caisse si paiement != crédit ──
+  const vpayC=document.getElementById('v-pay')?.value||'';
+  if(vpayC!=='credit'){
+    const cEntry={id:nid('caisses'),date:now,type:'vente',
+      libelle:'Vente '+nv.num+' ('+LV.map(l=>l.produit).join(', ')+')',
+      ref:nv.num,montant_entree:tot,montant_sortie:0,
+      paiement:vpayC,user:CU?.nom||'Caissier',notes:'',
+      point_vente_id:nv.point_vente_id||null,point_vente_nom:nv.point_vente_nom||''};
+    D.caisses.unshift(cEntry);
+    localStorage.setItem('db_ca',JSON.stringify(D.caisses));
+    if(sb&&ACCESS_MODE==='cloud')sb.from('caisses').insert(cEntry).catch(()=>{});
+  }
   // Gestion crédit modal vente
   const vcId=+document.getElementById('v-client')?.value||null;
   const vpay=document.getElementById('v-pay')?.value||'';
@@ -3159,6 +3444,212 @@ function xExcelDepenses(){
 }
 
 // ═══════════════════════════════
+//  CAISSE / RÈGLEMENT
+// ═══════════════════════════════
+
+// ── Calcul solde courant caisse ──
+function calcSoldeCaisse(){
+  return D.caisses.reduce((s,e)=>s+(e.montant_entree||0)-(e.montant_sortie||0),0);
+}
+function calcSoldeCaisseAt(upToId){
+  let s=0;
+  const sorted=[...D.caisses].sort((a,b)=>a.id-b.id);
+  for(const e of sorted){s+=(e.montant_entree||0)-(e.montant_sortie||0);if(e.id===upToId)break;}
+  return s;
+}
+
+// ── Render principal ──
+function rdCaisse(){
+  const today=new Date().toISOString().slice(0,10);
+  const dtF=document.getElementById('sc-date')?.value||'';
+  const tpF=document.getElementById('sc-type')?.value||'';
+  const pdvF=document.getElementById('sc-pdv')?.value||'';
+
+  const fil=[...D.caisses]
+    .filter(e=>(!dtF||(e.date||'').startsWith(dtF))&&(!tpF||e.type===tpF)&&(!pdvF||e.point_vente_id===+pdvF))
+    .sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+
+  // KPIs du jour
+  const todayEntries=D.caisses.filter(e=>(e.date||'').startsWith(today));
+  const entJour=todayEntries.reduce((s,e)=>s+(e.montant_entree||0),0);
+  const sorJour=todayEntries.reduce((s,e)=>s+(e.montant_sortie||0),0);
+  const soldeGlobal=calcSoldeCaisse();
+
+  const ckSolde=document.getElementById('ck-solde');
+  const ckE=document.getElementById('ck-entrees');
+  const ckS=document.getElementById('ck-sorties');
+  const ckNb=document.getElementById('ck-nb-mvt');
+  const ckDelta=document.getElementById('ck-solde-delta');
+  if(ckSolde)ckSolde.textContent=gnf(soldeGlobal);
+  if(ckE)ckE.textContent=gnf(entJour);
+  if(ckS)ckS.textContent=gnf(sorJour);
+  if(ckNb)ckNb.textContent=todayEntries.length;
+  if(ckDelta){
+    const net=entJour-sorJour;
+    ckDelta.textContent=(net>=0?'+':'')+gnf(net)+' net auj.';
+    ckDelta.className='kpi-delta '+(net>=0?'delta-up':'delta-dn');
+  }
+
+  // Résumé journée
+  const ouv=D.caisses.filter(e=>e.type==='ouverture'&&(e.date||'').startsWith(today));
+  const fondOuv=ouv.reduce((s,e)=>s+(e.montant_entree||0),0);
+  const crFond=document.getElementById('cr-fond');
+  const crEnt=document.getElementById('cr-entrees');
+  const crSor=document.getElementById('cr-sorties');
+  const crSol=document.getElementById('cr-solde');
+  if(crFond)crFond.textContent=ouv.length?gnf(fondOuv):'Non ouverte';
+  if(crEnt)crEnt.textContent=gnf(entJour);
+  if(crSor)crSor.textContent=gnf(sorJour);
+  if(crSol)crSol.textContent=gnf(soldeGlobal);
+
+  // Statut ouverture/fermeture
+  const isOpen=!D.caisses.some(e=>e.type==='fermeture'&&(e.date||'').startsWith(today));
+  const badge=document.getElementById('caisse-statut-badge');
+  const btnOuv=document.getElementById('btn-caisse-ouv');
+  const btnFerm=document.getElementById('btn-caisse-ferm');
+  if(badge){badge.textContent=isOpen?'🟢 Ouverte':'🔴 Fermée';badge.style.background=isOpen?'var(--green-glow)':'var(--red-glow)';badge.style.color=isOpen?'var(--green)':'var(--red)';}
+  if(btnOuv)btnOuv.style.display=isOpen?'none':'flex';
+  if(btnFerm)btnFerm.style.display=isOpen?'flex':'none';
+
+  // Tableau desktop
+  const typeLabels={entree:'📥 Entrée',sortie:'📤 Sortie',vente:'🛒 Vente',remboursement:'🔁 Remboursement',ouverture:'🔓 Ouverture',fermeture:'🔒 Fermeture'};
+  const typeColors={entree:'var(--green)',sortie:'var(--red)',vente:'var(--blue)',remboursement:'var(--orange)',ouverture:'var(--purple)',fermeture:'var(--text3)'};
+
+  // Calculer solde cumulé pour chaque ligne (du plus ancien au plus récent)
+  const sortedAll=[...D.caisses].sort((a,b)=>a.id-b.id);
+  const soldeMap={};let running=0;
+  sortedAll.forEach(e=>{running+=(e.montant_entree||0)-(e.montant_sortie||0);soldeMap[e.id]=running;});
+
+  const tb=document.getElementById('tb-caisse');
+  if(tb)tb.innerHTML=fil.length?fil.map(e=>`<tr>
+    <td style="font-size:11px;color:var(--text3)">${(e.date||'').slice(0,16)}</td>
+    <td><span style="font-size:11px;font-weight:700;color:${typeColors[e.type]||'var(--text2)'}">${typeLabels[e.type]||e.type}</span></td>
+    <td style="max-width:200px"><b style="color:var(--text)">${e.libelle||'—'}</b>${e.notes?`<br><span style="font-size:10.5px;color:var(--text3)">${e.notes}</span>`:''}</td>
+    <td><code>${e.ref||'—'}</code></td>
+    <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--green)">${e.montant_entree>0?gnf(e.montant_entree):'—'}</td>
+    <td style="font-family:'DM Mono',monospace;font-weight:700;color:var(--red)">${e.montant_sortie>0?gnf(e.montant_sortie):'—'}</td>
+    <td style="font-family:'DM Mono',monospace;font-weight:700;color:${(soldeMap[e.id]||0)>=0?'var(--accent)':'var(--red)'}">${gnf(soldeMap[e.id]||0)}</td>
+    <td style="font-size:11px;color:var(--text3)">${e.user||'—'}</td>
+    <td><button class="btn btn-danger btn-sm" onclick="delCaisseMvt(${e.id})" title="Supprimer">🗑️</button></td>
+  </tr>`).join(''):`<tr><td colspan="9"><div class="empty"><div class="ico">🏦</div><p>Aucun mouvement de caisse</p><p style="font-size:12px;color:var(--text3);margin-top:4px">Ouvrez la caisse ou enregistrez un mouvement</p></div></td></tr>`;
+
+  // Cartes mobile
+  const mc=document.getElementById('mc-caisse');
+  if(mc)mc.innerHTML=fil.length?fil.map(e=>`<div class="mcard" style="--mc:${typeColors[e.type]||'var(--blue)'}">
+    <div class="mcard-top">
+      <div><div class="mcard-title">${e.libelle||'—'}</div><div class="mcard-sub">${(e.date||'').slice(0,16)} • ${typeLabels[e.type]||e.type}</div></div>
+      <code>${e.ref||'—'}</code>
+    </div>
+    ${e.montant_entree>0?`<div class="mcard-row"><span class="mcard-lbl">Entrée</span><span class="mcard-val" style="color:var(--green)">${gnf(e.montant_entree)}</span></div>`:''}
+    ${e.montant_sortie>0?`<div class="mcard-row"><span class="mcard-lbl">Sortie</span><span class="mcard-val" style="color:var(--red)">${gnf(e.montant_sortie)}</span></div>`:''}
+    <div class="mcard-row"><span class="mcard-lbl">Solde après</span><span class="mcard-val" style="color:var(--accent)">${gnf(soldeMap[e.id]||0)}</span></div>
+    <div class="mcard-actions"><button class="btn btn-danger" onclick="delCaisseMvt(${e.id})">🗑️ Supprimer</button></div>
+  </div>`).join(''):`<div class="empty"><div class="ico">🏦</div><p>Aucun mouvement</p></div>`;
+}
+
+// ── Ouvrir modal ouverture caisse ──
+function openCaisseOuverture(){
+  const today=new Date().toISOString().slice(0,10);
+  const dEl=document.getElementById('couv-date');if(dEl)dEl.value=today;
+  const fEl=document.getElementById('couv-fond');if(fEl)fEl.value='0';
+  const nEl=document.getElementById('couv-notes');if(nEl)nEl.value='';
+  openM('m-caisse-ouv');
+}
+
+async function confirmerOuvertureCaisse(){
+  const date=document.getElementById('couv-date').value||new Date().toISOString().slice(0,10);
+  const fond=+document.getElementById('couv-fond').value||0;
+  const notes=document.getElementById('couv-notes').value;
+  const now=new Date().toISOString().slice(0,16).replace('T',' ');
+  const entry={id:nid('caisses'),date:now,type:'ouverture',
+    libelle:'Ouverture caisse du '+date,ref:'OUV-'+date.replace(/-/g,''),
+    montant_entree:fond,montant_sortie:0,paiement:'Espèces',
+    user:CU?.nom||'Admin',notes,
+    point_vente_id:getPDVId(),point_vente_nom:getPDV()?.nom||''};
+  D.caisses.unshift(entry);
+  localStorage.setItem('db_ca',JSON.stringify(D.caisses));
+  if(sb&&ACCESS_MODE==='cloud')sb.from('caisses').insert(entry).catch(()=>{});
+  logAction('CREATE','Ouverture caisse — fond: '+gnf(fond));
+  closeM('m-caisse-ouv');rdCaisse();
+  toast('🔓 Caisse ouverte — fond: '+gnf(fond),'success');
+}
+
+async function fermerCaisse(){
+  const today=new Date().toISOString().slice(0,10);
+  const solde=calcSoldeCaisse();
+  if(!confirm(`Fermer la caisse ?\n\nSolde théorique : ${gnf(solde)}\n\nUn mouvement de fermeture sera enregistré.`))return;
+  const now=new Date().toISOString().slice(0,16).replace('T',' ');
+  const entry={id:nid('caisses'),date:now,type:'fermeture',
+    libelle:'Fermeture caisse du '+today+' — solde: '+gnf(solde),
+    ref:'FERM-'+today.replace(/-/g,''),
+    montant_entree:0,montant_sortie:0,paiement:'—',
+    user:CU?.nom||'Admin',notes:'Solde à la fermeture: '+gnf(solde)};
+  D.caisses.unshift(entry);
+  localStorage.setItem('db_ca',JSON.stringify(D.caisses));
+  if(sb&&ACCESS_MODE==='cloud')sb.from('caisses').insert(entry).catch(()=>{});
+  logAction('UPDATE','Fermeture caisse — solde: '+gnf(solde));
+  rdCaisse();toast('🔒 Caisse fermée — solde: '+gnf(solde),'success');
+}
+
+async function saveCaisseMvt(){
+  const libelle=document.getElementById('cmvt-libelle').value.trim();
+  if(!libelle){toast('Libellé requis','error');return;}
+  const montant=+document.getElementById('cmvt-montant').value||0;
+  if(!montant||montant<=0){toast('Montant invalide','error');return;}
+  const type=document.getElementById('cmvt-type').value;
+  const isEntree=(type==='entree');
+  const now=new Date().toISOString().slice(0,16).replace('T',' ');
+  const refAuto='CA-'+new Date().toISOString().slice(0,10).replace(/-/g,'')+'-'+String(nid('caisses')).padStart(3,'0');
+  const entry={id:nid('caisses'),date:now,type,libelle,
+    ref:document.getElementById('cmvt-ref').value.trim()||refAuto,
+    montant_entree:isEntree||type==='remboursement'?0:0,
+    montant_sortie:0,
+    paiement:document.getElementById('cmvt-pay').value,
+    user:CU?.nom||'Admin',notes:document.getElementById('cmvt-notes').value,
+    point_vente_id:getPDVId(),point_vente_nom:getPDV()?.nom||''};
+  // Logique entrée/sortie selon type
+  if(type==='entree'){entry.montant_entree=montant;entry.montant_sortie=0;}
+  else if(type==='sortie'){entry.montant_entree=0;entry.montant_sortie=montant;}
+  else if(type==='remboursement'){entry.montant_entree=0;entry.montant_sortie=montant;}
+  D.caisses.unshift(entry);
+  localStorage.setItem('db_ca',JSON.stringify(D.caisses));
+  if(sb&&ACCESS_MODE==='cloud')sb.from('caisses').insert(entry).catch(()=>{});
+  logAction('CREATE','Caisse '+type+' — '+gnf(montant)+' — '+libelle);
+  closeM('m-caisse-mvt');
+  document.getElementById('cmvt-libelle').value='';
+  document.getElementById('cmvt-montant').value='';
+  document.getElementById('cmvt-ref').value='';
+  document.getElementById('cmvt-notes').value='';
+  rdCaisse();
+  toast((type==='entree'?'📥 Entrée':'📤 Sortie')+' caisse enregistrée — '+gnf(montant),'success');
+}
+
+function delCaisseMvt(id){
+  const e=D.caisses.find(x=>x.id===id);
+  if(!e||e.type==='vente'){toast('Impossible de supprimer un mouvement automatique','warning');return;}
+  if(!confirm('Supprimer ce mouvement de caisse ?'))return;
+  D.caisses=D.caisses.filter(x=>x.id!==id);
+  localStorage.setItem('db_ca',JSON.stringify(D.caisses));
+  if(sb&&ACCESS_MODE==='cloud')sb.from('caisses').delete().eq('id',id).catch(()=>{});
+  rdCaisse();logAction('DELETE','Caisse mvt supprimé id:'+id);toast('Mouvement supprimé','warning');
+}
+
+function xExcelCaisse(){
+  const sorted=[...D.caisses].sort((a,b)=>a.id-b.id);
+  let running=0;
+  const data=sorted.map(e=>{running+=(e.montant_entree||0)-(e.montant_sortie||0);return{
+    Date:e.date,Type:e.type,Libellé:e.libelle,Référence:e.ref||'',
+    'Mode règlement':e.paiement||'',
+    'Entrée (GNF)':e.montant_entree||0,'Sortie (GNF)':e.montant_sortie||0,
+    'Solde cumulé (GNF)':running,Opérateur:e.user||'',Notes:e.notes||''
+  };});
+  const ws=XLSX.utils.json_to_sheet(data),wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Caisse');
+  XLSX.writeFile(wb,'HABATECH_Caisse_'+new Date().toISOString().slice(0,10)+'.xlsx');
+  toast('Export caisse téléchargé','success');
+}
+
+// ═══════════════════════════════
 //  RETOURS / REMBOURSEMENTS
 // ═══════════════════════════════
 function rdRetours(){
@@ -3554,6 +4045,35 @@ CREATE TABLE IF NOT EXISTS retours (
   date_traitement TEXT, user_name TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
+CREATE TABLE IF NOT EXISTS caisses (
+  id BIGSERIAL PRIMARY KEY,
+  date TEXT,
+  type TEXT NOT NULL,
+  libelle TEXT NOT NULL,
+  ref TEXT,
+  montant_entree NUMERIC DEFAULT 0,
+  montant_sortie NUMERIC DEFAULT 0,
+  paiement TEXT DEFAULT 'Espèces',
+  user_name TEXT,
+  notes TEXT,
+  point_vente_id BIGINT,
+  point_vente_nom TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE TABLE IF NOT EXISTS points_vente (
+  id BIGSERIAL PRIMARY KEY,
+  nom TEXT NOT NULL,
+  code TEXT,
+  adresse TEXT,
+  responsable TEXT,
+  tel TEXT,
+  couleur TEXT DEFAULT '#3B82F6',
+  statut TEXT DEFAULT 'actif',
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+-- Colonnes PDV sur ventes
+ALTER TABLE ventes ADD COLUMN IF NOT EXISTS point_vente_id BIGINT;
+ALTER TABLE ventes ADD COLUMN IF NOT EXISTS point_vente_nom TEXT;
 -- RLS
 ALTER TABLE produits ENABLE ROW LEVEL SECURITY;
 ALTER TABLE mouvements ENABLE ROW LEVEL SECURITY;
@@ -3564,6 +4084,8 @@ ALTER TABLE utilisateurs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE clients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE depenses ENABLE ROW LEVEL SECURITY;
 ALTER TABLE retours ENABLE ROW LEVEL SECURITY;
+ALTER TABLE caisses ENABLE ROW LEVEL SECURITY;
+ALTER TABLE points_vente ENABLE ROW LEVEL SECURITY;
 -- Policies
 CREATE POLICY "auth" ON produits FOR ALL USING (auth.role()='authenticated');
 CREATE POLICY "auth" ON mouvements FOR ALL USING (auth.role()='authenticated');
@@ -3573,7 +4095,9 @@ CREATE POLICY "auth" ON fournisseurs FOR ALL USING (auth.role()='authenticated')
 CREATE POLICY "auth" ON utilisateurs FOR ALL USING (auth.role()='authenticated');
 CREATE POLICY "auth" ON clients FOR ALL USING (auth.role()='authenticated');
 CREATE POLICY "auth" ON depenses FOR ALL USING (auth.role()='authenticated');
-CREATE POLICY "auth" ON retours FOR ALL USING (auth.role()='authenticated');`;
+CREATE POLICY "auth" ON retours FOR ALL USING (auth.role()='authenticated');
+CREATE POLICY "auth" ON caisses FOR ALL USING (auth.role()='authenticated');
+CREATE POLICY "auth" ON points_vente FOR ALL USING (auth.role()='authenticated');`;
 }
 function cpSQL(){navigator.clipboard.writeText(document.getElementById('sql-out').value);toast('SQL copié','success');}
 
@@ -3703,8 +4227,8 @@ function rdClients(){
       <td><span class="tag ${dette>0?'critique':'normal'}">${dette>0?'Débiteur':'Soldé'}</span></td>
       <td style="display:flex;gap:4px;flex-wrap:wrap">
         <button class="btn btn-sm btn-primary" onclick="ouvrirFicheClient(${c.id})" title="Fiche détaillée">👤</button>
-        <button class="btn btn-sm btn-outline" onclick="openEditClient(${c.id})" title="Modifier">✏️</button>
-        <button class="btn btn-sm btn-outline" onclick="openReglement(${c.id})" title="Règlement dette">💳</button>
+        <button class="btn btn-sm btn-outline" onclick="editClient(${c.id})" title="Modifier">✏️</button>
+        <button class="btn btn-sm btn-outline" onclick="openRemb(${c.id})" title="Règlement dette">💳</button>
         <button class="btn btn-sm" style="background:var(--red-glow);color:var(--red);border:1px solid rgba(239,68,68,.3)" onclick="delClient(${c.id})">🗑️</button>
       </td>
     </tr>`;
@@ -3835,9 +4359,11 @@ async function posEncaisser(){
   const now=new Date().toISOString().slice(0,16).replace('T',' ');
   const yr=new Date().getFullYear();
   const newId=nid('ventes');
+  const pdvActifPOS=getPDV();
   const nv={id:newId,num:'VTE-'+yr+'-'+String(newId).padStart(3,'0'),date:now,
     articles:POS_CART.length,montant:tot,paiement:pay==='credit'?'Crédit':pay,statut:'finalisee',
-    lignes:[...POS_CART],client_id:clientId};
+    lignes:[...POS_CART],client_id:clientId,
+    point_vente_id:pdvActifPOS?.id||null,point_vente_nom:pdvActifPOS?.nom||''};
   D.ventes.unshift(nv);
   // Décrémenter stock
   for(const l of POS_CART){
@@ -4262,9 +4788,151 @@ function delCat(id){
   logAction('DELETE','Catégorie supprimée: '+c.nom);
 }
 
+// ═══════════════════════════════
+//  POINTS DE VENTE (CRUD)
+// ═══════════════════════════════
+function rdPDV(){
+  const curMois=new Date().toISOString().slice(0,7);
+  const tb=document.getElementById('tb-pdv');if(!tb)return;
+  const actifs=D.points_vente.filter(p=>p.statut==='actif').length;
+  const pdvActif=getPDV();
+  // KPIs
+  const kNb=document.getElementById('pdv-nb');if(kNb)kNb.textContent=D.points_vente.length;
+  const kAct=document.getElementById('pdv-actifs');if(kAct)kAct.textContent=actifs+' actif'+(actifs>1?'s':'');
+  const kNom=document.getElementById('pdv-actif-nom');if(kNom)kNom.textContent=pdvActif?pdvActif.nom:'—';
+  // CA total mois tous PDV
+  const vMois=D.ventes.filter(v=>(v.date||'').startsWith(curMois));
+  const caTot=vMois.reduce((s,v)=>s+(+v.montant||0),0);
+  const kCa=document.getElementById('pdv-ca-total');if(kCa)kCa.textContent=gnf(caTot);
+  const kVnt=document.getElementById('pdv-ventes-total');if(kVnt)kVnt.textContent=vMois.length;
+  // Compteur
+  const cl=document.getElementById('pdv-count-lbl');if(cl)cl.textContent=D.points_vente.length+' PDV';
+  // Tableau
+  const statTag={actif:'normal',inactif:'rupture',ferme:'critique'};
+  tb.innerHTML=D.points_vente.length?D.points_vente.map(p=>{
+    const vP=vMois.filter(v=>v.point_vente_id===p.id);
+    const caP=vP.reduce((s,v)=>s+(+v.montant||0),0);
+    const isActif=pdvActif?.id===p.id;
+    return`<tr style="${isActif?'background:rgba(59,130,246,.08)':''}">
+      <td><code style="border-left:3px solid ${p.couleur||'var(--blue)'};padding-left:6px">${p.code||'—'}</code></td>
+      <td><b style="color:var(--text)">${p.nom}</b>${isActif?'<span class="tag normal" style="margin-left:6px;font-size:10px">actif</span>':''}</td>
+      <td style="font-size:11px;color:var(--text3)">${p.adresse||'—'}</td>
+      <td style="color:var(--text2)">${p.responsable||'—'}</td>
+      <td style="font-size:11px;color:var(--text3)">${p.tel||'—'}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--green);font-weight:600">${gnf(caP)}</td>
+      <td style="font-family:'DM Mono',monospace">${vP.length}</td>
+      <td><span class="tag ${statTag[p.statut]||'autre'}">${p.statut}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-primary btn-sm" onclick="setPDV(${p.id})" title="Activer ce PDV">📍</button>
+        <button class="btn btn-outline btn-sm" onclick="editPDV(${p.id})" title="Modifier">✏️</button>
+        <button class="btn btn-danger btn-sm" onclick="delPDV(${p.id})" title="Supprimer" ${D.points_vente.length<=1?'disabled style="opacity:.4"':''}>🗑️</button>
+      </td>
+    </tr>`;
+  }).join(''):`<tr><td colspan="9"><div class="empty"><div class="ico">🏪</div><p>Aucun point de vente</p></div></td></tr>`;
+  // Graphique CA comparatif
+  drawPDVChart(vMois);
+}
+
+function drawPDVChart(vMois){
+  const canvas=document.getElementById('ch-pdv-ca');if(!canvas)return;
+  if(window._pdvChart){try{window._pdvChart.destroy();}catch(e){}}
+  const labels=D.points_vente.map(p=>p.nom);
+  const data=D.points_vente.map(p=>vMois.filter(v=>v.point_vente_id===p.id).reduce((s,v)=>s+(+v.montant||0),0));
+  const colors=D.points_vente.map(p=>p.couleur||'#3B82F6');
+  window._pdvChart=new Chart(canvas,{
+    type:'bar',
+    data:{labels,datasets:[{label:'CA (GNF)',data,backgroundColor:colors.map(c=>c+'AA'),borderColor:colors,borderWidth:2,borderRadius:6}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#64748B'},grid:{display:false}},y:{beginAtZero:true,ticks:{color:'#64748B',callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':v.toLocaleString('fr')},grid:{color:'rgba(255,255,255,.05)'}}}}
+  });
+}
+
+function resetPDVForm(){
+  document.getElementById('pdv-edit-id').value='';
+  document.getElementById('pdv-nom').value='';
+  document.getElementById('pdv-code').value='';
+  document.getElementById('pdv-color').value='#3B82F6';
+  document.getElementById('pdv-adresse').value='';
+  document.getElementById('pdv-resp').value='';
+  document.getElementById('pdv-tel').value='';
+  document.getElementById('pdv-statut').value='actif';
+  document.getElementById('pdv-form-title').textContent='➕ Nouveau Point de vente';
+  document.getElementById('pdv-cancel-btn').style.display='none';
+}
+
+function editPDV(id){
+  const p=D.points_vente.find(x=>x.id===id);if(!p)return;
+  document.getElementById('pdv-edit-id').value=id;
+  document.getElementById('pdv-nom').value=p.nom||'';
+  document.getElementById('pdv-code').value=p.code||'';
+  document.getElementById('pdv-color').value=p.couleur||'#3B82F6';
+  document.getElementById('pdv-adresse').value=p.adresse||'';
+  document.getElementById('pdv-resp').value=p.responsable||'';
+  document.getElementById('pdv-tel').value=p.tel||'';
+  document.getElementById('pdv-statut').value=p.statut||'actif';
+  document.getElementById('pdv-form-title').textContent='✏️ Modifier : '+p.nom;
+  document.getElementById('pdv-cancel-btn').style.display='';
+  goPage('points-vente',document.querySelector('[onclick*="points-vente"]'));
+}
+
+async function savePDV(){
+  const nom=(document.getElementById('pdv-nom').value||'').trim();
+  if(!nom){toast('Nom du PDV requis','error');return;}
+  const editId=+document.getElementById('pdv-edit-id').value||0;
+  const obj={
+    nom,
+    code:(document.getElementById('pdv-code').value||'').trim()||'PDV-'+String(nid('points_vente')).padStart(3,'0'),
+    couleur:document.getElementById('pdv-color').value||'#3B82F6',
+    adresse:document.getElementById('pdv-adresse').value||'',
+    responsable:document.getElementById('pdv-resp').value||'',
+    tel:document.getElementById('pdv-tel').value||'',
+    statut:document.getElementById('pdv-statut').value||'actif',
+  };
+  if(editId){
+    const i=D.points_vente.findIndex(x=>x.id===editId);
+    if(i>=0)D.points_vente[i]={...D.points_vente[i],...obj};
+    // Sync PDV actif si modifié
+    if(CURRENT_PDV?.id===editId){CURRENT_PDV={...CURRENT_PDV,...obj};sessionStorage.setItem('current_pdv',JSON.stringify(CURRENT_PDV));}
+    logAction('UPDATE','PDV modifié: '+nom);
+    toast('Point de vente modifié','success');
+  } else {
+    const np={id:nid('points_vente'),...obj};
+    D.points_vente.push(np);
+    logAction('CREATE','PDV créé: '+nom);
+    toast('Point de vente "'+nom+'" créé','success');
+  }
+  localStorage.setItem('db_pdv',JSON.stringify(D.points_vente));
+  if(sb&&ACCESS_MODE==='cloud')sb.from('points_vente').upsert(D.points_vente,{onConflict:'id'}).catch(()=>{});
+  resetPDVForm();rdPDV();fillPDVSelects();updatePDVUI();
+}
+
+function delPDV(id){
+  if(D.points_vente.length<=1){toast('Impossible : au moins 1 PDV requis','error');return;}
+  const p=D.points_vente.find(x=>x.id===id);if(!p)return;
+  const nbVentes=D.ventes.filter(v=>v.point_vente_id===id).length;
+  if(nbVentes>0&&!confirm(`⚠️ Ce PDV a ${nbVentes} vente(s) associée(s).\nSupprimer quand même ?`))return;
+  else if(!nbVentes&&!confirm('Supprimer le PDV "'+p.nom+'" ?'))return;
+  D.points_vente=D.points_vente.filter(x=>x.id!==id);
+  localStorage.setItem('db_pdv',JSON.stringify(D.points_vente));
+  if(sb&&ACCESS_MODE==='cloud')sb.from('points_vente').delete().eq('id',id).catch(()=>{});
+  // Si PDV actif supprimé → basculer sur le 1er
+  if(CURRENT_PDV?.id===id){CURRENT_PDV=D.points_vente[0]||null;sessionStorage.setItem('current_pdv',JSON.stringify(CURRENT_PDV));}
+  rdPDV();fillPDVSelects();updatePDVUI();
+  logAction('DELETE','PDV supprimé: '+p.nom);
+  toast('PDV supprimé','warning');
+}
+
+function fillPDVInVenteModal(){
+  const sel=document.getElementById('v-pdv');if(!sel)return;
+  const opts=D.points_vente.filter(p=>p.statut!=='ferme').map(p=>`<option value="${p.id}">${p.nom}</option>`).join('');
+  sel.innerHTML=opts;
+  const pdv=getPDV();if(pdv)sel.value=pdv.id;
+}
+
 function fillSelects(){
   fillClientSelects();
   fillCatSelects();
+  fillPDVSelects();
+  fillPDVInVenteModal();
   const opts=D.produits.map(p=>`<option value="${p.id}">${p.designation}</option>`).join('');
   document.getElementById('mv-prod').innerHTML=opts;
   document.getElementById('vl-prod').innerHTML=D.produits.map(p=>`<option value="${p.id}">${p.designation} — ${gnf(p.vente)}</option>`).join('');
