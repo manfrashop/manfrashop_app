@@ -180,9 +180,10 @@ input,select,textarea,.btn,.tbtn,.nav-item,.mcard,.hpanel{
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:"DM Sans",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
-::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar{width:9px;height:9px;}
 ::-webkit-scrollbar-track{background:var(--bg2);}
 ::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text3);}
 
 /* SIDEBAR */
 #sidebar{width:240px;min-height:100vh;background:var(--bg2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;transition:transform .3s ease;}
@@ -2420,7 +2421,11 @@ function rdMvt(){
     <td><b style="font-family:'DM Mono',monospace">${m.qte}</b></td>
     <td><code>${m.ref||'—'}</code></td>
     <td style="color:var(--text3)">${m.user||'—'}</td>
-    <td><button class="btn btn-danger btn-sm" onclick="delMvt(${m.id})">🗑️</button></td>
+    <td style="white-space:nowrap">
+      <button class="btn btn-outline btn-sm" onclick="printMvtTicket(${m.id})" title="Reçu thermique">🖨️</button>
+      <button class="btn btn-outline btn-sm" onclick="printMvtPDF(${m.id})" title="Bon mouvement PDF">📄</button>
+      <button class="btn btn-danger btn-sm" onclick="delMvt(${m.id})">🗑️</button>
+    </td>
   </tr>`).join(''):`<tr><td colspan="7"><div class="empty"><div class="ico">🔄</div><p>Aucun mouvement</p></div></td></tr>`;
   rdPag('pg-mvt','m',fil.length);
   // Cartes mobile
@@ -2448,7 +2453,9 @@ function rdMvt(){
         <span class="mcard-val" style="font-family:'DM Sans',sans-serif">${m.user||'—'}</span>
       </div>
       <div class="mcard-actions">
-        <button class="btn btn-danger" onclick="delMvt(${m.id})">🗑️ Supprimer</button>
+        <button class="btn btn-outline" onclick="printMvtTicket(${m.id})">🖨️ Reçu</button>
+        <button class="btn btn-outline" onclick="printMvtPDF(${m.id})">📄 PDF</button>
+        <button class="btn btn-danger" onclick="delMvt(${m.id})">🗑️</button>
       </div>
     </div>`).join(''):`<div class="empty"><div class="ico">🔄</div><p>Aucun mouvement</p></div>`;
 }
@@ -2844,6 +2851,138 @@ function delMvt(id){
   if(!confirm('Supprimer ce mouvement ?'))return;
   D.mouvements=D.mouvements.filter(m=>m.id!==id);
   sv('db_m','mouvements');rdMvt();toast('Mouvement supprimé','warning');
+}
+
+// ═══════════════════════════════════════════
+//  IMPRESSION MOUVEMENT — REÇU THERMIQUE
+// ═══════════════════════════════════════════
+function printMvtTicket(id){
+  const m=D.mouvements.find(x=>x.id===id);if(!m)return;
+  const p=D.produits.find(x=>x.id===m.produit_id)||{designation:m.produit,code:'—',achat:m.prix||0,vente:m.prix||0,unite:'u.',stock:'?'};
+  const tyIco={entree:'📥',sortie:'📤',transfert:'🔀',perte:'🗑️',ajustement:'⚖️'};
+  const tyColor={entree:'#10B981',sortie:'#EF4444',transfert:'#3B82F6',perte:'#F59E0B',ajustement:'#8B5CF6'};
+  const col=tyColor[m.type]||'#3B82F6';
+  const ico=tyIco[m.type]||'🔄';
+  const valeur=m.prix?((m.qte||0)*(m.prix||0)).toLocaleString('fr')+' GNF':'—';
+  const w=window.open('','_blank','width=400,height=520');
+  w.document.write(`<!DOCTYPE html><html><head><title>Mouvement ${m.ref||m.id}</title>
+  <style>
+    body{font-family:monospace;font-size:12px;padding:20px;max-width:320px;margin:0 auto;}
+    hr{border:none;border-top:1px dashed #000;margin:8px 0;}
+    .c{text-align:center;}.b{font-weight:bold;}.r{text-align:right;}
+    .row{display:flex;justify-content:space-between;margin:3px 0;}
+    .ttl{font-size:10px;color:#666;}
+    .type-badge{display:inline-block;padding:3px 10px;border-radius:12px;background:${col}22;color:${col};border:1px solid ${col};font-weight:bold;font-size:13px;}
+    @media print{button{display:none!important;}}
+  </style></head><body>
+  <div class="c b" style="font-size:18px;letter-spacing:1px">MANFRA-SHOP</div>
+  <div class="c ttl">HABATECH &copy; 2026 — Siguiri, Guinée</div>
+  <div class="c ttl" style="margin-top:2px">BON DE MOUVEMENT</div>
+  <hr>
+  <div class="row"><span>Référence :</span><span class="b">${m.ref||'—'}</span></div>
+  <div class="row"><span>Date :</span><span>${fdt(m.date)}</span></div>
+  <div class="row"><span>Opérateur :</span><span class="b">${m.user||'—'}</span></div>
+  <div class="row" style="margin:8px 0"><span>Type :</span><span class="type-badge">${ico} ${m.type?.toUpperCase()}</span></div>
+  <hr>
+  <div class="b ttl" style="margin-bottom:4px">PRODUIT CONCERNÉ</div>
+  <div class="row"><span>${p.designation||m.produit||'—'}</span></div>
+  <div class="row ttl"><span>Code : ${p.code||'—'}</span><span>Unité : ${p.unite||'u.'}</span></div>
+  <div class="row ttl"><span>Px achat : ${gnf(p.achat||0)}</span><span>Px vente : ${gnf(p.vente||0)}</span></div>
+  <hr>
+  <div class="row b" style="font-size:14px"><span>QUANTITÉ</span><span style="font-size:18px;color:${col}">${m.qte} ${p.unite||'u.'}</span></div>
+  ${m.prix?`<div class="row"><span>Prix unitaire :</span><span>${gnf(m.prix)}</span></div><div class="row b"><span>Valeur totale :</span><span style="color:${col}">${valeur}</span></div>`:''}
+  ${m.notes?`<hr><div class="ttl b">NOTES</div><div style="font-size:11px;margin-top:4px;color:#333">${m.notes}</div>`:''}
+  <hr>
+  <div class="c ttl" style="margin-top:8px">MANFRA-SHOP — HABATECH © 2026</div>
+  <div class="c ttl">Document généré automatiquement</div>
+  <br>
+  <button onclick="window.print()" style="width:100%;padding:8px;background:#000;color:#fff;border:none;cursor:pointer;font-size:13px;border-radius:4px">🖨️ Imprimer</button>
+  </body></html>`);
+  w.document.close();
+  toast('Reçu mouvement prêt','success');
+  logAction('PRINT','Reçu mouvement: '+(m.ref||m.id));
+}
+
+// ═══════════════════════════════════════════
+//  IMPRESSION MOUVEMENT — BON PDF (jsPDF)
+// ═══════════════════════════════════════════
+function printMvtPDF(id){
+  const m=D.mouvements.find(x=>x.id===id);if(!m)return;
+  const p=D.produits.find(x=>x.id===m.produit_id)||{designation:m.produit,code:'—',achat:m.prix||0,vente:m.prix||0,unite:'u.',stock:'?',etat:'—',categorie:'—'};
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a5'});
+  const W=148,M=12;
+
+  const tyColor={entree:[16,185,129],sortie:[239,68,68],transfert:[59,130,246],perte:[245,158,11],ajustement:[139,92,246]};
+  const tyIco={entree:'ENTREE',sortie:'SORTIE',transfert:'TRANSFERT',perte:'PERTE',ajustement:'AJUSTEMENT'};
+  const col=tyColor[m.type]||[59,130,246];
+
+  // EN-TÊTE
+  doc.setFillColor(15,23,42);doc.rect(0,0,W,30,'F');
+  doc.setTextColor(245,158,11);doc.setFontSize(14);doc.setFont('helvetica','bold');
+  doc.text('MANFRA-SHOP',M,12);
+  doc.setTextColor(148,163,184);doc.setFontSize(7.5);doc.setFont('helvetica','normal');
+  doc.text('HABATECH © 2026 — Siguiri, Guinée',M,18);
+  doc.text('BON DE MOUVEMENT DE STOCK',M,24);
+  // Badge type
+  doc.setFillColor(...col);doc.roundedRect(W-54,8,50,14,2,2,'F');
+  doc.setTextColor(255,255,255);doc.setFont('helvetica','bold');doc.setFontSize(9);
+  doc.text(tyIco[m.type]||m.type.toUpperCase(),W-29,17,{align:'center'});
+
+  // INFOS BON
+  let y=38;
+  doc.setTextColor(30,40,60);doc.setFont('helvetica','normal');doc.setFontSize(8.5);
+  const drawRow=(lbl,val,bold=false)=>{
+    doc.setFont('helvetica','bold');doc.text(lbl+' :',M,y);
+    doc.setFont('helvetica',bold?'bold':'normal');doc.text(String(val),M+40,y);
+    y+=6;
+  };
+  drawRow('Référence',m.ref||'—',true);
+  drawRow('Date / Heure',fdt(m.date));
+  drawRow('Opérateur',m.user||'Admin');
+  y+=2;doc.setDrawColor(200,210,225);doc.setLineWidth(0.3);doc.line(M,y,W-M,y);y+=6;
+
+  // PRODUIT
+  doc.setFillColor(240,244,252);doc.roundedRect(M-2,y-4,W-2*M+4,30,2,2,'F');
+  doc.setFont('helvetica','bold');doc.setFontSize(9);doc.setTextColor(30,40,60);
+  doc.text('PRODUIT CONCERNÉ',M,y+1);y+=7;
+  doc.setFontSize(11);doc.setTextColor(15,23,42);
+  doc.text((p.designation||m.produit||'—').substring(0,32),M,y);y+=6;
+  doc.setFontSize(8);doc.setFont('helvetica','normal');doc.setTextColor(100,116,139);
+  doc.text(`Code : ${p.code||'—'}   Catégorie : ${p.categorie||'—'}   Unité : ${p.unite||'u.'}`,M,y);y+=5;
+  doc.text(`Px achat : ${gnf(p.achat||0)}   Px vente : ${gnf(p.vente||0)}   Stock actuel : ${p.stock??'?'} ${p.unite||'u.'}`,M,y);y+=10;
+
+  // QUANTITÉ / VALEUR
+  doc.setFillColor(...col,40);doc.roundedRect(M-2,y-4,W-2*M+4,18,2,2,'F');
+  doc.setDrawColor(...col);doc.setLineWidth(0.5);doc.roundedRect(M-2,y-4,W-2*M+4,18,2,2,'S');
+  doc.setFont('helvetica','bold');doc.setFontSize(10);doc.setTextColor(30,40,60);
+  doc.text('QUANTITÉ MOUVEMENTÉE :',M,y+3);
+  doc.setFontSize(16);doc.setTextColor(...col);
+  doc.text(`${m.qte} ${p.unite||'u.'}`,M+75,y+6);
+  if(m.prix){
+    doc.setFontSize(8.5);doc.setTextColor(80,90,110);doc.setFont('helvetica','normal');
+    doc.text(`P.U. : ${gnf(m.prix)}   Total : ${gnf(m.qte*m.prix)}`,M,y+11);
+  }
+  y+=22;
+
+  // NOTES
+  if(m.notes){
+    doc.setFont('helvetica','bold');doc.setFontSize(8.5);doc.setTextColor(30,40,60);
+    doc.text('NOTES :',M,y);y+=5;
+    doc.setFont('helvetica','normal');doc.setTextColor(80,90,110);
+    const lines=doc.splitTextToSize(m.notes,W-2*M);
+    lines.forEach(l=>{doc.text(l,M,y);y+=5;});
+  }
+
+  // PIED DE PAGE
+  const H=doc.internal.pageSize.height;
+  doc.setDrawColor(200,210,225);doc.setLineWidth(0.3);doc.line(M,H-14,W-M,H-14);
+  doc.setTextColor(150);doc.setFontSize(7);doc.setFont('helvetica','normal');
+  doc.text('MANFRA-SHOP — HABATECH © 2026 — Document généré le '+new Date().toLocaleDateString('fr-FR'),W/2,H-9,{align:'center'});
+
+  doc.save('Mouvement_'+(m.ref||m.id)+'_'+new Date().toISOString().slice(0,10)+'.pdf');
+  toast('📄 Bon mouvement PDF téléchargé','success');
+  logAction('PRINT','Bon mouvement PDF: '+(m.ref||m.id));
 }
 
 // ═══════════════════════════════
@@ -5617,6 +5756,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   display:flex;flex-direction:column;z-index:500;
   transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);
   box-shadow:-8px 0 40px rgba(0,0,0,.4);
+  overflow:hidden;
 }
 #ai-panel.open{transform:translateX(0);}
 #ai-header{
@@ -5649,9 +5789,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 #ai-close:hover{background:var(--red-glow);color:var(--red);}
 #ai-messages{
   flex:1;overflow-y:auto;padding:14px 14px 6px;display:flex;flex-direction:column;gap:10px;
+  min-height:0;
 }
-#ai-messages::-webkit-scrollbar{width:3px;}
+#ai-messages::-webkit-scrollbar{width:7px;}
 #ai-messages::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
+#ai-messages::-webkit-scrollbar-thumb:hover{background:var(--text3);}
 .ai-msg{display:flex;gap:8px;animation:aiMsgIn .22s ease;}
 @keyframes aiMsgIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 .ai-msg.user{flex-direction:row-reverse;}
@@ -5682,8 +5824,15 @@ document.addEventListener('DOMContentLoaded',()=>{
 .ai-typing span:nth-child(3){animation-delay:.4s;}
 @keyframes aiDot{0%,100%{opacity:.4;transform:scale(1);}50%{opacity:1;transform:scale(1.3);}}
 #ai-suggestions{
-  padding:8px 14px;display:flex;flex-wrap:wrap;gap:6px;flex-shrink:0;
+  padding:8px 14px;display:flex;flex-wrap:wrap;gap:6px;
+  flex-shrink:0;
+  max-height:220px;
+  overflow-y:auto;
+  border-top:1px solid var(--border);
 }
+#ai-suggestions::-webkit-scrollbar{width:7px;}
+#ai-suggestions::-webkit-scrollbar-thumb{background:var(--border2);border-radius:10px;}
+#ai-suggestions::-webkit-scrollbar-thumb:hover{background:var(--text3);}
 .ai-chip{
   font-size:11px;padding:5px 10px;border-radius:20px;cursor:pointer;
   background:var(--bg3);border:1px solid var(--border);color:var(--text2);
@@ -5757,26 +5906,61 @@ document.addEventListener('DOMContentLoaded',()=>{
   </div>
 
   <div id="ai-suggestions">
+    <!-- Stock & Produits -->
     <span class="ai-chip" onclick="aiAsk('Alertes stock')">🔔 Alertes</span>
-    <span class="ai-chip" onclick="aiAsk('Ventes du jour ?')">💰 Ventes du jour</span>
-    <span class="ai-chip" onclick="aiAsk('Bénéfice net du jour ?')">📈 Bénéfice net</span>
-    <span class="ai-chip" onclick="aiAsk('Rapport journalier')">📋 Rapport jour</span>
     <span class="ai-chip" onclick="aiAsk('Quel est le stock critique ?')">📦 Stock critique</span>
+    <span class="ai-chip" onclick="aiAsk('Produits en rupture de stock ?')">🚨 Ruptures</span>
     <span class="ai-chip" onclick="aiAsk('Produits en surstock ?')">🏔️ Surstock</span>
     <span class="ai-chip" onclick="aiAsk('Valeur totale du stock ?')">💎 Valeur stock</span>
     <span class="ai-chip" onclick="aiAsk('Marge et rentabilité des produits ?')">📊 Marges</span>
-    <span class="ai-chip" onclick="aiAsk('Mouvements de stock du jour ?')">🔄 Mouvements</span>
+    <span class="ai-chip" onclick="aiAsk('Liste de tous les produits ?')">📋 Tous produits</span>
+    <span class="ai-chip" onclick="aiAsk('Produits sans fournisseur ?')">🏭 Sans fournisseur</span>
+    <span class="ai-chip" onclick="aiAsk('Produits les plus rentables ?')">💡 Rentabilité</span>
+    <span class="ai-chip" onclick="aiAsk('Produits avec faible marge ?')">📉 Faible marge</span>
+    <span class="ai-chip" onclick="aiAsk('Valeur du stock par catégorie ?')">🏷️ Stock / catégorie</span>
+    <!-- Ventes & Finances -->
+    <span class="ai-chip" onclick="aiAsk('Ventes du jour ?')">💰 Ventes du jour</span>
+    <span class="ai-chip" onclick="aiAsk('Bénéfice net du jour ?')">📈 Bénéfice jour</span>
+    <span class="ai-chip" onclick="aiAsk('Bénéfice net du mois ?')">📅 Bénéfice mois</span>
+    <span class="ai-chip" onclick="aiAsk('Chiffre affaires ce mois ?')">💵 CA mois</span>
+    <span class="ai-chip" onclick="aiAsk('Produits les plus vendus ?')">🏆 Top produits</span>
+    <span class="ai-chip" onclick="aiAsk('Comparaison CA mois précédent ?')">📊 Évolution CA</span>
+    <span class="ai-chip" onclick="aiAsk('Ventes par mode de paiement ?')">💳 Modes paiement</span>
+    <span class="ai-chip" onclick="aiAsk('Ticket moyen ce mois ?')">🧾 Ticket moyen</span>
+    <span class="ai-chip" onclick="aiAsk('Résumé du tableau de bord')">🏠 Dashboard</span>
+    <span class="ai-chip" onclick="aiAsk('Rapport journalier')">📋 Rapport jour</span>
+    <span class="ai-chip" onclick="aiAsk('Prévisions et tendances ventes ?')">🔮 Prévisions</span>
+    <!-- Mouvements -->
+    <span class="ai-chip" onclick="aiAsk('Mouvements de stock du jour ?')">🔄 Mouvements jour</span>
+    <span class="ai-chip" onclick="aiAsk('Entrées de stock du jour ?')">📥 Entrées</span>
+    <span class="ai-chip" onclick="aiAsk('Sorties de stock du jour ?')">📤 Sorties</span>
+    <span class="ai-chip" onclick="aiAsk('Pertes et ajustements ?')">⚖️ Pertes/Ajust.</span>
+    <span class="ai-chip" onclick="aiAsk('Transferts de stock ?')">🔀 Transferts</span>
+    <!-- Commandes & Fournisseurs -->
     <span class="ai-chip" onclick="aiAsk('Commandes fournisseurs en cours ?')">📋 Commandes</span>
     <span class="ai-chip" onclick="aiAsk('Fournisseurs principaux ?')">🏭 Fournisseurs</span>
-    <span class="ai-chip" onclick="aiAsk('Retours et remboursements ?')">🔁 Retours</span>
-    <span class="ai-chip" onclick="aiAsk('Clients avec dettes ?')">👤 Clients dettes</span>
-    <span class="ai-chip" onclick="aiAsk('Dépenses ce mois ?')">💸 Dépenses</span>
-    <span class="ai-chip" onclick="aiAsk('Produits les plus vendus ?')">🏆 Top produits</span>
     <span class="ai-chip" onclick="aiAsk('Conseils réapprovisionnement')">🚚 Réappro</span>
-    <span class="ai-chip" onclick="aiAsk('Résumé du tableau de bord')">🏠 Dashboard</span>
-    <span class="ai-chip" onclick="aiAsk('Prévisions et tendances ventes ?')">🔮 Prévisions</span>
+    <span class="ai-chip" onclick="aiAsk('Commandes en attente de livraison ?')">⏳ Livraisons</span>
+    <!-- Clients & Crédit -->
+    <span class="ai-chip" onclick="aiAsk('Clients avec dettes ?')">👤 Dettes clients</span>
+    <span class="ai-chip" onclick="aiAsk('Encours crédit total ?')">💳 Encours crédit</span>
+    <span class="ai-chip" onclick="aiAsk('Meilleurs clients du mois ?')">🥇 Top clients</span>
+    <span class="ai-chip" onclick="aiAsk('Nombre de clients actifs ?')">👥 Nb clients</span>
+    <!-- Dépenses & Caisse -->
+    <span class="ai-chip" onclick="aiAsk('Dépenses ce mois ?')">💸 Dépenses</span>
+    <span class="ai-chip" onclick="aiAsk('Dépenses par catégorie ?')">📂 Dép. catégories</span>
+    <span class="ai-chip" onclick="aiAsk('Solde de caisse actuel ?')">🏦 Solde caisse</span>
+    <!-- Retours -->
+    <span class="ai-chip" onclick="aiAsk('Retours et remboursements ?')">🔁 Retours</span>
+    <span class="ai-chip" onclick="aiAsk('Retours en attente de traitement ?')">⏰ Retours en attente</span>
+    <!-- Points de vente -->
+    <span class="ai-chip" onclick="aiAsk('Performance par point de vente ?')">🏪 Perf. PDV</span>
+    <span class="ai-chip" onclick="aiAsk('CA par point de vente ce mois ?')">📍 CA par PDV</span>
+    <!-- Audit & Conseils -->
     <span class="ai-chip" onclick="aiAsk('Dernières actions du journal ?')">🗒️ Journal</span>
     <span class="ai-chip" onclick="aiAsk('Conseils pour augmenter les ventes')">💡 Conseils ventes</span>
+    <span class="ai-chip" onclick="aiAsk('Analyse complète de la boutique')">🔍 Analyse globale</span>
+    <span class="ai-chip" onclick="aiAsk('Que dois-je améliorer en priorité ?')">🎯 Priorités</span>
   </div>
 
   <div id="ai-footer">
@@ -6280,13 +6464,329 @@ async function aiLocalAnswer(q){
     return r;
   }
 
+  // — Entrées de stock —
+  if(ql.includes('entrée') || ql.includes('entrées') || ql.includes('réception') || ql.includes('approvisionnement reçu')){
+    const mvts = D.mouvements || [];
+    const today = new Date().toISOString().slice(0,10);
+    const entrees = mvts.filter(m=>m.type==='entree');
+    const entreesJ = entrees.filter(m=>(m.date||'').startsWith(today));
+    const totQteJ = entreesJ.reduce((s,m)=>s+(+m.qte||0),0);
+    const totQte = entrees.reduce((s,m)=>s+(+m.qte||0),0);
+    let r = `📥 **Entrées de Stock**\n\n• Aujourd'hui : **${entreesJ.length}** entrées — **${totQteJ} unités**\n• Total historique : ${entrees.length} entrées — ${totQte} unités\n\n**Dernières entrées :**\n`;
+    r += entrees.slice(0,6).map(m=>`• ${m.produit||'?'} × **${m.qte}** — Réf: ${m.ref||'—'} — ${(m.date||'').slice(0,10)}`).join('\n');
+    return r;
+  }
+
+  // — Sorties de stock —
+  if(ql.includes('sortie') || ql.includes('sorties') || ql.includes('stock sorti')){
+    const mvts = D.mouvements || [];
+    const today = new Date().toISOString().slice(0,10);
+    const sorties = mvts.filter(m=>m.type==='sortie');
+    const sortiesJ = sorties.filter(m=>(m.date||'').startsWith(today));
+    const totQteJ = sortiesJ.reduce((s,m)=>s+(+m.qte||0),0);
+    let r = `📤 **Sorties de Stock**\n\n• Aujourd'hui : **${sortiesJ.length}** sorties — **${totQteJ} unités**\n• Total historique : ${sorties.length} sorties\n\n**Dernières sorties :**\n`;
+    r += sorties.slice(0,6).map(m=>`• ${m.produit||'?'} × **${m.qte}** — Réf: ${m.ref||'—'} — ${(m.date||'').slice(0,10)}`).join('\n');
+    return r;
+  }
+
+  // — Pertes et ajustements —
+  if(ql.includes('perte') || ql.includes('ajustement') || ql.includes('casse') || ql.includes('vol')){
+    const mvts = D.mouvements || [];
+    const pertes = mvts.filter(m=>m.type==='perte');
+    const ajust = mvts.filter(m=>m.type==='ajustement');
+    const totPerteQte = pertes.reduce((s,m)=>s+(+m.qte||0),0);
+    const totPerteMnt = pertes.reduce((s,m)=>{
+      const p=D.produits.find(x=>x.id===m.produit_id);
+      return s+(+m.qte||0)*(m.prix||p?.achat||0);
+    },0);
+    let r = `⚖️ **Pertes & Ajustements**\n\n• **Pertes** : ${pertes.length} opération${pertes.length>1?'s':''} — ${totPerteQte} unités perdues\n• **Valeur perdue** : ~${totPerteMnt.toLocaleString('fr')} GNF\n• **Ajustements** : ${ajust.length} opération${ajust.length>1?'s':''}\n`;
+    if(pertes.length){
+      r += `\n**Dernières pertes :**\n`;
+      r += pertes.slice(0,5).map(m=>`• ${m.produit||'?'} × ${m.qte} — ${(m.date||'').slice(0,10)} — ${m.notes||'—'}`).join('\n');
+    }
+    return r;
+  }
+
+  // — Transferts de stock —
+  if(ql.includes('transfert') || ql.includes('transit') || ql.includes('transferts')){
+    const mvts = D.mouvements || [];
+    const transferts = mvts.filter(m=>m.type==='transfert');
+    if(!transferts.length) return `🔀 **Transferts de Stock**\n\n✅ Aucun transfert enregistré.`;
+    let r = `🔀 **Transferts de Stock (${transferts.length})**\n\n`;
+    r += transferts.slice(0,8).map(m=>`• ${m.produit||'?'} × **${m.qte}** — Réf: ${m.ref||'—'} — ${(m.date||'').slice(0,10)}`).join('\n');
+    return r;
+  }
+
+  // — Solde de caisse —
+  if(ql.includes('caisse') || ql.includes('solde') || ql.includes('trésorerie') || ql.includes('cash')){
+    const caisses = D.caisses || [];
+    const solde = caisses.reduce((s,e)=>s+(+e.montant_entree||0)-(+e.montant_sortie||0),0);
+    const today = new Date().toISOString().slice(0,10);
+    const todayE = caisses.filter(e=>(e.date||'').startsWith(today));
+    const entJ = todayE.reduce((s,e)=>s+(+e.montant_entree||0),0);
+    const sorJ = todayE.reduce((s,e)=>s+(+e.montant_sortie||0),0);
+    return `🏦 **Solde de Caisse**\n\n• **Solde actuel (cumulé) : ${solde.toLocaleString('fr')} GNF** ${solde>=0?'✅':'⚠️'}\n• Entrées aujourd'hui : +${entJ.toLocaleString('fr')} GNF\n• Sorties aujourd'hui : -${sorJ.toLocaleString('fr')} GNF\n• Net du jour : ${(entJ-sorJ)>=0?'+':''}${(entJ-sorJ).toLocaleString('fr')} GNF\n• Nb mouvements aujourd'hui : ${todayE.length}`;
+  }
+
+  // — Dépenses par catégorie —
+  if(ql.includes('catégorie') && (ql.includes('dépense') || ql.includes('charge'))){
+    const depenses2 = D.depenses || [];
+    const byCat={};
+    depenses2.forEach(d=>{byCat[d.categorie]=(byCat[d.categorie]||0)+(+d.montant||0);});
+    const catLbl={achat_stock:'📦 Achat stock',salaires:'👷 Salaires',loyer:'🏠 Loyer',transport:'🚛 Transport',charges:'⚡ Charges',maintenance:'🔧 Maintenance',autre:'📋 Autre'};
+    const sorted=Object.entries(byCat).sort((a,b)=>b[1]-a[1]);
+    const tot=sorted.reduce((s,[,v])=>s+v,0);
+    let r=`📂 **Dépenses par Catégorie**\n\nTotal : **${tot.toLocaleString('fr')} GNF**\n\n`;
+    r+=sorted.map(([cat,mnt])=>`• ${catLbl[cat]||cat} : **${mnt.toLocaleString('fr')} GNF** (${tot?Math.round(mnt/tot*100):0}%)`).join('\n');
+    return r;
+  }
+
+  // — Performance par point de vente —
+  if(ql.includes('point de vente') || ql.includes('pdv') || ql.includes('boutique') || ql.includes('magasin')){
+    const pdvs = D.points_vente || [];
+    const ventes2 = D.ventes || [];
+    const curMonth = new Date().toISOString().slice(0,7);
+    const vM = ventes2.filter(v=>(v.date||'').startsWith(curMonth));
+    if(!pdvs.length) return `🏪 Aucun point de vente configuré.`;
+    let r = `🏪 **Performance par Point de Vente — ${curMonth}**\n\n`;
+    const stats = pdvs.map(p=>{
+      const vP = vM.filter(v=>v.point_vente_id===p.id);
+      const ca = vP.reduce((s,v)=>s+(+v.montant||0),0);
+      return {nom:p.nom,nb:vP.length,ca};
+    }).sort((a,b)=>b.ca-a.ca);
+    r += stats.map((s,i)=>`${['🥇','🥈','🥉','4.','5.'][Math.min(i,4)]} **${s.nom}** — ${s.nb} vente${s.nb>1?'s':''} — **${s.ca.toLocaleString('fr')} GNF**`).join('\n');
+    const total = stats.reduce((s,p)=>s+p.ca,0);
+    r += `\n\n📊 CA total tous PDV : **${total.toLocaleString('fr')} GNF**`;
+    return r;
+  }
+
+  // — CA par PDV —
+  if((ql.includes('ca') || ql.includes('chiffre')) && ql.includes('pdv')){
+    return aiLocalAnswer('Performance par point de vente');
+  }
+
+  // — Top clients du mois —
+  if((ql.includes('meilleur') || ql.includes('top')) && ql.includes('client')){
+    const ventes2 = D.ventes || [];
+    const clients2 = D.clients || [];
+    const curMonth = new Date().toISOString().slice(0,7);
+    const vM = ventes2.filter(v=>(v.date||'').startsWith(curMonth));
+    const stats={};
+    vM.forEach(v=>{
+      if(!v.client_id) return;
+      const c=clients2.find(x=>x.id===v.client_id);if(!c) return;
+      if(!stats[c.id]) stats[c.id]={nom:c.nom,ca:0,nb:0};
+      stats[c.id].ca+=(+v.montant||0);stats[c.id].nb++;
+    });
+    const top=Object.values(stats).sort((a,b)=>b.ca-a.ca).slice(0,5);
+    if(!top.length) return `🥇 **Meilleurs clients du mois**\n\nAucun achat client identifié ce mois.`;
+    let r=`🥇 **Top Clients — ${curMonth}**\n\n`;
+    r+=top.map((c,i)=>`${['🥇','🥈','🥉','4.','5.'][i]} **${c.nom}** — ${c.nb} achat${c.nb>1?'s':''} — **${c.ca.toLocaleString('fr')} GNF**`).join('\n');
+    return r;
+  }
+
+  // — Nombre de clients —
+  if(ql.includes('nombre de client') || ql.includes('nb client') || ql.includes('combien de client')){
+    const clients2 = D.clients || [];
+    const actifs = clients2.filter(c=>c.last_vente);
+    const detteurs = clients2.filter(c=>(+c.dette||0)>0);
+    return `👥 **Clients**\n\n• Total enregistrés : **${clients2.length}**\n• Avec historique d'achats : **${actifs.length}**\n• Avec dettes : **${detteurs.length}**\n• Sans achat : **${clients2.length-actifs.length}**`;
+  }
+
+  // — Encours crédit —
+  if(ql.includes('encours') || ql.includes('crédit total')){
+    const clients2 = D.clients || [];
+    const detteurs = clients2.filter(c=>(+c.dette||0)>0).sort((a,b)=>(+b.dette)-(+a.dette));
+    const tot = detteurs.reduce((s,c)=>s+(+c.dette||0),0);
+    if(!detteurs.length) return `💳 **Encours Crédit**\n\n✅ Aucun encours crédit — tous les clients sont à jour !`;
+    let r = `💳 **Encours Crédit Total : ${tot.toLocaleString('fr')} GNF**\n\n${detteurs.length} client${detteurs.length>1?'s':''} en crédit :\n\n`;
+    r += detteurs.slice(0,8).map((c,i)=>`${i+1}. **${c.nom}** — **${(+c.dette).toLocaleString('fr')} GNF**${c.tel?' — '+c.tel:''}`).join('\n');
+    if(detteurs.length>8) r+=`\n_…et ${detteurs.length-8} autre${detteurs.length>9?'s':''}_`;
+    return r;
+  }
+
+  // — Comparaison CA mois précédent —
+  if(ql.includes('compar') || ql.includes('évolution') || ql.includes('mois précédent')){
+    const ventes2 = D.ventes || [];
+    const today = new Date().toISOString().slice(0,10);
+    const curMonth = today.slice(0,7);
+    const prevMonth = new Date(new Date().setMonth(new Date().getMonth()-1)).toISOString().slice(0,7);
+    const vCur = ventes2.filter(v=>(v.date||'').startsWith(curMonth));
+    const vPrev = ventes2.filter(v=>(v.date||'').startsWith(prevMonth));
+    const caCur = vCur.reduce((s,v)=>s+(+v.montant||0),0);
+    const caPrev = vPrev.reduce((s,v)=>s+(+v.montant||0),0);
+    const diff = caCur - caPrev;
+    const pct = caPrev > 0 ? Math.round(diff/caPrev*100) : null;
+    let r = `📊 **Comparaison CA — Évolution**\n\n• **Ce mois (${curMonth})** : ${caCur.toLocaleString('fr')} GNF (${vCur.length} ventes)\n• **Mois précédent (${prevMonth})** : ${caPrev.toLocaleString('fr')} GNF (${vPrev.length} ventes)\n• **Différence** : ${diff>=0?'+':''}${diff.toLocaleString('fr')} GNF`;
+    if(pct!==null) r += ` — **${diff>=0?'+':''}${pct}%** ${diff>=0?'📈':'📉'}`;
+    r += `\n\n${diff>=0?'✅ Bonne dynamique !':'⚠️ CA en baisse — analysez les causes et agissez.'}`;
+    return r;
+  }
+
+  // — Ventes par mode de paiement —
+  if(ql.includes('paiement') || ql.includes('mobile money') || ql.includes('espèces') || ql.includes('orange money') || ql.includes('mtn')){
+    const ventes2 = D.ventes || [];
+    const curMonth = new Date().toISOString().slice(0,7);
+    const vM = ventes2.filter(v=>(v.date||'').startsWith(curMonth));
+    const byPay={};
+    vM.forEach(v=>{byPay[v.paiement]=(byPay[v.paiement]||0)+(+v.montant||0);});
+    const tot = vM.reduce((s,v)=>s+(+v.montant||0),0);
+    const sorted = Object.entries(byPay).sort((a,b)=>b[1]-a[1]);
+    let r = `💳 **Ventes par Mode de Paiement — ${curMonth}**\n\n`;
+    r += sorted.map(([pay,mnt])=>`• **${pay}** : ${mnt.toLocaleString('fr')} GNF (${tot?Math.round(mnt/tot*100):0}%)`).join('\n');
+    r += `\n\n📊 Total : **${tot.toLocaleString('fr')} GNF**`;
+    return r;
+  }
+
+  // — Ticket moyen —
+  if(ql.includes('ticket') || ql.includes('panier moyen')){
+    const ventes2 = D.ventes || [];
+    const curMonth = new Date().toISOString().slice(0,7);
+    const today = new Date().toISOString().slice(0,10);
+    const vM = ventes2.filter(v=>(v.date||'').startsWith(curMonth));
+    const vJ = ventes2.filter(v=>(v.date||'').startsWith(today));
+    const caM = vM.reduce((s,v)=>s+(+v.montant||0),0);
+    const caJ = vJ.reduce((s,v)=>s+(+v.montant||0),0);
+    const tmM = vM.length ? Math.round(caM/vM.length) : 0;
+    const tmJ = vJ.length ? Math.round(caJ/vJ.length) : 0;
+    return `🧾 **Ticket Moyen**\n\n• **Aujourd'hui** : ${tmJ.toLocaleString('fr')} GNF (${vJ.length} vente${vJ.length>1?'s':''})\n• **Ce mois** : ${tmM.toLocaleString('fr')} GNF (${vM.length} vente${vM.length>1?'s':''})`;
+  }
+
+  // — Liste de tous les produits —
+  if(ql.includes('liste') && (ql.includes('produit') || ql.includes('article') || ql.includes('tous les'))){
+    const cats={};
+    prods.forEach(p=>{cats[p.categorie]=(cats[p.categorie]||[]);cats[p.categorie].push(p);});
+    let r=`📋 **Liste des Produits (${prods.length})**\n\n`;
+    Object.entries(cats).slice(0,6).forEach(([cat,ps])=>{
+      r+=`**${cat} (${ps.length})** : ${ps.slice(0,4).map(p=>`${p.designation} [${p.etat}]`).join(', ')}${ps.length>4?' …':''}\n`;
+    });
+    const catNb=Object.keys(cats).length;
+    if(catNb>6) r+=`\n_…et ${catNb-6} autres catégories_`;
+    return r;
+  }
+
+  // — Produits sans fournisseur —
+  if(ql.includes('sans fournisseur') || (ql.includes('fournisseur') && ql.includes('manquant'))){
+    const sansFourn = prods.filter(p=>!p.fournisseur);
+    if(!sansFourn.length) return `🏭 **Produits sans fournisseur**\n\n✅ Tous les produits ont un fournisseur renseigné !`;
+    let r=`🏭 **Produits sans fournisseur (${sansFourn.length})**\n\n`;
+    r+=sansFourn.slice(0,8).map(p=>`• ${p.designation} — stock : ${p.stock} ${p.unite||'u.'}`).join('\n');
+    if(sansFourn.length>8) r+=`\n_…et ${sansFourn.length-8} autres_`;
+    r+=`\n\n💡 Renseignez les fournisseurs pour faciliter le réapprovisionnement.`;
+    return r;
+  }
+
+  // — Produits les plus rentables —
+  if(ql.includes('rentable') || (ql.includes('plus') && ql.includes('marge'))){
+    const avecMarge = prods.filter(p=>p.achat>0&&p.vente>0).map(p=>({...p,pct:Math.round((p.vente-p.achat)/p.achat*100)})).sort((a,b)=>b.pct-a.pct);
+    if(!avecMarge.length) return `💡 Aucun produit avec prix d'achat et vente renseignés.`;
+    let r=`💡 **Produits les plus rentables**\n\n`;
+    r+=avecMarge.slice(0,8).map((p,i)=>`${i+1}. **${p.designation}** — marge **${p.pct}%** (achat: ${gnf(p.achat)} → vente: ${gnf(p.vente)})`).join('\n');
+    return r;
+  }
+
+  // — Produits à faible marge —
+  if(ql.includes('faible marge') || (ql.includes('mauvaise') && ql.includes('marge'))){
+    const avecMarge = prods.filter(p=>p.achat>0&&p.vente>0).map(p=>({...p,pct:Math.round((p.vente-p.achat)/p.achat*100)})).sort((a,b)=>a.pct-b.pct);
+    const faibles = avecMarge.filter(p=>p.pct<20);
+    if(!faibles.length) return `📉 **Marges**\n\n✅ Tous les produits ont une marge supérieure à 20%.`;
+    let r=`📉 **Produits à faible marge (<20%)**\n\n`;
+    r+=faibles.slice(0,8).map(p=>`• **${p.designation}** — **${p.pct}%** (achat: ${gnf(p.achat)}, vente: ${gnf(p.vente)})`).join('\n');
+    r+=`\n\n💡 Revoyez les prix de vente de ces produits pour améliorer la rentabilité.`;
+    return r;
+  }
+
+  // — Stock par catégorie —
+  if((ql.includes('catégorie') || ql.includes('categorie')) && ql.includes('stock')){
+    const byCat={};
+    prods.forEach(p=>{
+      if(!byCat[p.categorie]) byCat[p.categorie]={nb:0,qte:0,val:0};
+      byCat[p.categorie].nb++;byCat[p.categorie].qte+=p.stock;byCat[p.categorie].val+=p.stock*p.achat;
+    });
+    const sorted=Object.entries(byCat).sort((a,b)=>b[1].val-a[1].val);
+    let r=`🏷️ **Valeur du Stock par Catégorie**\n\n`;
+    r+=sorted.map(([cat,s])=>`• **${cat}** : ${s.nb} produit${s.nb>1?'s':''} — ${s.qte} unités — **${s.val.toLocaleString('fr')} GNF**`).join('\n');
+    return r;
+  }
+
+  // — Analyse complète / globale —
+  if(ql.includes('analyse') || ql.includes('global') || ql.includes('état de la boutique') || ql.includes('situation')){
+    const today = new Date().toISOString().slice(0,10);
+    const curMonth = today.slice(0,7);
+    const vJ = ventes.filter(v=>(v.date||'').startsWith(today));
+    const vM = ventes.filter(v=>(v.date||'').startsWith(curMonth));
+    const caJ = vJ.reduce((s,v)=>s+(+v.montant||0),0);
+    const caM = vM.reduce((s,v)=>s+(+v.montant||0),0);
+    const depM = depenses.filter(d=>(d.date||'').startsWith(curMonth)).reduce((s,d)=>s+(+d.montant||0),0);
+    const benM = caM - depM;
+    const ruptures = prods.filter(p=>p.stock<=0||p.etat==='rupture');
+    const critiques = prods.filter(p=>p.stock>0&&p.stock<=(p.min||5));
+    const valStock = prods.reduce((s,p)=>s+p.stock*p.achat,0);
+    const detteurs = clients.filter(c=>(+c.dette||0)>0);
+    const totDette = detteurs.reduce((s,c)=>s+(+c.dette||0),0);
+    const avecMarge = prods.filter(p=>p.achat>0&&p.vente>0);
+    const margeMoy = avecMarge.length ? Math.round(avecMarge.reduce((s,p)=>s+(p.vente-p.achat)/p.achat*100,0)/avecMarge.length) : 0;
+    const mvtJ = (D.mouvements||[]).filter(m=>(m.date||'').startsWith(today));
+    const solde = (D.caisses||[]).reduce((s,e)=>s+(+e.montant_entree||0)-(+e.montant_sortie||0),0);
+    let score = 0;
+    const points = [];
+    if(caJ>0){score+=20;points.push('✅ Ventes actives aujourd\'hui');}else points.push('⚠️ Aucune vente aujourd\'hui');
+    if(ruptures.length===0){score+=20;points.push('✅ Aucune rupture de stock');}else points.push(`⚠️ ${ruptures.length} rupture(s)`);
+    if(margeMoy>=25){score+=20;points.push(`✅ Bonne marge moyenne (${margeMoy}%)`);}else points.push(`⚠️ Marge faible (${margeMoy}%)`);
+    if(detteurs.length===0){score+=20;points.push('✅ Aucun encours crédit');}else points.push(`ℹ️ ${detteurs.length} débiteur(s) — ${totDette.toLocaleString('fr')} GNF`);
+    if(benM>0){score+=20;points.push('✅ Bénéfice mensuel positif');}else points.push('🔴 Bénéfice mensuel négatif');
+    let mention = score>=80?'🟢 Excellent':score>=60?'🟡 Correct':score>=40?'🟠 À améliorer':'🔴 Critique';
+    let r=`🔍 **Analyse Globale — Score ${score}/100 ${mention}**\n\n`;
+    r+=`**📊 Aujourd'hui :** CA ${caJ.toLocaleString('fr')} GNF | ${vJ.length} ventes | ${mvtJ.length} mouvements\n`;
+    r+=`**📅 Ce mois :** CA ${caM.toLocaleString('fr')} GNF | Dépenses ${depM.toLocaleString('fr')} GNF | Bénéfice ${benM>=0?'+':''}${benM.toLocaleString('fr')} GNF\n`;
+    r+=`**📦 Stock :** Valeur ${(valStock/1000000).toFixed(1)}M GNF | ${ruptures.length} rupt. | ${critiques.length} crit.\n`;
+    r+=`**🏦 Caisse :** ${solde.toLocaleString('fr')} GNF | **👥 Clients :** ${clients.length} | Dettes : ${totDette.toLocaleString('fr')} GNF\n\n`;
+    r+=`**Points clés :**\n`+points.map(p=>`• ${p}`).join('\n');
+    return r;
+  }
+
+  // — Priorités / Que dois-je faire —
+  if(ql.includes('priorité') || ql.includes('que dois') || ql.includes('quoi faire') || ql.includes('action') || ql.includes('que faire')){
+    const today = new Date().toISOString().slice(0,10);
+    const curMonth = today.slice(0,7);
+    const vJ = ventes.filter(v=>(v.date||'').startsWith(today));
+    const caJ = vJ.reduce((s,v)=>s+(+v.montant||0),0);
+    const ruptures = prods.filter(p=>p.stock<=0||p.etat==='rupture');
+    const critiques = prods.filter(p=>p.stock>0&&p.stock<=(p.min||5));
+    const detteurs = clients.filter(c=>(+c.dette||0)>0).sort((a,b)=>(+b.dette)-(+a.dette));
+    const totDette = detteurs.reduce((s,c)=>s+(+c.dette||0),0);
+    const retours = (D.retours||[]).filter(r=>r.statut==='en_attente');
+    const cmdsEnCours = (D.commandes||[]).filter(c=>c.statut!=='livree'&&c.statut!=='annulee');
+    const actions=[];
+    if(ruptures.length) actions.push({urgence:'🔴 URGENT',texte:`Commander immédiatement : ${ruptures.slice(0,3).map(p=>p.designation).join(', ')}${ruptures.length>3?` (+${ruptures.length-3})`:''}`});
+    if(critiques.length) actions.push({urgence:'🟠 Bientôt',texte:`Stock critique à surveiller : ${critiques.length} produit${critiques.length>1?'s':''}`});
+    if(retours.length) actions.push({urgence:'🟠 En attente',texte:`Traiter ${retours.length} retour${retours.length>1?'s':''} en attente`});
+    if(totDette>0) actions.push({urgence:'🟡 Important',texte:`Relancer les débiteurs : ${detteurs.slice(0,2).map(c=>c.nom).join(', ')} — total ${totDette.toLocaleString('fr')} GNF`});
+    if(caJ===0) actions.push({urgence:'🟡 Aujourd\'hui',texte:'Aucune vente enregistrée — contactez vos clients habituels'});
+    if(cmdsEnCours.length) actions.push({urgence:'ℹ️ Suivi',texte:`${cmdsEnCours.length} commande${cmdsEnCours.length>1?'s':''} en cours à confirmer`});
+    actions.push({urgence:'💡 Conseil',texte:'Passez en revue les produits à faible rotation pour ajuster les prix'});
+    let r=`🎯 **Actions Prioritaires**\n\n`;
+    r+=actions.map((a,i)=>`${i+1}. ${a.urgence} — ${a.texte}`).join('\n\n');
+    return r;
+  }
+
+  // — Commandes en attente de livraison —
+  if(ql.includes('livraison') || ql.includes('en attente') && ql.includes('commande')){
+    const cmds = D.commandes || [];
+    const attente = cmds.filter(c=>c.statut==='envoyee'||c.statut==='confirmee');
+    if(!attente.length) return `⏳ **Livraisons en attente**\n\n✅ Aucune commande en attente de livraison.`;
+    let r=`⏳ **Commandes en attente de livraison (${attente.length})**\n\n`;
+    r+=attente.map(c=>`• **${c.num}** — ${c.fourn} — ${(+c.montant||0).toLocaleString('fr')} GNF — livraison: **${c.prevue||'—'}** [${c.statut}]`).join('\n');
+    return r;
+  }
+
   // — Aide —
   if(ql.includes('aide') || ql.includes('help') || ql.includes('que peux')){
-    return `🤖 **Ce que je peux faire en mode local :**\n\n📦 Stock & Produits\n• Stock critique / ruptures / surstock\n• Valeur totale du stock\n• Marge et rentabilité par produit\n\n💰 Ventes & Finance\n• Ventes du jour et du mois\n• Bénéfice net (CA − dépenses)\n• Prévisions et tendances\n• Top produits vendus\n\n🔄 Opérations\n• Mouvements de stock du jour\n• Commandes fournisseurs en cours\n• Fournisseurs et délais\n• Retours et remboursements\n\n👤 Clients\n• Clients avec dettes\n• Encours total crédit\n\n📊 Rapports\n• Rapport journalier complet\n• Dépenses par catégorie\n• Journal d'audit\n• Alertes actives\n• Conseils pour augmenter les ventes\n\n💡 Passez en mode **🖥️ LM Studio / OpenAI** pour des questions libres !`;
+    return `🤖 **Ce que je peux faire en mode local :**\n\n📦 **Stock & Produits**\n• Stock critique / ruptures / surstock\n• Valeur du stock global et par catégorie\n• Marge, rentabilité, faible marge\n• Entrées, sorties, pertes, transferts, ajustements\n• Produits sans fournisseur\n\n💰 **Ventes & Finance**\n• Ventes du jour, du mois, ticket moyen\n• Bénéfice net jour/mois\n• Comparaison CA mois précédent\n• Ventes par mode de paiement\n• Top produits vendus\n\n📊 **Rapports & Analyse**\n• Rapport journalier complet\n• Analyse globale avec score\n• Actions prioritaires\n• Prévisions et tendances\n\n🔄 **Opérations**\n• Mouvements du jour (entrées/sorties/pertes/transferts)\n• Commandes fournisseurs / livraisons en attente\n• Retours en attente de traitement\n\n👤 **Clients & Caisse**\n• Clients avec dettes, encours crédit\n• Meilleurs clients du mois\n• Solde de caisse actuel\n• Dépenses par catégorie\n\n🏪 **Points de vente**\n• Performance et CA par PDV\n\n🗒️ **Audit** : Journal des actions\n\n💡 Passez en mode **🖥️ LM Studio / OpenAI** pour des questions libres !`;
   }
 
   // — Réponse générique —
-  return `🤔 Je n'ai pas trouvé de correspondance pour : *"${q}"*\n\nEssayez :\n• "Bénéfice net" · "Valeur stock" · "Marges"\n• "Mouvements" · "Commandes" · "Retours"\n• "Fournisseurs" · "Prévisions" · "Journal"\n• "Alertes stock" · "Rapport journalier"\n\nOu passez en mode **🖥️ LM Studio / OpenAI** pour des questions libres !`;
+  return `🤔 Je n'ai pas trouvé de correspondance pour : *"${q}"*\n\nEssayez par exemple :\n• "Alertes stock" · "Ruptures" · "Surstock"\n• "Ventes du jour" · "Bénéfice net" · "CA mois"\n• "Valeur stock" · "Stock par catégorie" · "Marges"\n• "Entrées" · "Sorties" · "Pertes" · "Transferts"\n• "Commandes" · "Livraisons" · "Retours"\n• "Fournisseurs" · "Clients dettes" · "Encours crédit"\n• "Solde caisse" · "Dépenses catégorie" · "PDV"\n• "Rapport journalier" · "Analyse globale" · "Priorités"\n• "Prévisions" · "Journal" · "Ticket moyen"\n\nOu passez en mode **🖥️ LM Studio / OpenAI** pour des questions libres !`;
 }
 
 // ── MODE LM STUDIO / OPENAI : API compatible OpenAI ──
@@ -6330,26 +6830,44 @@ VENTES & FINANCES :
 - Dépenses aujourd'hui : ${depJ.toLocaleString('fr')} GNF | Ce mois : ${depM.toLocaleString('fr')} GNF
 - Bénéfice net aujourd'hui : ${(totJ-depJ).toLocaleString('fr')} GNF
 - Bénéfice net ce mois : ${(totM-depM).toLocaleString('fr')} GNF
+- Ticket moyen du mois : ${vM.length?Math.round(totM/vM.length).toLocaleString('fr'):0} GNF
+- Modes de paiement (mois) : ${(()=>{const bp={};vM.forEach(v=>{bp[v.paiement]=(bp[v.paiement]||0)+1;});return Object.entries(bp).map(([p,n])=>`${p}:${n}`).join(', ')||'—';})()}
 
 STOCK & PRODUITS :
-- Total produits : ${prods.length} | Valeur stock : ${valStock.toLocaleString('fr')} GNF
+- Total produits : ${prods.length} | Valeur stock (achat) : ${valStock.toLocaleString('fr')} GNF
+- Valeur stock (vente) : ${prods.reduce((s,p)=>s+p.stock*p.vente,0).toLocaleString('fr')} GNF
 - Ruptures : ${prods.filter(p=>p.stock<=0).length} | Critiques : ${prods.filter(p=>p.stock>0&&p.stock<=(p.min||5)).length} | Surstock : ${surstock.length}
 - Marge moyenne : ${margeMoy}%
 - Produits alertes : ${crit.slice(0,6).map(p=>`${p.designation}(stk:${p.stock},min:${p.min||5})`).join(', ')||'aucun'}
+- Catégories : ${(()=>{const bc={};prods.forEach(p=>{bc[p.categorie]=(bc[p.categorie]||0)+1;});return Object.entries(bc).map(([c,n])=>`${c}:${n}`).join(', ')||'—';})()}
 
-OPÉRATIONS :
+MOUVEMENTS :
 - Mouvements aujourd'hui : ${mvtJ.length} | Entrées : ${mvtJ.filter(m=>m.type==='entree').reduce((s,m)=>s+m.qte,0)} u. | Sorties : ${mvtJ.filter(m=>m.type==='sortie').reduce((s,m)=>s+m.qte,0)} u.
-- Commandes en cours : ${cmdsEnCours.length} (${cmdsEnCours.reduce((s,c)=>s+(+c.montant||0),0).toLocaleString('fr')} GNF) | Fournisseurs : ${fns.length}
-- Retours en attente : ${retsEnAttente.length} | Total retours : ${rets.length}
+- Pertes aujourd'hui : ${mvtJ.filter(m=>m.type==='perte').reduce((s,m)=>s+m.qte,0)} u. | Transferts : ${mvtJ.filter(m=>m.type==='transfert').length}
+- Total mouvements historique : ${(D.mouvements||[]).length}
 
-CLIENTS :
+COMMANDES & FOURNISSEURS :
+- Commandes en cours : ${cmdsEnCours.length} (${cmdsEnCours.reduce((s,c)=>s+(+c.montant||0),0).toLocaleString('fr')} GNF) | Fournisseurs : ${fns.length}
+- Commandes en attente livraison : ${cmdsEnCours.filter(c=>c.statut==='envoyee'||c.statut==='confirmee').length}
+- Top fournisseurs : ${fns.slice(0,3).map(f=>f.nom).join(', ')||'—'}
+
+RETOURS :
+- Retours en attente : ${retsEnAttente.length} | Total retours : ${rets.length}
+- Montant total retours : ${rets.reduce((s,r)=>s+(+r.montant||0),0).toLocaleString('fr')} GNF
+
+CLIENTS & CAISSE :
 - Total clients : ${clients.length} | Avec dettes : ${detteurs.length} | Encours total : ${totDette.toLocaleString('fr')} GNF
 ${detteurs.length?'- Top débiteurs : '+detteurs.sort((a,b)=>(+b.dette)-(+a.dette)).slice(0,3).map(c=>`${c.nom}(${(+c.dette).toLocaleString('fr')} GNF)`).join(', '):''}
+- Solde caisse : ${(D.caisses||[]).reduce((s,e)=>s+(+e.montant_entree||0)-(+e.montant_sortie||0),0).toLocaleString('fr')} GNF
+
+POINTS DE VENTE :
+- Nombre de PDV : ${(D.points_vente||[]).length}
+${(D.points_vente||[]).map(p=>{const vP=vM.filter(v=>v.point_vente_id===p.id);return `- ${p.nom} : ${vP.length} ventes, ${vP.reduce((s,v)=>s+(+v.montant||0),0).toLocaleString('fr')} GNF ce mois`;}).join('\n')}
 
 TOP 5 PRODUITS STOCK : ${prods.slice(0,5).map(p=>`${p.designation}(stk:${p.stock}, px:${p.vente} GNF, marge:${p.achat>0?Math.round((p.vente-p.achat)/p.achat*100)+'%':'?'})`).join(' | ')||'—'}
 
-TES CAPACITÉS : stock, ventes, bénéfice, marges, mouvements, commandes, retours, fournisseurs, clients/dettes, dépenses, prévisions, conseils stratégiques.
-Réponds en moins de 350 mots sauf analyse détaillée demandée. Sois direct et actionnable.`;
+TES CAPACITÉS : stock, ventes, bénéfice, marges, mouvements (entrées/sorties/pertes/transferts), commandes, retours, fournisseurs, clients/dettes, dépenses, caisse, PDV, prévisions, conseils stratégiques, analyse globale, priorités.
+Réponds en moins de 400 mots sauf analyse détaillée demandée. Sois direct et actionnable.`;
 
   // Format OpenAI-compatible (messages array avec role system/user/assistant)
   const msgs = [
